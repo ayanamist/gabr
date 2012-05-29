@@ -1,0 +1,12 @@
+<!doctype html>
+<title>{{ title }}</title>
+<link rel=stylesheet type=text/css href="{{ url_for("static", filename="css/style.css") }}">
+<div class=page>
+    {% for message in get_flashed_messages() %}
+    <div class=flash>{{ message }}</div>
+    {% endfor %}
+    <form method="post" action="{{ url_for("oauth_login") }}">
+        <label for="password">Password: </label><input type="text" id="password" name="password" />
+        <input type="submit" value="OAuth with Twitter" />
+    </form>
+</div>
