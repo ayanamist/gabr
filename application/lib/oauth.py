@@ -140,6 +140,7 @@ class OAuthToken(object):
             data['oauth_callback_confirmed'] = self.callback_confirmed
         return urllib.urlencode(data)
 
+    @staticmethod
     def from_string(s):
         """ Returns a token from something like:
         oauth_token_secret=xxx&oauth_token=xxx
@@ -153,8 +154,6 @@ class OAuthToken(object):
         except KeyError:
             pass # 1.0, no callback confirmed.
         return token
-
-    from_string = staticmethod(from_string)
 
     def __str__(self):
         return self.to_string()
@@ -202,7 +201,7 @@ class OAuthRequest(object):
         parameters = {}
         for k, v in self.parameters.iteritems():
             # Ignore oauth parameters.
-            if k.find('oauth_') < 0:
+            if not k.startswith('oauth_'):
                 parameters[k] = v
         return parameters
 
@@ -212,7 +211,7 @@ class OAuthRequest(object):
         # Add the oauth parameters.
         if self.parameters:
             for k, v in self.parameters.iteritems():
-                if k[:6] == 'oauth_':
+                if k.startswith('oauth_'):
                     auth_header += ', %s="%s"' % (k, escape(str(v)))
         return {'Authorization': auth_header}
 
@@ -266,6 +265,7 @@ class OAuthRequest(object):
         """Calls the build signature method within the signature method."""
         return signature_method.build_signature(self, consumer, token)
 
+    @staticmethod
     def from_request(http_method, http_url, headers=None, parameters=None,
                      query_string=None):
         """Combines multiple parameter sources."""
@@ -301,8 +301,7 @@ class OAuthRequest(object):
 
         return None
 
-    from_request = staticmethod(from_request)
-
+    @staticmethod
     def from_consumer_and_token(oauth_consumer, token=None,
                                 callback=None, verifier=None, http_method=HTTP_METHOD,
                                 http_url=None, parameters=None):
@@ -332,8 +331,8 @@ class OAuthRequest(object):
 
         return OAuthRequest(http_method, http_url, parameters)
 
-    from_consumer_and_token = staticmethod(from_consumer_and_token)
 
+    @staticmethod
     def from_token_and_callback(token, callback=None, http_method=HTTP_METHOD,
                                 http_url=None, parameters=None):
         if not parameters:
@@ -346,8 +345,7 @@ class OAuthRequest(object):
 
         return OAuthRequest(http_method, http_url, parameters)
 
-    from_token_and_callback = staticmethod(from_token_and_callback)
-
+    @staticmethod
     def _split_header(header):
         """Turn Authorization: header into parameters."""
         params = {}
@@ -364,233 +362,13 @@ class OAuthRequest(object):
             params[param_parts[0]] = urllib.unquote(param_parts[1].strip('\"'))
         return params
 
-    _split_header = staticmethod(_split_header)
-
+    @staticmethod
     def _split_url_string(param_str):
         """Turn URL string into parameters."""
         parameters = urlparse.parse_qs(param_str, keep_blank_values=False)
         for k, v in parameters.iteritems():
             parameters[k] = urllib.unquote(v[0])
         return parameters
-
-    _split_url_string = staticmethod(_split_url_string)
-
-
-class OAuthServer(object):
-    """A worker to check the validity of a request against a data store."""
-    timestamp_threshold = 300 # In seconds, five minutes.
-    version = VERSION
-    signature_methods = None
-    data_store = None
-
-    def __init__(self, data_store=None, signature_methods=None):
-        self.data_store = data_store
-        self.signature_methods = signature_methods or {}
-
-    def set_data_store(self, data_store):
-        self.data_store = data_store
-
-    def get_data_store(self):
-        return self.data_store
-
-    def add_signature_method(self, signature_method):
-        self.signature_methods[signature_method.get_name()] = signature_method
-        return self.signature_methods
-
-    def fetch_request_token(self, oauth_request):
-        """Processes a request_token request and returns the
-        request token on success.
-        """
-        try:
-            # Get the request token for authorization.
-            token = self._get_token(oauth_request, 'request')
-        except OAuthError:
-            # No token required for the initial token request.
-            version = self._get_version(oauth_request)
-            consumer = self._get_consumer(oauth_request)
-            try:
-                callback = self.get_callback(oauth_request)
-            except OAuthError:
-                callback = None # 1.0, no callback specified.
-            self._check_signature(oauth_request, consumer, None)
-            # Fetch a new token.
-            token = self.data_store.fetch_request_token(consumer, callback)
-        return token
-
-    def fetch_access_token(self, oauth_request):
-        """Processes an access_token request and returns the
-        access token on success.
-        """
-        version = self._get_version(oauth_request)
-        consumer = self._get_consumer(oauth_request)
-        try:
-            verifier = self._get_verifier(oauth_request)
-        except OAuthError:
-            verifier = None
-            # Get the request token.
-        token = self._get_token(oauth_request, 'request')
-        self._check_signature(oauth_request, consumer, token)
-        new_token = self.data_store.fetch_access_token(consumer, token, verifier)
-        return new_token
-
-    def verify_request(self, oauth_request):
-        """Verifies an api call and checks all the parameters."""
-        # -> consumer and token
-        version = self._get_version(oauth_request)
-        consumer = self._get_consumer(oauth_request)
-        # Get the access token.
-        token = self._get_token(oauth_request, 'access')
-        self._check_signature(oauth_request, consumer, token)
-        parameters = oauth_request.get_nonoauth_parameters()
-        return consumer, token, parameters
-
-    def authorize_token(self, token, user):
-        """Authorize a request token."""
-        return self.data_store.authorize_request_token(token, user)
-
-    def get_callback(self, oauth_request):
-        """Get the callback URL."""
-        return oauth_request.get_parameter('oauth_callback')
-
-    def build_authenticate_header(self, realm=''):
-        """Optional support for the authenticate header."""
-        return {'WWW-Authenticate': 'OAuth realm="%s"' % realm}
-
-    def _get_version(self, oauth_request):
-        """Verify the correct version request for this server."""
-        try:
-            version = oauth_request.get_parameter('oauth_version')
-        except:
-            version = VERSION
-        if version and version != self.version:
-            raise OAuthError('OAuth version %s not supported.' % str(version))
-        return version
-
-    def _get_signature_method(self, oauth_request):
-        """Figure out the signature with some defaults."""
-        try:
-            signature_method = oauth_request.get_parameter(
-                'oauth_signature_method')
-        except:
-            signature_method = SIGNATURE_METHOD
-        try:
-            # Get the signature method object.
-            signature_method = self.signature_methods[signature_method]
-        except:
-            signature_method_names = ', '.join(self.signature_methods.keys())
-            raise OAuthError('Signature method %s not supported try one of the '
-                             'following: %s' % (signature_method, signature_method_names))
-
-        return signature_method
-
-    def _get_consumer(self, oauth_request):
-        consumer_key = oauth_request.get_parameter('oauth_consumer_key')
-        consumer = self.data_store.lookup_consumer(consumer_key)
-        if not consumer:
-            raise OAuthError('Invalid consumer.')
-        return consumer
-
-    def _get_token(self, oauth_request, token_type='access'):
-        """Try to find the token for the provided request token key."""
-        token_field = oauth_request.get_parameter('oauth_token')
-        token = self.data_store.lookup_token(token_type, token_field)
-        if not token:
-            raise OAuthError('Invalid %s token: %s' % (token_type, token_field))
-        return token
-
-    def _get_verifier(self, oauth_request):
-        return oauth_request.get_parameter('oauth_verifier')
-
-    def _check_signature(self, oauth_request, consumer, token):
-        timestamp, nonce = oauth_request._get_timestamp_nonce()
-        self._check_timestamp(timestamp)
-        self._check_nonce(consumer, token, nonce)
-        signature_method = self._get_signature_method(oauth_request)
-        try:
-            signature = oauth_request.get_parameter('oauth_signature')
-        except:
-            raise OAuthError('Missing signature.')
-            # Validate the signature.
-        valid_sig = signature_method.check_signature(oauth_request, consumer,
-            token, signature)
-        if not valid_sig:
-            key, base = signature_method.build_signature_base_string(
-                oauth_request, consumer, token)
-            raise OAuthError('Invalid signature. Expected signature base '
-                             'string: %s' % base)
-        built = signature_method.build_signature(oauth_request, consumer, token)
-
-    def _check_timestamp(self, timestamp):
-        """Verify that timestamp is recentish."""
-        timestamp = int(timestamp)
-        now = int(time.time())
-        lapsed = abs(now - timestamp)
-        if lapsed > self.timestamp_threshold:
-            raise OAuthError('Expired timestamp: given %d and now %s has a '
-                             'greater difference than threshold %d' %
-                             (timestamp, now, self.timestamp_threshold))
-
-    def _check_nonce(self, consumer, token, nonce):
-        """Verify that the nonce is uniqueish."""
-        nonce = self.data_store.lookup_nonce(consumer, token, nonce)
-        if nonce:
-            raise OAuthError('Nonce already used: %s' % str(nonce))
-
-
-class OAuthClient(object):
-    """OAuthClient is a worker to attempt to execute a request."""
-    consumer = None
-    token = None
-
-    def __init__(self, oauth_consumer, oauth_token):
-        self.consumer = oauth_consumer
-        self.token = oauth_token
-
-    def get_consumer(self):
-        return self.consumer
-
-    def get_token(self):
-        return self.token
-
-    def fetch_request_token(self, oauth_request):
-        """-> OAuthToken."""
-        raise NotImplementedError
-
-    def fetch_access_token(self, oauth_request):
-        """-> OAuthToken."""
-        raise NotImplementedError
-
-    def access_resource(self, oauth_request):
-        """-> Some protected resource."""
-        raise NotImplementedError
-
-
-class OAuthDataStore(object):
-    """A database abstraction used to lookup consumers and tokens."""
-
-    def lookup_consumer(self, key):
-        """-> OAuthConsumer."""
-        raise NotImplementedError
-
-    def lookup_token(self, oauth_consumer, token_type, token_token):
-        """-> OAuthToken."""
-        raise NotImplementedError
-
-    def lookup_nonce(self, oauth_consumer, oauth_token, nonce):
-        """-> OAuthToken."""
-        raise NotImplementedError
-
-    def fetch_request_token(self, oauth_consumer, oauth_callback):
-        """-> OAuthToken."""
-        raise NotImplementedError
-
-    def fetch_access_token(self, oauth_consumer, oauth_token, oauth_verifier):
-        """-> OAuthToken."""
-        raise NotImplementedError
-
-    def authorize_request_token(self, oauth_token, user):
-        """-> OAuthToken."""
-        raise NotImplementedError
 
 
 class OAuthSignatureMethod(object):
@@ -657,3 +435,12 @@ class OAuthSignatureMethod_PLAINTEXT(OAuthSignatureMethod):
         key, raw = self.build_signature_base_string(oauth_request, consumer,
             token)
         return key
+
+
+class OAuthHandler(object):
+    def __init__(self, consumer_key, consumer_secret):
+        self.consumer = OAuthConsumer(consumer_key, consumer_secret)
+        self.token = None
+
+    def set_access_token(self, access_key, access_secret):
+        self.token = OAuthToken(access_key, access_secret)
