@@ -48,7 +48,7 @@ def oauth_fetch_async(oauth_handler, url, payload=None, headers=None):
     else:
         method = "GET"
     req = oauth.OAuthRequest(http_method=method, http_url=url, parameters=payload)
-    req.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1, oauth_handler.consumer, oauth_handler.token)
+    req.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), oauth_handler.consumer, oauth_handler.token)
     headers.update(req.to_header())
     return fetch_async(url, payload=payload, headers=headers)
 
