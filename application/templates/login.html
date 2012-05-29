@@ -5,8 +5,5 @@
     {% for message in get_flashed_messages() %}
         <div class=flash>{{ message }}</div>
     {% endfor %}
-    <form method="post" action="{{ url_for("oauth_login") }}">
-        <label for="invitecode">Invite Code: </label><input type="text" id="invitecode" name="invitecode"/>
-        <input type="submit" value="Sign in via Twitter.com"/>
-    </form>
+    <a href="{{ url_for("oauth_login") }}">Sign in via Twitter.com</a>
 </div>
