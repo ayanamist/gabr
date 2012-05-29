@@ -38,10 +38,6 @@ def fetch_async(url, payload=None, headers=None):
     return Future(rpc)
 
 
-def fetch(url, payload=None, headers=None):
-    return fetch_async(url, payload=payload, headers=headers).get_result()
-
-
 def oauth_fetch_async(oauth_handler, url, payload=None, headers=None):
     if not isinstance(oauth_handler, oauth.OAuthHandler):
         raise TypeError("oauth_handler must be OAuthHandler.")
@@ -62,3 +58,16 @@ def twitter_fetch_async(oauth_handler, url, payload=None, headers=None):
         headers = dict()
     headers["X-PHX"] = True # add header to increase limit to 1000
     return oauth_fetch_async(oauth_handler, url, payload=payload, headers=headers)
+
+
+def sync_wrapper(func):
+    def invoke_func(*args, **kwargs):
+        return func(*args, **kwargs).get_result()
+
+    return invoke_func
+
+fetch = sync_wrapper(fetch_async)
+
+oauth_fetch = sync_wrapper(oauth_fetch_async)
+
+twitter_fetch = sync_wrapper(twitter_fetch_async)
