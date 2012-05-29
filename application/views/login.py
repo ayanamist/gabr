@@ -1,4 +1,3 @@
-import logging
 import urlparse
 
 import flask
@@ -25,8 +24,11 @@ def oauth_login():
     url = oauth_request.to_url()
     resp = urlfetch.fetch(url).content
     request_token = dict(urlparse.parse_qsl(resp))
-    oauth_token = request_token['oauth_token']
-    return flask.redirect("https://api.twitter.com/oauth/authorize?oauth_token=%s" % oauth_token)
+    oauth_token = request_token.get("oauth_token")
+    if oauth_token:
+        return flask.redirect("https://api.twitter.com/oauth/authorize?oauth_token=%s" % oauth_token)
+    else:
+        return resp
 
 
 @app.route("/oauth_callback/")
