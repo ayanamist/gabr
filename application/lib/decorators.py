@@ -9,7 +9,7 @@ def login_required(func):
     @functools.wraps(func)
     def decorated_view(*args, **kwargs):
         if not is_authenticated():
-            return flask.redirect("login")
+            return flask.redirect(flask.url_for("login"))
         return func(*args, **kwargs)
 
     return decorated_view
