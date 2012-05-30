@@ -6,6 +6,12 @@ threadsafe: true
 
 default_expiration: "7d"
 
+env_variables:
+  CONSUMER_KEY: ""
+  CONSUMER_SECRET: ""
+  SECRET_KEY: ""
+  INVITE_CODE: ""
+
 builtins:
 - appstats: on
 
@@ -36,3 +42,4 @@ skip_files:
 - ^(.*/)?.*\.py[co]
 - ^(.*/)?.*\.md
 - ^(.*/)?\..*
+- ^[^-]*-example\..*
