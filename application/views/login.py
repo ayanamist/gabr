@@ -62,3 +62,9 @@ def oauth_callback():
     return flask.redirect(flask.url_for("login"))
 
 
+@app.route("/logout/")
+def logout():
+    flask.session.permanent = True
+    flask.session["oauth_token"] = ""
+    flask.session["oauth_token_secret"] = ""
+    return flask.redirect(flask.url_for("login"))
