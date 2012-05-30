@@ -1,5 +1,10 @@
 import datetime
 import os
+import sys
+
+egg_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "egg"))
+for egg in os.listdir(egg_path):
+    sys.path.append(os.path.join(egg_path, egg))
 
 import flask
 
