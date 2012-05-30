@@ -1,3 +1,4 @@
+import logging
 import urlparse
 
 import flask
@@ -28,10 +29,24 @@ def oauth_login():
     if oauth_token:
         return flask.redirect("https://api.twitter.com/oauth/authorize?oauth_token=%s" % oauth_token)
     else:
-        return resp
+        logging.error("OAuth: request token error\n%s" % resp)
+        flask.flash("OAuth error, please try again.")
+        return flask.redirect(flask.url_for("login"))
 
 
 @app.route("/oauth_callback/")
 def oauth_callback():
-    pass
+    flask.session.permanent = True
+    oauth_token = flask.request.args.get("oauth_token")
+    oauth_token_secret = flask.request.args.get("oauth_token_secret")
+    if oauth_token and oauth_token_secret:
+        flask.session["oauth_token"] = oauth_token
+        flask.session["oauth_token_secret"] = oauth_token_secret
+        return flask.redirect(flask.url_for("home_timeline"))
+    else:
+        args = str(flask.request.args)
+        logging.debug(args)
+        flask.flash(args)
+        return flask.redirect("login")
+
 
