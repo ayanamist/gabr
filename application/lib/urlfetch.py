@@ -1,6 +1,7 @@
 import zlib
 
 from google.appengine.api import urlfetch
+from google.appengine.api.urlfetch_errors import *
 
 from . import oauth
 

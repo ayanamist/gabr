@@ -6,4 +6,4 @@ from ..lib import decorators
 @app.route("/")
 @decorators.login_required
 def home_timeline():
-    pass
+    return "OK"

@@ -23,15 +23,16 @@ def oauth_login():
         http_url="https://api.twitter.com/oauth/request_token")
     oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, None)
     url = oauth_request.to_url()
-    resp = urlfetch.fetch(url).content
+    try:
+        resp = urlfetch.fetch(url).content
+    except urlfetch.Error:
+        resp = ""
     request_token = dict(urlparse.parse_qsl(resp))
     oauth_token = request_token.get("oauth_token")
     if oauth_token:
         return flask.redirect("https://api.twitter.com/oauth/authorize?oauth_token=%s" % oauth_token)
-    else:
-        logging.error("OAuth: request token error\n%s" % resp)
-        flask.flash("OAuth error, please try again.")
-        return flask.redirect(flask.url_for("login"))
+    flask.flash("OAuth error, please try again.")
+    return flask.redirect(flask.url_for("login"))
 
 
 @app.route("/oauth_callback/")
@@ -47,7 +48,10 @@ def oauth_callback():
             http_method="POST", http_url="https://api.twitter.com/oauth/access_token")
         oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, token)
         url = oauth_request.to_url()
-        resp = urlfetch.fetch(url).content
+        try:
+            resp = urlfetch.fetch(url).content
+        except urlfetch.Error:
+            resp = ""
         access_token = dict(urlparse.parse_qsl(resp))
         oauth_token = access_token.get("oauth_token")
         oauth_token_secret = access_token.get("oauth_token_secret")
@@ -55,13 +59,6 @@ def oauth_callback():
             flask.session["oauth_token"] = oauth_token
             flask.session["oauth_token_secret"] = oauth_token_secret
             return flask.redirect(flask.url_for("home_timeline"))
-        else:
-            logging.error("OAuth: get access token error\n%s" % resp)
-            return flask.redirect(flask.url_for("login"))
-    else:
-        args = str(flask.request.args)
-        logging.debug(args)
-        flask.flash(args)
-        return flask.redirect(flask.url_for("login"))
+    return flask.redirect(flask.url_for("login"))
 
 
