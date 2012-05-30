@@ -18,8 +18,8 @@ def login():
 @app.route("/oauth/")
 def oauth_login():
     consumer = oauth.OAuthConsumer(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
-    oauth_request = oauth.OAuthRequest.from_consumer_and_token(consumer,
-        callback=flask.url_for("oauth_callback"),
+    oauth_request = oauth.OAuthRequest.from_token_and_callback(None,
+        callback="%s%s" % (flask.request.host_url, flask.url_for("oauth_callback")),
         http_url="https://api.twitter.com/oauth/request_token")
     oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, None)
     url = oauth_request.to_url()
@@ -38,15 +38,29 @@ def oauth_login():
 def oauth_callback():
     flask.session.permanent = True
     oauth_token = flask.request.args.get("oauth_token")
-    oauth_token_secret = flask.request.args.get("oauth_token_secret")
-    if oauth_token and oauth_token_secret:
-        flask.session["oauth_token"] = oauth_token
-        flask.session["oauth_token_secret"] = oauth_token_secret
-        return flask.redirect(flask.url_for("home_timeline"))
+    oauth_verifier = flask.request.args.get("oauth_verifier")
+    if oauth_token and oauth_verifier:
+        consumer = oauth.OAuthConsumer(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
+        token = oauth.OAuthToken(oauth_token, None)
+        token.set_verifier(oauth_verifier)
+        oauth_request = oauth.OAuthRequest("POST", http_url="https://api.twitter.com/oauth/access_token")
+        oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, token)
+        url = oauth_request.to_url()
+        resp = urlfetch.fetch(url).content
+        access_token = dict(urlparse.parse_qsl(resp))
+        oauth_token = access_token.get("oauth_token")
+        oauth_token_secret = access_token.get("oauth_token_secret")
+        if oauth_token and oauth_token_secret:
+            flask.session["oauth_token"] = oauth_token
+            flask.session["oauth_token_secret"] = oauth_token_secret
+            return flask.redirect(flask.url_for("home_timeline"))
+        else:
+            logging.error("OAuth: get access token error\n%s" % resp)
+            return flask.redirect(flask.url_for("login"))
     else:
         args = str(flask.request.args)
         logging.debug(args)
         flask.flash(args)
-        return flask.redirect("login")
+        return flask.redirect(flask.url_for("login"))
 
 
