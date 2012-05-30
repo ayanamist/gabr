@@ -4,7 +4,10 @@ import flask
 
 def login_required(func):
     def is_authenticated():
-        return flask.session.get("oauth_token") and flask.session.get("oauth_token_secret")
+        try:
+            return flask.session.get("oauth_token") and flask.session.get("oauth_token_secret")
+        except Exception:
+            return False
 
     @functools.wraps(func)
     def decorated_view(*args, **kwargs):
