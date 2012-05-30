@@ -403,7 +403,7 @@ class OAuthSignatureMethod_HMAC_SHA1(OAuthSignatureMethod):
             )
 
         key = '%s&' % escape(consumer.secret)
-        if token:
+        if token and token.secret:
             key += escape(token.secret)
         raw = '&'.join(sig)
         return key, raw

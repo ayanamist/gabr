@@ -18,7 +18,7 @@ def login():
 @app.route("/oauth/")
 def oauth_login():
     consumer = oauth.OAuthConsumer(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
-    oauth_request = oauth.OAuthRequest.from_token_and_callback(None,
+    oauth_request = oauth.OAuthRequest.from_consumer_and_token(consumer,
         callback="%s%s" % (flask.request.host_url, flask.url_for("oauth_callback")),
         http_url="https://api.twitter.com/oauth/request_token")
     oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, None)
@@ -43,7 +43,8 @@ def oauth_callback():
         consumer = oauth.OAuthConsumer(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
         token = oauth.OAuthToken(oauth_token, None)
         token.set_verifier(oauth_verifier)
-        oauth_request = oauth.OAuthRequest("POST", http_url="https://api.twitter.com/oauth/access_token")
+        oauth_request = oauth.OAuthRequest.from_consumer_and_token(consumer, token, verifier=oauth_verifier,
+            http_method="POST", http_url="https://api.twitter.com/oauth/access_token")
         oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, token)
         url = oauth_request.to_url()
         resp = urlfetch.fetch(url).content
