@@ -11,7 +11,9 @@ from ..models import twitter
 @app.route("/login/")
 @decorators.templated()
 def login():
-    return
+    return {
+        "title": "Login",
+        }
 
 
 @app.route("/oauth/")

@@ -7,6 +7,7 @@ threadsafe: true
 default_expiration: "7d"
 
 env_variables:
+  SITE_NAME: "gabr"
   CONSUMER_KEY: ""
   CONSUMER_SECRET: ""
   SECRET_KEY: ""

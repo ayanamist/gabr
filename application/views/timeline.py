@@ -5,5 +5,8 @@ from ..lib import decorators
 
 @app.route("/")
 @decorators.login_required
+@decorators.templated("timeline.html")
 def home_timeline():
-    return "OK"
+    return {
+        "title": "Home",
+        }

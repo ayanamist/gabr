@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-    <link rel=stylesheet type=text/css href="{{ url_for("static", filename="css/style.css") }}">
-</head>
-<body>
-<div class=page>
-    {% for message in get_flashed_messages() %}
-        <div class=flash>{{ message }}</div>
-    {% endfor %}
+{% extends "base.html" %}
+{% block main %}
     <a href="{{ url_for("oauth_login") }}">Sign in via Twitter.com</a>
-</div>
-</body>
-</html>
+{% endblock main %}
