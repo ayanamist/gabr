@@ -9,11 +9,13 @@
 <body>
 <div class="page">
     <div class='menu menu-top'>
-        <a href="{{ url_for("home_timeline") }}">home</a>
-        |
-        <a href="{{ url_for("settings") }}">settings</a>
-        |
-        <a href="http://code.google.com/p/gabr/">about</a>
+        {% block navbar %}
+            <a href="{{ url_for("home_timeline") }}">home</a>
+            |
+            <a href="{{ url_for("settings") }}">settings</a>
+            |
+            <a href="http://code.google.com/p/gabr/">about</a>
+        {% endblock navbar %}
     </div>
     {% for message in get_flashed_messages() %}
         <div class="flash">{{ message }}</div>
