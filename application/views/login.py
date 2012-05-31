@@ -68,4 +68,5 @@ def logout():
     flask.session.permanent = True
     flask.session["oauth_token"] = ""
     flask.session["oauth_token_secret"] = ""
+    flask.flash("Logout successfully!")
     return flask.redirect(flask.url_for("login"))

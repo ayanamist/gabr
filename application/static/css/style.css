@@ -1,0 +1,113 @@
+a {
+    color: #138
+}
+
+table {
+    border-collapse: collapse
+}
+
+form {
+    margin: .3em;
+}
+
+td {
+    vertical-align: top;
+    padding: 0.3em
+}
+
+img {
+    border: 0
+}
+
+small, small a {
+    color: #555
+}
+
+body {
+    background: #ddd;
+    color: #111;
+    margin: 0;
+    font: 90% sans-serif
+}
+
+.odd {
+    background: #fff
+}
+
+.even {
+    background: #eee
+}
+
+.reply {
+    background: #ffa
+}
+
+.reply.even {
+    background: #dd9
+}
+
+.menu {
+    color: #fff;
+    background: #138;
+    padding: 2px
+}
+
+.menu a {
+    color: #fff;
+    text-decoration: none
+}
+
+.tweet, .features {
+    padding: 5px
+}
+
+.date {
+    padding: 5px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #555
+}
+
+.about, .time {
+    font-size: 0.75em;
+    color: #555
+}
+
+.avatar {
+    display: block;
+    height: 26px;
+    width: 26px;
+    left: 0.3em;
+    margin: 0;
+    overflow: hidden;
+    position: absolute;
+}
+
+.status {
+    display: block;
+    word-wrap: break-word;
+}
+
+.shift {
+    margin-left: 30px;
+    min-height: 24px;
+}
+
+.from {
+    font-size: 0.75em;
+    color: #555;
+    font-family: serif;
+}
+
+.from a {
+    color: #555;
+}
+
+.login {
+    margin: 1em;
+    font-size: 1.2em;
+}
+
+.login a {
+    font-size: 2em;
+}
