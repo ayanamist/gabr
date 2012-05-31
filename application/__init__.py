@@ -18,8 +18,4 @@ app.config["SESSION_COOKIE_PATH"] = "/"
 for name in (x for x in os.environ.keys() if x.isupper()):
     app.config[name] = os.environ[name]
 
-# import all views
-for view in (x[:-3] for x in
-    os.listdir(os.path.join(os.path.dirname(__file__), "views")) if x != "__init__.py"):
-    __import__("views.%s" % view, globals(), locals(), [], -1)
-
+__import__("views", globals(), locals(), [], -1)
