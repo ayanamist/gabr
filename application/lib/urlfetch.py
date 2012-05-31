@@ -1,8 +1,10 @@
+import json
 import zlib
 
 from google.appengine.api import urlfetch
 from google.appengine.api.urlfetch_errors import *
 
+from . import decorators
 from . import oauth
 
 accept_encoding = "Accept-Encoding"
@@ -54,11 +56,14 @@ def oauth_fetch_async(oauth_handler, url, payload=None, headers=None):
     return fetch_async(url, payload=payload, headers=headers)
 
 
-def twitter_fetch_async(oauth_handler, url, payload=None, headers=None):
+def twitter_fetch_async(url, payload=None, headers=None, oauth_handler=None):
     if headers is None:
         headers = dict()
+
     headers["X-PHX"] = True # add header to increase limit to 1000
-    return oauth_fetch_async(oauth_handler, url, payload=payload, headers=headers)
+    if oauth_handler:
+        return oauth_fetch_async(oauth_handler, url, payload=payload, headers=headers)
+    return fetch_async(url, payload=payload, headers=headers)
 
 
 def sync_wrapper(func):
@@ -71,4 +76,10 @@ fetch = sync_wrapper(fetch_async)
 
 oauth_fetch = sync_wrapper(oauth_fetch_async)
 
-twitter_fetch = sync_wrapper(twitter_fetch_async)
+def twitter_fetch(*args, **kwargs):
+    result = twitter_fetch_async(*args, **kwargs).get_result()
+    try:
+        result.content_json = json.loads(result.content)
+    except ValueError:
+        result.content_json = None
+    return result
