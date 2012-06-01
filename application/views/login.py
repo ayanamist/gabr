@@ -61,9 +61,11 @@ def oauth_callback():
         access_token = dict(urlparse.parse_qsl(resp))
         oauth_token = access_token.get("oauth_token")
         oauth_token_secret = access_token.get("oauth_token_secret")
-        if oauth_token and oauth_token_secret:
+        screen_name = access_token.get("screen_name")
+        if oauth_token and oauth_token_secret and screen_name:
             flask.session["oauth_token"] = oauth_token
             flask.session["oauth_token_secret"] = oauth_token_secret
+            flask.session["screen_name"] = screen_name
             return flask.redirect(flask.url_for("home_timeline"))
     return flask.redirect(flask.url_for("login"))
 
