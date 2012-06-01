@@ -19,7 +19,8 @@ img {
     border: 0
 }
 
-small, small a {
+.small, .small a {
+    font-size: small;
     color: #555
 }
 
