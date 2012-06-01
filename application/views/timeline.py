@@ -25,7 +25,8 @@ def home_timeline():
 
     data = {
         "title": "Home",
-        "tweets": list(),
+        "tweets": tuple(),
+        "keep_max_id": bool(flask.request.args.get("keep_max_id", False)),
         }
 
     params = {
@@ -54,6 +55,8 @@ def home_timeline():
             error_message = "Twitter Internal Server Error"
         flask.flash("Error %d: %s" % (home_result.status_code, error_message))
         return data
+    data["tweets"] = home_result.content_json
+    return data
 
 
 @app.route("/connect")
