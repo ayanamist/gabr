@@ -10,6 +10,8 @@ for egg in os.listdir(egg_path):
 
 import flask
 
+from .lib import oauth
+
 app = flask.Flask("application")
 app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=365)
 app.config["SESSION_COOKIE_PATH"] = "/"
@@ -19,3 +21,14 @@ for name in (x for x in os.environ.keys() if x.isupper()):
     app.config[name] = os.environ[name]
 
 __import__("views", globals(), locals(), [], -1)
+
+def init_request_vars(sender, **extra):
+    g = flask.g
+    g.screen_name = flask.session.get("screen_name")
+    if g.screen_name:
+        g.api = oauth.OAuthHandler(sender.config["CONSUMER_KEY"], sender.config["CONSUMER_SECRET"])
+        g.api.set_access_token(flask.session["oauth_token"], flask.session["oauth_token_secret"])
+    else:
+        g.api = None
+
+flask.request_started.connect(init_request_vars, app)
