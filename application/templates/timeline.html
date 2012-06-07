@@ -45,6 +45,9 @@
             </span>
         </span>
 </div>
+{% if loop.last %}
+    <p><a href="?max_id={{ tweet.id }}">More</a></p>
+{% endif %}
 {% else %}
 <p>No tweets to display.</p>
 {% endfor %}
