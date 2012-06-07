@@ -92,7 +92,7 @@ class NetworkError(Error):
 
 class Status(dict):
     def __init__(self, *args, **kwargs):
-        dict.__init__(*args, **kwargs)
+        dict.__init__(self, *args, **kwargs)
         if 'retweeted_status' in self:
             self['retweeted_status'] = Status(self['retweeted_status'])
 
@@ -478,5 +478,6 @@ class Api(object):
             response = urlfetch.fetch(method=http_method, url=url, payload=encoded_post_data, headers=headers)
         except urlfetch.Error, e:
             raise NetworkError(str(e))
-        self._check_for_twitter_code_error(response, self._get_twitter_data_error(response))
+        error_message = self._get_twitter_data_error(response)
+        self._check_for_twitter_code_error(response, error_message)
         return response.content
