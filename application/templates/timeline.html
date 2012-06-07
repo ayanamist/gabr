@@ -11,20 +11,20 @@
                         {{ tweet.user.screen_name }} ({{ tweet.user.name }})
                     </a>
                 </strong>
-                <a href="{{ url_for("status_reply", tweet.id) }}">@</a>
+                <a href="{{ url_for("status_reply", id=tweet.id) }}">@</a>
                 &nbsp;
-                <a href="{{ url_for("status_replyall", tweet.id) }}">@@</a>
+                <a href="{{ url_for("status_replyall", id=tweet.id) }}">@@</a>
                 &nbsp;
-                <a href="{{ url_for("status_retweet", tweet.id) }}">RT</a>
+                <a href="{{ url_for("status_retweet", id=tweet.id) }}">RT</a>
                 &nbsp;
                 {% if tweet.favorited %}
-                    <a href="{{ url_for("status_unfavorite", tweet.id) }}">UNFAV</a>
+                    <a href="{{ url_for("status_unfavorite", id=tweet.id) }}">UNFAV</a>
                 {% else %}
-                    <a href="{{ url_for("status_favorite", tweet.id) }}">FAV</a>
+                    <a href="{{ url_for("status_favorite", id=tweet.id) }}">FAV</a>
                 {% endif %}
                 {% if tweet.user.screen_name == g.screen_name %}
                     &nbsp;
-                    <a href="{{ url_for("status_delete", tweet.id) }}">DEL</a>
+                    <a href="{{ url_for("status_delete", id=tweet.id) }}">DEL</a>
                 {% endif %}
                 <br/>
                 {{ tweet.text }}
