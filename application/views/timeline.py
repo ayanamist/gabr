@@ -6,6 +6,7 @@ import flask
 from application import app
 from ..lib import decorators
 from ..lib import oauth
+from ..lib import render
 from ..lib import urlfetch
 
 def _get_oauth_handler():
@@ -34,28 +35,29 @@ def home_timeline():
         "include_rts": 1,
         }
     for access_param in ("max_id", "page", "since_id", "count"):
-        param = flask.request.args.get(access_param, 0)
-        try:
-            param = int(param, 10)
-        except ValueError:
-            param = None
+        param = flask.request.args.get(access_param)
         if param:
-            params[access_param] = param
+            try:
+                param = int(param, 10)
+                params[access_param] = param
+            except ValueError:
+                pass
 
     url = "https://api.twitter.com/1/statuses/home_timeline.json?%s" % urllib.urlencode(params)
     try:
         home_result = urlfetch.twitter_fetch(url=url, oauth_handler=oauth_handler)
     except urlfetch.Error, e:
         flask.flash("Network Error: %s" % str(e))
-        return data
-    if home_result.status_code != httplib.OK:
-        if home_result.content_json and "error" in home_result.content_json:
-            error_message = home_result.content_json["error"]
-        else:
-            error_message = "Twitter Internal Server Error"
-        flask.flash("Error %d: %s" % (home_result.status_code, error_message))
-        return data
-    data["tweets"] = home_result.content_json
+    else:
+        if home_result.status_code != httplib.OK:
+            if home_result.content_json and "error" in home_result.content_json:
+                error_message = home_result.content_json["error"]
+            else:
+                app.logger.error(home_result.content)
+                error_message = "Twitter Internal Server Error"
+            flask.flash("Error %d: %s" % (home_result.status_code, error_message))
+            return data
+        data["tweets"] = render.prerender_timeline(home_result.content_json)
     return data
 
 
