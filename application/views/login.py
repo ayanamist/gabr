@@ -23,6 +23,7 @@ def login():
 
 @app.route("/oauth")
 def oauth_login():
+    # TODO: oauth lib accept callback url.
     callback_url = "%s%s" % (flask.request.host_url, flask.url_for("oauth_callback"))
     consumer = oauth.Consumer(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
     client = oauth.Client(consumer)
