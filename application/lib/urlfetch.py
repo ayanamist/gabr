@@ -1,11 +1,7 @@
-import json
 import zlib
 
 from google.appengine.api import urlfetch
 from google.appengine.api.urlfetch_errors import *
-
-from . import decorators
-from . import oauth
 
 accept_encoding = "Accept-Encoding"
 content_encoding = "Content-Encoding"
