@@ -22,13 +22,12 @@ for name in (x for x in os.environ.keys() if x.isupper()):
 
 __import__("views", globals(), locals(), [], -1)
 
-def init_request_vars(sender, **extra):
+@app.before_request
+def before_request():
     g = flask.g
     g.screen_name = flask.session.get("screen_name")
     if g.screen_name:
-        g.api = oauth.OAuthHandler(sender.config["CONSUMER_KEY"], sender.config["CONSUMER_SECRET"])
+        g.api = oauth.OAuthHandler(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
         g.api.set_access_token(flask.session["oauth_token"], flask.session["oauth_token_secret"])
     else:
         g.api = None
-
-flask.request_started.connect(init_request_vars, app)
