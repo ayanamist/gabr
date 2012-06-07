@@ -503,7 +503,7 @@ class Client():
         else:
             headers.update(req.to_header())
 
-        return urlfetch.fetch(url=uri, method=method, body=body, headers=headers).data
+        return urlfetch.fetch(url=uri, method=method, payload=body, headers=headers).content
 
 
 class SignatureMethod(object):
