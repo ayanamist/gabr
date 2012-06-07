@@ -10,7 +10,7 @@ for egg in os.listdir(egg_path):
 
 import flask
 
-from .lib import oauth
+from .lib import twitter
 
 app = flask.Flask("application")
 app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=365)
@@ -26,8 +26,6 @@ __import__("views", globals(), locals(), [], -1)
 def before_request():
     g = flask.g
     g.screen_name = flask.session.get("screen_name")
+    g.api = twitter.Api(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
     if g.screen_name:
-        g.api = oauth.OAuthHandler(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
         g.api.set_access_token(flask.session["oauth_token"], flask.session["oauth_token_secret"])
-    else:
-        g.api = None

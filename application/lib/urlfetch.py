@@ -41,31 +41,6 @@ def fetch_async(url, payload=None, headers=None):
     return Future(rpc)
 
 
-def oauth_fetch_async(oauth_handler, url, payload=None, headers=None):
-    if not isinstance(oauth_handler, oauth.OAuthHandler):
-        raise TypeError("oauth_handler must be OAuthHandler.")
-    if headers is None:
-        headers = dict()
-    if payload is not None:
-        method = "POST"
-    else:
-        method = "GET"
-    req = oauth.OAuthRequest(http_method=method, http_url=url, parameters=payload)
-    req.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), oauth_handler.consumer, oauth_handler.token)
-    headers.update(req.to_header())
-    return fetch_async(url, payload=payload, headers=headers)
-
-
-def twitter_fetch_async(url, payload=None, headers=None, oauth_handler=None):
-    if headers is None:
-        headers = dict()
-
-    headers["X-PHX"] = True # add header to increase limit to 1000
-    if oauth_handler:
-        return oauth_fetch_async(oauth_handler, url, payload=payload, headers=headers)
-    return fetch_async(url, payload=payload, headers=headers)
-
-
 def sync_wrapper(func):
     def invoke_func(*args, **kwargs):
         return func(*args, **kwargs).get_result()
@@ -73,13 +48,3 @@ def sync_wrapper(func):
     return invoke_func
 
 fetch = sync_wrapper(fetch_async)
-
-oauth_fetch = sync_wrapper(oauth_fetch_async)
-
-def twitter_fetch(*args, **kwargs):
-    result = twitter_fetch_async(*args, **kwargs).get_result()
-    try:
-        result.content_json = json.loads(result.content)
-    except ValueError:
-        result.content_json = None
-    return result

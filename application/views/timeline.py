@@ -1,39 +1,21 @@
-import httplib
-import urllib
-
 import flask
 
 from application import app
 from ..lib import decorators
-from ..lib import oauth
 from ..lib import render
-from ..lib import urlfetch
-
-def _get_oauth_handler():
-    oauth_token = flask.session.get("oauth_token")
-    oauth_token_secret = flask.session.get("oauth_token_secret")
-    if oauth_token and oauth_token_secret:
-        oauth_handler = oauth.OAuthHandler(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
-        oauth_handler.set_access_token(oauth_token, oauth_token_secret)
-        return oauth_handler
+from ..lib import twitter
 
 
 @app.route("/")
 @decorators.login_required
 @decorators.templated("timeline.html")
 def home_timeline():
-    oauth_handler = _get_oauth_handler()
-
     data = {
         "title": "Home",
         "tweets": tuple(),
         "keep_max_id": bool(flask.request.args.get("keep_max_id", False)),
         }
-
-    params = {
-        "include_entities": 1,
-        "include_rts": 1,
-        }
+    params = dict()
     for access_param in ("max_id", "page", "since_id", "count"):
         param = flask.request.args.get(access_param)
         if param:
@@ -43,21 +25,12 @@ def home_timeline():
             except ValueError:
                 pass
 
-    url = "https://api.twitter.com/1/statuses/home_timeline.json?%s" % urllib.urlencode(params)
     try:
-        home_result = urlfetch.twitter_fetch(url=url, oauth_handler=oauth_handler)
-    except urlfetch.Error, e:
-        flask.flash("Network Error: %s" % str(e))
+        home_result = flask.g.api.get_home_timeline(**params)
+    except twitter.Error, e:
+        flask.flash("Error: %s" % str(e))
     else:
-        if home_result.status_code != httplib.OK:
-            if home_result.content_json and "error" in home_result.content_json:
-                error_message = home_result.content_json["error"]
-            else:
-                app.logger.error(home_result.content)
-                error_message = "Twitter Internal Server Error"
-            flask.flash("Error %d: %s" % (home_result.status_code, error_message))
-            return data
-        data["tweets"] = render.prerender_timeline(home_result.content_json)
+        data["tweets"] = render.prerender_timeline(home_result)
     return data
 
 
