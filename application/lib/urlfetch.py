@@ -22,15 +22,13 @@ class Future(object):
         return result
 
 
-def fetch_async(url, payload=None, headers=None):
+def fetch_async(url, method="GET", payload=None, headers=None):
     if headers is None:
         headers = dict()
     if accept_encoding.lower() not in [x.lower() for x in headers.keys()]:
         headers[accept_encoding] = "gzip"
     if payload is not None:
         method = "POST"
-    else:
-        method = "GET"
     rpc = urlfetch.create_rpc()
     urlfetch.make_fetch_call(rpc, url, payload=payload, method=method, headers=headers, allow_truncated=False,
         follow_redirects=False)

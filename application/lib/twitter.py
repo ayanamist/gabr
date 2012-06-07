@@ -449,7 +449,7 @@ class Api(object):
         else:
             raise Error('%d: %s' % (response.status, str(error_message)))
 
-    def _fetch_url(self, url, post_data=None, parameters=None, http_method='GET', timeout=None):
+    def _fetch_url(self, url, post_data=None, parameters=None, http_method='GET'):
         headers = dict()
         extra_params = dict()
         if parameters is not None:
@@ -475,8 +475,7 @@ class Api(object):
             url = self._build_url(url, extra_params=extra_params)
             encoded_post_data = self._encode_post_data(post_data)
         try:
-            response = urlfetch.fetch(method=http_method, url=url, body=encoded_post_data, headers=headers,
-                timeout=timeout)
+            response = urlfetch.fetch(method=http_method, url=url, payload=encoded_post_data, headers=headers)
         except urlfetch.Error, e:
             raise NetworkError(str(e))
         self._check_for_twitter_code_error(response, self._get_twitter_data_error(response))
