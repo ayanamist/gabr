@@ -11,6 +11,7 @@
                         {{ tweet.user.screen_name }} ({{ tweet.user.name }})
                     </a>
                 </strong>
+                &nbsp;
                 <a href="{{ url_for("status_reply", id=tweet.id) }}">@</a>
                 &nbsp;
                 <a href="{{ url_for("status_replyall", id=tweet.id) }}">@@</a>
@@ -27,11 +28,11 @@
                     <a href="{{ url_for("status_delete", id=tweet.id) }}">DEL</a>
                 {% endif %}
                 <br/>
-                {{ tweet.text }}
+                {{ tweet.text|safe }}
                 <br/>
                 <a href="{{ url_for("status", id=tweet.id) }}" class="time">{{ tweet.timestamp }}</a>
                 <span class="small">
-                    from {{ tweet.source }}
+                    from {{ tweet.source|safe }}
                     {% if tweet.in_reply_to_status_id %}
                         <a href="{{ url_for("status", id=tweet.id) }}">&gt;&gt;</a>
                     {% endif %}
@@ -39,7 +40,7 @@
                         <br/>
                         <a href="{{ url_for("status", id=tweet.retweeted.id) }}">retweeted</a> by
                         <a href="{{ url_for("user", screen_name=tweet.retweeted.user.screen_name) }}">{{ tweet.retweeted.user.screen_name }}</a>
-                        from {{ tweet.retweeted.source }}
+                        from {{ tweet.retweeted.source|safe }}
                         {% if tweet.retweet_count > 1 %}
                             and {{ tweet.retweet_count - 1 }} other(s)
                         {% endif %}
