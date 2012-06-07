@@ -416,38 +416,38 @@ class Api(object):
             return urllib.urlencode(dict([(k, self._encode(v)) for k, v in post_data.items()]))
 
     def _get_twitter_data_error(self, response):
-        if response.data is not None:
+        if response.content is not None:
             try:
-                data = json.loads(response.data)
+                data = json.loads(response.content)
             except ValueError:
                 pass
             else:
-                response.data = data
+                response.content = data
                 if isinstance(data, dict) and 'error' in data:
                     return data['error']
         return ''
 
     def _check_for_twitter_code_error(self, response, error_message=''):
-        if response.status == httplib.OK:
+        if response.status_code == httplib.OK:
             pass
-        elif response.status == httplib.BAD_REQUEST:
+        elif response.status_code == httplib.BAD_REQUEST:
             raise BadRequestError(error_message)
-        elif response.status == httplib.UNAUTHORIZED:
+        elif response.status_code == httplib.UNAUTHORIZED:
             raise UnauthorizedError(error_message)
-        elif response.status == httplib.FORBIDDEN:
+        elif response.status_code == httplib.FORBIDDEN:
             raise ForbiddenError(error_message)
-        elif response.status == httplib.NOT_FOUND:
+        elif response.status_code == httplib.NOT_FOUND:
             raise NotFoundError(error_message)
-        elif response.status == 420:
+        elif response.status_code == 420:
             raise EnhanceYourCalmError(error_message)
-        elif response.status == httplib.INTERNAL_SERVER_ERROR:
+        elif response.status_code == httplib.INTERNAL_SERVER_ERROR:
             raise InternalServerError(error_message)
-        elif response.status == httplib.BAD_GATEWAY:
+        elif response.status_code == httplib.BAD_GATEWAY:
             raise BadGatewayError(error_message)
-        elif response.status == httplib.SERVICE_UNAVAILABLE:
+        elif response.status_code == httplib.SERVICE_UNAVAILABLE:
             raise ServiceUnavailableError(error_message)
         else:
-            raise Error('%d: %s' % (response.status, str(error_message)))
+            raise Error('%d: %s' % (response.status_code, str(error_message)))
 
     def _fetch_url(self, url, post_data=None, parameters=None, http_method='GET'):
         headers = dict()
