@@ -54,3 +54,9 @@ def user_timeline(screen_name):
     return {
         "title": "%s's tweets" % screen_name
     }
+
+
+@app.route("/search")
+@decorators.templated("timeline.html")
+def search_tweets():
+    return {}

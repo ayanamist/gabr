@@ -1,6 +1,10 @@
 import email
 import time
 
+import flask
+
+from . import indicesreplace
+
 def prerender_timeline(timeline_json):
     return [prerender_tweet(x) for x in timeline_json]
 
@@ -8,6 +12,7 @@ def prerender_timeline(timeline_json):
 def prerender_tweet(tweet_json):
     tweet_json = prerender_retweet(tweet_json)
     tweet_json = prerender_timestamp(tweet_json)
+    tweet_json = prerender_entities(tweet_json)
     return tweet_json
 
 
@@ -31,4 +36,53 @@ def prerender_timestamp(tweet_json):
     if now_t.tm_year != t.tm_year:
         date_fmt = "%Y-" + date_fmt
     tweet_json["timestamp"] = time.strftime(date_fmt, t)
+    return tweet_json
+
+
+def prerender_entities(tweet_json):
+    tweet_json["text_raw"] = tweet_json["text"]
+
+    entities = tweet_json.get("entities")
+    if not entities:
+        return tweet_json
+    new_text = indicesreplace.IndicesReplace(tweet_json["text_raw"])
+
+    hashtags = entities.get("hashtags", list())
+    for hashtag in hashtags:
+        start, stop = hashtag["indices"]
+        data = {
+            "url": "%s?q=%s" % (flask.url_for("search_tweets"), hashtag["text"]),
+            "text": hashtag["text"],
+            }
+        new_text.replace_indices(start, stop, "<a href=\"%(url)s\">#%(text)s</a>" % data)
+
+    urls = entities.get("urls", list())
+    for url in urls:
+        start, stop = url["indices"]
+        data = {
+            "url": url["expanded_url"],
+            "text": url["display_url"],
+            }
+        new_text.replace_indices(start, stop, "<a href=\"%(url)s\">%(text)s</a>" % data)
+
+    user_mentions = entities.get("user_mentions", list())
+    for user_mention in user_mentions:
+        start, stop = user_mention["indices"]
+        data = {
+            "url": flask.url_for("user", screen_name=user_mention["screen_name"]),
+            "title": user_mention["name"],
+            "text": user_mention["screen_name"],
+            }
+        new_text.replace_indices(start, stop, "<a href=\"%(url)s\" title=\"%(title)s\">@%(text)s</a>" % data)
+
+    medias = entities.get("media", list())
+    for media in medias:
+        start, stop = media["indices"]
+        data = {
+            "url": media["expanded_url"],
+            "text": media["display_url"],
+            }
+        new_text.replace_indices(start, stop, "<a href=\"%(url)s\">%(text)s</a>" % data)
+
+    tweet_json["text"] = unicode(new_text)
     return tweet_json
