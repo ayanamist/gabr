@@ -22,7 +22,6 @@ import json
 
 from . import oauth
 from . import urlfetch
-from . import ttp
 
 
 CHARACTER_LIMIT = 140
@@ -38,17 +37,6 @@ AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
 SIGNIN_URL = 'https://api.twitter.com/oauth/authenticate'
 
 BASE_URL = 'https://api.twitter.com/1'
-
-_ttp_parser = ttp.Parser()
-
-# twitter will convert all urls into t.co links.
-def actual_len(text):
-    length = len(text)
-    parse_result = _ttp_parser.parse(text, html=False)
-    for url in parse_result.urls:
-        length = length - len(url) + TCO_LENGTH
-    return length
-
 
 class Error(Exception):
     pass
@@ -101,12 +89,8 @@ class DirectMessage(dict):
     pass
 
 
-class Result(list):
-    def __init__(self, seq=()):
-        list.__init__(self, seq)
-        if self:
-            for result in self[0]['results']:
-                result['value'] = Status(result['value'])
+class Activity(dict):
+    pass
 
 
 class Api(object):
@@ -175,7 +159,7 @@ class Api(object):
     def get_related_results(self, id, include_entities=True):
         url = '%s/related_results/show/%s.json' % (self.base_url, str(id))
         parameters = {'include_entities': int(bool(include_entities))}
-        return Result(self._fetch_url(url, parameters=parameters))
+        return [Activity(x) for x in self._fetch_url(url, parameters=parameters)]
 
     def get_activity(self, since_id=None, max_id=None, page=None, count=None):
         url = 'https://api.twitter.com/i/activity/by_friends.json'
@@ -190,7 +174,7 @@ class Api(object):
             parameters['count'] = int(count)
         if page:
             parameters['page'] = int(page)
-        return self._fetch_url(url, parameters=parameters)
+        return [Activity(x) for x in self._fetch_url(url, parameters=parameters)]
 
 
     def get_status(self, id, include_entities=True):
