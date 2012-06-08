@@ -55,7 +55,7 @@ def prerender_entities(tweet_json):
             "text": media["display_url"],
             }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\">%(text)s</a>" % data)
-        media["preview_url"] = "%s:small" % media["media_url"] # use small because it's fit but not crop
+        media["preview_url"] = "%s:thumb" % media["media_url"]
 
     hashtags = entities.get("hashtags", list())
     for hashtag in hashtags:
