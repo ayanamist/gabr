@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block main %}
+{% for tweet in tweets %}
+<div class="tweet {{ loop.cycle('odd', 'even') }}">
+        <span class="avatar">
+            <img src="{{ tweet.user.profile_image_url }}" height="24" width="24"/>
+        </span>
+        <span class="status shift">
+            <strong>
+                <a href="{{ url_for("user", screen_name=tweet.user.screen_name) }}">
+                    {{ tweet.user.screen_name }} ({{ tweet.user.name }})
+                </a>
+            </strong>
+            &nbsp;
+            <a href="{{ url_for("status_reply", id=tweet.id) }}">@</a>
+            <a href="{{ url_for("status_replyall", id=tweet.id) }}">@@</a>
+            <a href="{{ url_for("status_retweet", id=tweet.id) }}">RT</a>
+            {% if tweet.favorited %}
+                <a href="{{ url_for("status_unfavorite", id=tweet.id) }}">UNFAV</a>
+            {% else %}
+                <a href="{{ url_for("status_favorite", id=tweet.id) }}">FAV</a>
+            {% endif %}
+            {% if tweet.user.screen_name == g.screen_name %}
+                &nbsp;
+                <a href="{{ url_for("status_delete", id=tweet.id) }}">DEL</a>
+            {% endif %}
+            <br/>
+            {{ tweet.text|safe }}
+            <br/>
+            <a href="{{ url_for("status", id=tweet.id) }}" class="time">{{ tweet.timestamp }}</a>
+            <span class="small">
+                from {{ tweet.source|safe }}
+                {% if tweet.in_reply_to_status_id %}
+                    <a href="{{ url_for("status", id=tweet.id) }}">&gt;&gt;</a>
+                {% endif %}
+                {% if tweet.retweeted %}
+                    <br/>
+                    <a href="{{ url_for("status", id=tweet.retweeted.id) }}">retweeted</a> by
+                    <a href="{{ url_for("user", screen_name=tweet.retweeted.user.screen_name) }}">{{ tweet.retweeted.user.screen_name }}</a>
+                    from {{ tweet.retweeted.source|safe }}
+                    {% if tweet.retweet_count > 1 %}
+                        and {{ tweet.retweet_count - 1 }} other(s)
+                    {% endif %}
+                {% endif %}
+            </span>
+        </span>
+</div>
+{% else %}
+<p>No tweets to display.</p>
+{% endfor %}
+{% endblock main %}

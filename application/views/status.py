@@ -34,7 +34,7 @@ def status_retweet(id):
 
 @app.route("/status/<int:id>/favorite")
 @decorators.login_required
-@decorators.templated("timeline.html")
+@decorators.templated("tweets.html")
 def status_favorite(id):
     data = {
         "title": "Home",
@@ -53,7 +53,7 @@ def status_favorite(id):
 
 @app.route("/status/<int:id>/unfavorite")
 @decorators.login_required
-@decorators.templated("timeline.html")
+@decorators.templated("tweets.html")
 def status_unfavorite(id):
     data = {
         "title": "Home",
