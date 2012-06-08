@@ -26,16 +26,16 @@ def home_timeline():
                 pass
 
     try:
-        home_result = flask.g.api.get_home_timeline(**params)
+        result = flask.g.api.get_home_timeline(**params)
     except twitter.Error, e:
         flask.flash("Error: %s" % str(e))
     else:
         max_id = flask.request.args.get("max_id")
         if not keep_max_id and max_id:
-            for i, tweet in enumerate(home_result):
+            for i, tweet in enumerate(result):
                 if tweet["id_str"] == max_id:
-                    del home_result[i]
-        data["tweets"] = render.prerender_timeline(home_result)
+                    del result[i]
+        data["tweets"] = render.prerender_timeline(result)
     return data
 
 
