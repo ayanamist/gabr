@@ -10,10 +10,10 @@ from ..lib import twitter
 @decorators.login_required
 @decorators.templated("timeline.html")
 def home_timeline():
+    keep_max_id = bool(flask.request.args.get("keep_max_id", False))
     data = {
         "title": "Home",
         "tweets": tuple(),
-        "keep_max_id": bool(flask.request.args.get("keep_max_id", False)),
         }
     params = dict()
     for access_param in ("max_id", "page", "since_id", "count"):
@@ -31,9 +31,9 @@ def home_timeline():
         flask.flash("Error: %s" % str(e))
     else:
         max_id = flask.request.args.get("max_id")
-        if max_id:
+        if not keep_max_id and max_id:
             for i, tweet in enumerate(home_result):
-                if not data["keep_max_id"] and tweet["id_str"] == max_id:
+                if tweet["id_str"] == max_id:
                     del home_result[i]
         data["tweets"] = render.prerender_timeline(home_result)
     return data
