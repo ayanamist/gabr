@@ -19,7 +19,6 @@ def prerender_tweet(tweet_json):
 def prerender_retweet(tweet_json):
     retweeted_status = tweet_json.get('retweeted_status')
     if retweeted_status:
-        tweet_json['retweeted_status'] = prerender_tweet(retweeted_status)
         retweet = tweet_json
         tweet_json = retweeted_status
         tweet_json['retweeted'] = retweet
