@@ -1,7 +1,11 @@
 {% extends "tweets.html" %}
 {% block main %}
     {{ super() }}
-    {% if tweets|length > 0 %}
-        <p><a href="?max_id={{ tweets|last|attr("id_str") }}">More</a></p>
+    {% if tweets|length|int > 0 %}
+        {% if tweet.retweeted %}
+            <p><a href="?max_id={{ tweets|last|item("retweeted")|item("id_str") }}">More</a></p>
+        {% else %}
+            <p><a href="?max_id={{ tweets|last|item("id_str") }}">More</a></p>
+        {% endif %}
     {% endif %}
 {% endblock main %}

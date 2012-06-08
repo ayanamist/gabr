@@ -29,3 +29,4 @@ def before_request():
     g.api = twitter.Api(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
     if g.screen_name:
         g.api.set_access_token(flask.session["oauth_token"], flask.session["oauth_token_secret"])
+

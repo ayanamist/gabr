@@ -2,6 +2,7 @@ import email
 import time
 
 import flask
+import jinja2
 
 from . import indicesreplace
 
@@ -85,3 +86,21 @@ def prerender_entities(tweet_json):
 
     tweet_json["text"] = unicode(new_text)
     return tweet_json
+
+
+@jinja2.environmentfilter
+def do_item(environment, obj, name):
+    try:
+        name = str(name)
+    except UnicodeError:
+        pass
+    else:
+        try:
+            value = obj[name]
+        except (TypeError, KeyError):
+            pass
+        else:
+            return value
+    return environment.undefined(obj=obj, name=name)
+
+jinja2.filters.FILTERS["item"] = do_item
