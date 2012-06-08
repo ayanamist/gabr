@@ -177,6 +177,22 @@ class Api(object):
         parameters = {'include_entities': int(bool(include_entities))}
         return Result(self._fetch_url(url, parameters=parameters))
 
+    def get_activity(self, since_id=None, max_id=None, page=None, count=None):
+        url = 'https://api.twitter.com/i/activity/by_friends.json'
+        parameters = {
+            'include_entities': 1,
+            }
+        if since_id:
+            parameters['since_id'] = since_id
+        if max_id:
+            parameters['max_id'] = max_id
+        if count:
+            parameters['count'] = int(count)
+        if page:
+            parameters['page'] = int(page)
+        return self._fetch_url(url, parameters=parameters)
+
+
     def get_status(self, id, include_entities=True):
         url = '%s/statuses/show/%s.json' % (self.base_url, str(id))
         parameters = {'include_entities': int(bool(include_entities))}
