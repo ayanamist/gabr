@@ -66,7 +66,9 @@ def oauth_callback():
 @app.route("/logout")
 def logout():
     flask.session.permanent = True
+    flask.session["screen_name"] = ""
     flask.session["oauth_token"] = ""
     flask.session["oauth_token_secret"] = ""
+    flask.g.screen_name = None
     flask.flash("Logout successfully!")
     return flask.redirect(flask.url_for("login"))
