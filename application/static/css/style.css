@@ -130,6 +130,7 @@ body {
 .login {
     margin: 1em;
     font-size: 1.2em;
+    text-align: center
 }
 
 .more {
@@ -139,5 +140,11 @@ body {
 }
 
 .dialog {
+    text-align: center
+}
+
+.flash {
+    margin: 0.5em;
+    color: #8b0000;
     text-align: center
 }
