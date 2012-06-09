@@ -20,6 +20,8 @@ import urllib
 import urlparse
 import json
 
+from google.appengine.runtime import apiproxy_errors
+
 from . import oauth
 from . import urlfetch
 
@@ -476,7 +478,7 @@ class Api(object):
             encoded_post_data = self._encode_post_data(post_data)
         try:
             response = urlfetch.fetch(method=http_method, url=url, payload=encoded_post_data, headers=headers)
-        except urlfetch.Error, e:
+        except (urlfetch.Error, apiproxy_errors.ApplicationError), e:
             raise NetworkError(str(e))
         error_message = self._get_twitter_data_error(response)
         self._check_for_twitter_code_error(response, error_message)
