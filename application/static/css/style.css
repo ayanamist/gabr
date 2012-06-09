@@ -28,8 +28,7 @@ img {
 body {
     background: #ddd;
     color: #111;
-    margin: 0;
-    font: 90% sans-serif
+    margin: 0
 }
 
 .odd {
@@ -51,7 +50,7 @@ body {
 .menu {
     color: #fff;
     background: #138;
-    padding: 2px
+    padding: 0.125em
 }
 
 .menu a {
@@ -60,11 +59,11 @@ body {
 }
 
 .tweet, .features {
-    padding: 5px
+    padding: 0.313em
 }
 
 .date {
-    padding: 5px;
+    padding: 0.313em;
     font-size: 0.8em;
     font-weight: bold;
     color: #555
@@ -77,8 +76,8 @@ body {
 
 .avatar {
     display: block;
-    height: 26px;
-    width: 26px;
+    height: 1.625em;
+    width: 1.625em;
     left: 0.3em;
     margin: 0;
     overflow: hidden;
@@ -91,8 +90,8 @@ body {
 }
 
 .shift {
-    margin-left: 30px;
-    min-height: 24px;
+    margin-left: 1.875em;
+    min-height: 1.5em;
 }
 
 .from {
@@ -111,5 +110,6 @@ body {
 }
 
 .more {
+    margin: 0.5em;
     font-size: 1.2em
 }
