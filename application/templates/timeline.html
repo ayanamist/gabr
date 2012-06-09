@@ -3,9 +3,10 @@
     {{ super() }}
     {% if tweets|length|int > 0 %}
         {% if tweets|last|item("retweeted") %}
-            <p class="more"><a href="?max_id={{ tweets|last|item("retweeted")|item("id_str") }}">More</a></p>
+            {% set max_id = tweets|last|item("retweeted")|item("id_str") %}
         {% else %}
-            <p class="more"><a href="?max_id={{ tweets|last|item("id_str") }}">More</a></p>
+            {% set max_id = tweets|last|item("id_str") %}
         {% endif %}
+        <p class="more"><a href="?max_id={{ max_id }}">More</a></p>
     {% endif %}
 {% endblock main %}
