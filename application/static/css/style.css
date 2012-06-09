@@ -76,12 +76,17 @@ body {
 
 .avatar {
     display: block;
-    height: 1.625em;
-    width: 1.625em;
+    height: 3em;
+    width: 3em;
     left: 0.3em;
     margin: 0;
     overflow: hidden;
     position: absolute;
+}
+
+.avatar img {
+    height: 3em;
+    width: 3em;
 }
 
 .status {
@@ -90,8 +95,8 @@ body {
 }
 
 .shift {
-    margin-left: 1.875em;
-    min-height: 1.5em;
+    margin-left: 3.5em;
+    min-height: 3em;
 }
 
 .from {

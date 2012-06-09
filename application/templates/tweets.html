@@ -3,7 +3,7 @@
 {% for tweet in tweets %}
 <div class="tweet {{ loop.cycle('odd', 'even') }}">
         <span class="avatar">
-            <img src="{{ tweet.user.profile_image_url }}" height="24" width="24"/>
+            <img src="{{ tweet.user.profile_image_url }}"/>
         </span>
         <span class="status shift">
             <strong>
