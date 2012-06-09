@@ -85,6 +85,8 @@ def prerender_entities(tweet_json):
             "text": user_mention["screen_name"],
             }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\" title=\"%(title)s\">@%(text)s</a>" % data)
+        if user_mention["screen_name"] == flask.g.screen_name:
+            tweet_json["highlight"] = True
 
     tweet_json["text"] = unicode(new_text)
     return tweet_json
