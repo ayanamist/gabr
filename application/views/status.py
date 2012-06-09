@@ -115,14 +115,16 @@ def status_unfavorite(id):
     return data
 
 
-@app.route("/status/<int:id>/delete")
+@app.route("/status/<int:id>/delete", methods=['GET', 'POST'])
 @decorators.login_required
-@decorators.templated("tweets.html")
 def status_delete(id):
     data = {
-        "title": "Unfavorite",
+        "title": "Delete",
         "tweets": tuple(),
         }
+    if flask.request.method == "GET":
+        data["status_id"] = id
+        return flask.render_template("status_delete.html", **data)
     try:
         result = flask.g.api.destroy_status(id)
     except twitter.Error, e:
@@ -131,5 +133,5 @@ def status_delete(id):
         flask.flash("Destroyed status successfully!")
         result["deleted"] = True
         data["tweets"] = [render.prerender_tweet(result)]
-    return data
+    return flask.render_template("tweets.html", **data)
 
