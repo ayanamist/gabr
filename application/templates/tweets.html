@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block main %}
 {% for tweet in tweets %}
-<div class="tweet {{ loop.cycle('odd', 'even') }}">
+<div class="tweet {{ loop.cycle('odd', 'even') }}{% if tweet.orig %} reply{% endif %}">
         <span class="avatar">
             <img src="{{ tweet.user.profile_image_url }}"/>
         </span>
@@ -34,7 +34,7 @@
                     <br/>
                 {% endfor %}
             {% endif %}
-            <a href="{{ url_for("status", id=tweet.id) }}" class="time">{{ tweet.timestamp }}</a>
+            <a href="{{ url_for("status", id=tweet.id) }}" class="time">{{ tweet.created_at_fmt }}</a>
             <span class="small">
                 from {{ tweet.source|safe }}
                 {% if tweet.in_reply_to_status_id %}

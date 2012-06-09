@@ -1,3 +1,5 @@
+import operator
+
 import flask
 
 from application import app
@@ -6,9 +8,52 @@ from ..lib import render
 from ..lib import twitter
 
 @app.route("/status/<int:id>")
-@decorators.templated("timeline.html")
+@decorators.templated("tweets.html")
 def status(id):
-    pass
+    data = {
+        "title": "Status",
+        "tweets": tuple(),
+        }
+    try:
+        result = flask.g.api.get_status(id)
+    except twitter.Error, e:
+        flask.flash("Error: %s" % str(e))
+    else:
+        result["orig"] = True
+        data["tweets"] = [result]
+        related_results = list()
+        try:
+            result = flask.g.api.get_related_results(id)
+            if result:
+                related_results = result[0]['results']
+        except twitter.Error:
+            pass
+        orig_index = 0
+        for related_result in related_results:
+            if related_result['kind'] == 'Tweet':
+                conversation_role = related_result['annotations']['ConversationRole']
+                if conversation_role == "Ancestor":
+                    data["tweets"].insert(orig_index, related_result["value"])
+                    orig_index += 1
+                else: # possible value: Descendant, Fork
+                    data["tweets"].append(related_result["value"])
+        status_id = data["tweets"][0].get("in_reply_to_status_id")
+        while orig_index < 3 and status_id:
+            try:
+                result = flask.g.api.get_status(status_id)
+            except twitter.NotFoundError:
+                data["tweets"][0]["in_reply_to_status_id"] = None
+                break
+            except twitter.Error:
+                break
+            else:
+                data["tweets"].insert(0, result)
+                status_id = result.get("in_reply_to_status_id")
+                orig_index += 1
+        data["tweets"] = render.prerender_timeline(data["tweets"])
+        # Since twitter will return misordered forks, i think sorted by timestamp will solve this problem.
+        data["tweets"].sort(key=operator.itemgetter("timestamp"))
+    return data
 
 
 @app.route("/status/<int:id>/reply", methods=["GET", "POST"])

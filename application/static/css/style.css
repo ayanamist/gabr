@@ -39,7 +39,7 @@ body {
     background: #eee
 }
 
-.reply {
+.reply.odd {
     background: #ffa
 }
 

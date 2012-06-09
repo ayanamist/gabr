@@ -29,13 +29,14 @@ def prerender_retweet(tweet_json):
 
 def prerender_timestamp(tweet_json):
     unix_timestamp = time.mktime(email.utils.parsedate(tweet_json['created_at']))
+    tweet_json["timestamp"] = unix_timestamp
     unix_timestamp += 28800 # GMT+8
     t = time.gmtime(unix_timestamp)
     now_t = time.gmtime()
     date_fmt = "%m-%d %H:%M:%S"
     if now_t.tm_year != t.tm_year:
         date_fmt = "%Y-" + date_fmt
-    tweet_json["timestamp"] = time.strftime(date_fmt, t)
+    tweet_json["created_at_fmt"] = time.strftime(date_fmt, t)
     return tweet_json
 
 
