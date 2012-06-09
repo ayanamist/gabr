@@ -14,9 +14,11 @@
                 <a href="{{ url_for("user", screen_name=g.screen_name) }}">{{ g.screen_name }}</a> |
                 <a href="{{ url_for("home_timeline") }}">Home</a> |
                 <a href="{{ url_for("connect_timeline") }}">Connect</a> |
+                <a href="{{ url_for("logout") }}">Logout</a>
+            {% else %}
+                <a href="http://code.google.com/p/gabr/">About</a>
             {% endif %}
         {% endblock navbar %}
-        <a href="http://code.google.com/p/gabr/">About</a>
     </div>
     {% for message in get_flashed_messages() %}
         <div class="flash">{{ message }}</div>
