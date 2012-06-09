@@ -4,8 +4,6 @@ runtime: python27
 api_version: 1
 threadsafe: true
 
-default_expiration: "7d"
-
 env_variables:
   SITE_NAME: "gabr"
   CONSUMER_KEY: ""
