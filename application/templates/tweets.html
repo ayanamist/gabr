@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block main %}
 {% for tweet in tweets %}
-<div class="tweet {{ loop.cycle('odd', 'even') }}{% if tweet.orig %} reply{% endif %}">
+<div class="tweet {{ loop.cycle('odd', 'even') }}{% if loop.length > 1 and tweet.orig %} reply{% endif %}">
         <span class="avatar">
             <img src="{{ tweet.user.profile_image_url }}"/>
         </span>
