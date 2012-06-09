@@ -27,7 +27,7 @@ def oauth_login():
     callback_url = "%s%s" % (flask.request.host_url, flask.url_for("oauth_callback"))
     consumer = oauth.Consumer(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
     client = oauth.Client(consumer)
-    resp = client.request(twitter.REQUEST_TOKEN_URL)
+    resp = client.request(twitter.REQUEST_TOKEN_URL, parameters={"oauth_callback": callback_url})
     if resp:
         request_token = dict(urlparse.parse_qsl(resp))
         oauth_token = request_token.get("oauth_token")
