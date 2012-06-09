@@ -100,6 +100,23 @@ body {
     min-height: 3em;
 }
 
+@media screen and (max-device-width: 400px) {
+    .avatar {
+        height: 1.5em !important;
+        width: 1.5em !important;
+    }
+
+    .avatar img {
+        height: 1.5em !important;
+        width: 1.5em !important;
+    }
+
+    .shift {
+        margin-left: 1.875em !important;
+        min-height: 1.5em !important;
+    }
+}
+
 .from {
     font-size: 0.75em;
     color: #555;
