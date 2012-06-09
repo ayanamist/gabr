@@ -18,17 +18,17 @@ def prerender_tweet(tweet_json):
 
 
 def prerender_retweet(tweet_json):
-    retweeted_status = tweet_json.get('retweeted_status')
+    retweeted_status = tweet_json.get("retweeted_status")
     if retweeted_status:
         retweet = tweet_json
         tweet_json = retweeted_status
-        tweet_json['retweeted'] = retweet
-        del tweet_json['retweeted']['retweeted_status']
+        tweet_json["retweet"] = retweet
+        del tweet_json["retweet"]["retweeted_status"]
     return tweet_json
 
 
 def prerender_timestamp(tweet_json):
-    unix_timestamp = time.mktime(email.utils.parsedate(tweet_json['created_at']))
+    unix_timestamp = time.mktime(email.utils.parsedate(tweet_json["created_at"]))
     tweet_json["timestamp"] = unix_timestamp
     unix_timestamp += 28800 # GMT+8
     t = time.gmtime(unix_timestamp)

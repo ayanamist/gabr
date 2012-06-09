@@ -39,11 +39,11 @@
                 {% if tweet.in_reply_to_status_id %}
                     <a href="{{ url_for("status", id=tweet.id) }}">&gt;&gt;</a>
                 {% endif %}
-                {% if tweet.retweeted %}
+                {% if tweet.retweet %}
                     <br/>
-                    <a href="{{ url_for("status", id=tweet.retweeted.id) }}">retweeted</a> by
-                    <a href="{{ url_for("user", screen_name=tweet.retweeted.user.screen_name) }}">{{ tweet.retweeted.user.screen_name }}</a>
-                    from {{ tweet.retweeted.source|safe }}
+                    <a href="{{ url_for("status", id=tweet.retweet.id) }}">retweeted</a> by
+                    <a href="{{ url_for("user", screen_name=tweet.retweet.user.screen_name) }}">{{ tweet.retweet.user.screen_name }}</a>
+                    from {{ tweet.retweet.source|safe }}
                     {% if tweet.retweet_count > 1 %}
                         and {{ tweet.retweet_count - 1 }} other(s)
                     {% endif %}

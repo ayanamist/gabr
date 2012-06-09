@@ -2,8 +2,8 @@
 {% block main %}
     {{ super() }}
     {% if tweets|length|int > 0 %}
-        {% if tweets|last|item("retweeted") %}
-            {% set max_id = tweets|last|item("retweeted")|item("id_str") %}
+        {% if tweets|last|item("retweet") %}
+            {% set max_id = tweets|last|item("retweet")|item("id_str") %}
         {% else %}
             {% set max_id = tweets|last|item("id_str") %}
         {% endif %}
