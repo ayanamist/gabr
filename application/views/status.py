@@ -37,7 +37,7 @@ def status_retweet(id):
 @decorators.templated("tweets.html")
 def status_favorite(id):
     data = {
-        "title": "Home",
+        "title": "Favorite",
         "tweets": tuple(),
         }
     try:
@@ -56,7 +56,7 @@ def status_favorite(id):
 @decorators.templated("tweets.html")
 def status_unfavorite(id):
     data = {
-        "title": "Home",
+        "title": "Unfavorite",
         "tweets": tuple(),
         }
     try:
@@ -70,9 +70,21 @@ def status_unfavorite(id):
     return data
 
 
-@app.route("/status/<int:id>/delete", methods=["GET", "POST"])
+@app.route("/status/<int:id>/delete")
 @decorators.login_required
-@decorators.templated("timeline.html")
+@decorators.templated("tweets.html")
 def status_delete(id):
-    return {}
+    data = {
+        "title": "Unfavorite",
+        "tweets": tuple(),
+        }
+    try:
+        result = flask.g.api.destroy_status(id)
+    except twitter.Error, e:
+        flask.flash("Error: %s" % str(e))
+    else:
+        flask.flash("Destroyed status successfully!")
+        result["deleted"] = True
+        data["tweets"] = [render.prerender_tweet(result)]
+    return data
 
