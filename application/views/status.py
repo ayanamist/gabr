@@ -11,7 +11,7 @@ from ..lib import twitter
 @decorators.templated("tweets.html")
 def status(id):
     data = {
-        "title": "Status",
+        "title": "Status %d" % id,
         "tweets": tuple(),
         }
     try:
