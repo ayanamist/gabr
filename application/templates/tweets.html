@@ -41,8 +41,11 @@
                 {% endif %}
                 {% if tweet.retweet %}
                     <br/>
-                    <span class="time">{{ tweet.retweet.created_at_fmt }}</span>
-                    <a href="{{ url_for("status", id=tweet.retweet.id) }}">retweeted</a> by
+                    <a href="{{ url_for("status", id=tweet.retweet.id) }}">
+                        <span class="time">{{ tweet.retweet.created_at_fmt }}</span>
+                        retweeted
+                    </a>
+                    by
                     <a href="{{ url_for("user", screen_name=tweet.retweet.user.screen_name) }}">{{ tweet.retweet.user.screen_name }}</a>
                     from {{ tweet.retweet.source|safe }}
                     {% if tweet.retweet_count > 1 %}
