@@ -3,12 +3,12 @@
     <form action="{{ url_for("status_post") }}" method="post">
         <fieldset>
             <legend>What's Happening?</legend>
-            <textarea name="status" id="status"></textarea>
+            <textarea name="status" id="status">{{ preset_status }}</textarea>
 
             <div class="tweet-btn">
-                <input type="hidden" value="" name="in_reply_to_id"/>
+                <input type="hidden" value="{{ in_reply_to_id }}" name="in_reply_to_id"/>
                 <input type="submit" value="Tweet"/>
-                <span id="remaining">140</span>
+                <span id="remaining">{{ word_count|default("140") }}</span>
             </div>
         </fieldset>
     </form>
