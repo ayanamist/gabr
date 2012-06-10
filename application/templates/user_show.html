@@ -10,6 +10,12 @@
         <span class="status shift">
             <span class="bold">
                 {{ user.screen_name }} ({{ user.name }})
+                <span class="small">
+                    {% if user.protected %}Protected{% endif %}
+                    {% if user.verified %}Verified{% endif %}
+                    {% if user.is_translator %}Translator{% endif %}
+                    {% if user.contributors_enabled %}Contributed{% endif %}
+                </span>
             </span>
             <br/>
             <span class="about">Bio: {{ user.description }}
@@ -26,11 +32,17 @@
                 <a href="">{{ user.followers_count }} followers</a> |
                 <a href="">{{ user.friends_count }} friends</a> |
                 <a href="">{{ user.favourites_count }} favourites</a> |
-                <a href="">lists</a> |
-                <a href="">Direct Message</a> |
-                <a href="">Follow</a> |
-                <a href="">(Un)Block</a> |
-                <a href="">Report Spam</a>
+                <a href="">lists</a>
+                {% if user.screen_name != g.screen_name %}|
+                    <a href="">Direct Message</a> |
+                    {% if user.following %}
+                        <a href="">Unfollow</a> |
+                    {% else %}
+                        <a href="">Follow</a> |
+                    {% endif %}
+                    <a href="">(Un)Block</a> |
+                    <a href="">Report Spam</a>
+                {% endif %}
             </div>
         </div>
     {% endif %}
