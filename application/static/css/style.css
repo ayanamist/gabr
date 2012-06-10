@@ -152,3 +152,15 @@ body {
 .bold {
     font-weight: bold
 }
+
+#status {
+    width: 100%;
+    height: 10em;
+}
+
+.tweet-btn {
+    width: 6em;
+    margin: 0 auto
+}
+
+    }

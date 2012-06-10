@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block main %}
+    <form action="{{ url_for("status_post") }}" method="post">
+        <fieldset>
+            <legend>What's Happening?</legend>
+            <textarea name="status" id="status"></textarea>
+
+            <div class="tweet-btn">
+                <input type="hidden" value="" name="in_reply_to_id"/>
+                <input type="submit" value="Tweet"/>
+                <span id="remaining">140</span>
+            </div>
+        </fieldset>
+    </form>
+{% endblock main %}

@@ -7,6 +7,28 @@ from ..lib import decorators
 from ..lib import render
 from ..lib import twitter
 
+@app.route("/post", methods=["GET", "POST"])
+@decorators.login_required
+def status_post():
+    data = dict()
+    if flask.request.method == "POST":
+        in_reply_to_id = flask.request.form.get("in_reply_to_id")
+        if not in_reply_to_id:
+            in_reply_to_id = None
+        try:
+            result = flask.g.api.post_update(flask.request.form.get("status"), in_reply_to_id)
+        except twitter.Error, e:
+            data["title"] = "Post Error"
+            flask.flash("Post Error: %s" % str(e))
+            data["tweets"] = list()
+        else:
+            data["title"] = "New Tweet"
+            data["tweets"] = [render.prerender_tweet(result)]
+        return flask.render_template("tweets.html", **data)
+    data["title"] = "What's happening?"
+    return flask.render_template("status_post.html", **data)
+
+
 @app.route("/status/<int:id>")
 @decorators.templated("tweets.html")
 def status(id):
