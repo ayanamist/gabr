@@ -98,9 +98,28 @@ def status_reply(id):
 
 @app.route("/status/<int:id>/replyall")
 @decorators.login_required
-@decorators.templated("status_reply.html")
+@decorators.templated("status_post.html")
 def status_replyall(id):
-    return {}
+    data = {
+        "title": "Reply to All",
+        }
+    try:
+        result = flask.g.api.get_status(id)
+    except twitter.Error, e:
+        flask.flash("Get status error: %s" % str(e))
+    else:
+        mentioned_screen_name = [result["user"]["screen_name"]]
+        entities = result.get("entities")
+        if entities:
+            for user_mention in entities.get("user_mentions", list()):
+                if user_mention["screen_name"] not in mentioned_screen_name:
+                    mentioned_screen_name.append(user_mention["screen_name"])
+        if flask.g.screen_name in mentioned_screen_name and len(mentioned_screen_name) > 1:
+            mentioned_screen_name.remove(flask.g.screen_name)
+        data["preset_status"] = "%s " % " ".join("@%s" % x for x in mentioned_screen_name)
+        data["in_reply_to_id"] = id
+        data["word_count"] = twitter.CHARACTER_LIMIT - len(data["preset_status"])
+    return data
 
 
 @app.route("/status/<int:id>/retweet", methods=["GET", "POST"])
