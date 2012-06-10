@@ -159,8 +159,6 @@ body {
 }
 
 .tweet-btn {
-    width: 6em;
+    text-align: center;
     margin: 0 auto
 }
-
-    }

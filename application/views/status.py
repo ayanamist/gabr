@@ -12,11 +12,13 @@ from ..lib import twitter
 def status_post():
     data = dict()
     if flask.request.method == "POST":
-        in_reply_to_id = flask.request.form.get("in_reply_to_id")
-        if not in_reply_to_id:
-            in_reply_to_id = None
         try:
-            result = flask.g.api.post_update(flask.request.form.get("status"), in_reply_to_id)
+            retweet_id = flask.request.form.get("retweet_id")
+            if retweet_id:
+                result = flask.g.api.create_retweet(retweet_id)
+            else:
+                in_reply_to_id = flask.request.form.get("in_reply_to_id")
+                result = flask.g.api.post_update(flask.request.form.get("status"), in_reply_to_id)
         except twitter.Error, e:
             data["title"] = "Post Error"
             flask.flash("Post error: %s" % str(e))
@@ -124,9 +126,21 @@ def status_replyall(id):
 
 @app.route("/status/<int:id>/retweet", methods=["GET", "POST"])
 @decorators.login_required
-@decorators.templated("status_retweet.html")
+@decorators.templated("status_post.html")
 def status_retweet(id):
-    return {}
+    data = {
+        "title": "Retweet",
+        }
+    try:
+        result = flask.g.api.get_status(id)
+    except twitter.Error, e:
+        flask.flash("Get status error: %s" % str(e))
+    else:
+        data["preset_status"] = "RT @%s: %s" % (result["user"]["screen_name"], result["text"])
+        data["word_count"] = twitter.CHARACTER_LIMIT - len(data["preset_status"])
+        data["retweet_id"] = id
+        data["retweet"] = True
+    return data
 
 
 @app.route("/status/<int:id>/favorite")
