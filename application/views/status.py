@@ -19,7 +19,7 @@ def status_post():
             result = flask.g.api.post_update(flask.request.form.get("status"), in_reply_to_id)
         except twitter.Error, e:
             data["title"] = "Post Error"
-            flask.flash("Post Error: %s" % str(e))
+            flask.flash("Post error: %s" % str(e))
             data["tweets"] = list()
         else:
             data["title"] = "New Tweet"
@@ -39,7 +39,7 @@ def status(id):
     try:
         result = flask.g.api.get_status(id)
     except twitter.Error, e:
-        flask.flash("Error: %s" % str(e))
+        flask.flash("Get status error: %s" % str(e))
     else:
         result["highlight"] = True
         data["tweets"] = [result]
@@ -80,9 +80,20 @@ def status(id):
 
 @app.route("/status/<int:id>/reply", methods=["GET", "POST"])
 @decorators.login_required
-@decorators.templated("status_reply.html")
+@decorators.templated("status_post.html")
 def status_reply(id):
-    return {}
+    data = {
+        "title": "Reply",
+        }
+    try:
+        result = flask.g.api.get_status(id)
+    except twitter.Error, e:
+        flask.flash("Get status error: %s" % str(e))
+    else:
+        data["preset_status"] = "@%s " % result["user"]["screen_name"]
+        data["in_reply_to_id"] = id
+        data["word_count"] = twitter.CHARACTER_LIMIT - len(data["preset_status"])
+    return data
 
 
 @app.route("/status/<int:id>/replyall")
@@ -110,7 +121,7 @@ def status_favorite(id):
     try:
         result = flask.g.api.create_favorite(id)
     except twitter.Error, e:
-        flask.flash("Error: %s" % str(e))
+        flask.flash("Create favorite error: %s" % str(e))
     else:
         flask.flash("Created favorite successfully!")
         result["favorited"] = True # fucking twitter won't mark it as favorited.
@@ -129,7 +140,7 @@ def status_unfavorite(id):
     try:
         result = flask.g.api.destroy_favorite(id)
     except twitter.Error, e:
-        flask.flash("Error: %s" % str(e))
+        flask.flash("Destroy favorite error: %s" % str(e))
     else:
         flask.flash("Destroyed favorite successfully!")
         result["favorited"] = False # fucking twitter won't mark it as not favorited.
@@ -150,7 +161,7 @@ def status_delete(id):
     try:
         result = flask.g.api.destroy_status(id)
     except twitter.Error, e:
-        flask.flash("Error: %s" % str(e))
+        flask.flash("Destroy status error: %s" % str(e))
     else:
         flask.flash("Destroyed status successfully!")
         result["deleted"] = True
