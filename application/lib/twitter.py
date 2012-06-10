@@ -191,6 +191,8 @@ class Api(object):
 
     def post_update(self, status, in_reply_to_status_id=None, include_entities=True):
         url = '%s/statuses/update.json' % self.base_url
+        if isinstance(status, unicode):
+            status = status.encode("UTF8")
         data = {'status': status, 'include_entities': int(bool(include_entities))}
         if in_reply_to_status_id:
             data['in_reply_to_status_id'] = in_reply_to_status_id
