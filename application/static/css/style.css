@@ -59,7 +59,7 @@ body {
     text-decoration: none
 }
 
-.tweet, .features {
+.tweet, .features, .profile {
     padding: 0.313em
 }
 
@@ -147,4 +147,8 @@ body {
     margin: 0.5em;
     color: #8b0000;
     text-align: center
+}
+
+.bold {
+    font-weight: bold
 }

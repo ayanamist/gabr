@@ -10,7 +10,6 @@ from ..lib import twitter
 @decorators.login_required
 @decorators.templated("timeline.html")
 def home_timeline():
-    keep_max_id = bool(flask.request.args.get("keep_max_id", False))
     data = {
         "title": "Home",
         "tweets": tuple(),
@@ -31,7 +30,7 @@ def home_timeline():
         flask.flash("Error: %s" % str(e))
     else:
         max_id = flask.request.args.get("max_id")
-        if not keep_max_id and max_id:
+        if max_id:
             for i, tweet in enumerate(result):
                 if tweet["id_str"] == max_id:
                     del result[i]

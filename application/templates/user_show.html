@@ -1,0 +1,40 @@
+{% extends "timeline.html" %}
+{% block main %}
+    {% if user is defined %}
+        <div class="profile">
+        <span class="avatar">
+            <a href="{{ user.profile_image_url|replace("_normal", "") }}">
+                <img src="{{ user.profile_image_url }}"/>
+            </a>
+        </span>
+        <span class="status shift">
+            <span class="bold">
+                {{ user.screen_name }} ({{ user.name }})
+            </span>
+            <br/>
+            <span class="about">Bio: {{ user.description }}
+                <br/>
+                Link: {% if user.url %}<a href="{{ user.url }}">{{ user.url }}</a>{% endif %}
+                <br/>
+                Location: {{ user.location }}
+                <br/>
+                Joined: {{ user.created_at_fmt }} (~{{ user.tweets_per_day }} tweets per day)
+            </span>
+        </span>
+
+            <div class="features">{{ user.statuses_count }} tweets |
+                <a href="">{{ user.followers_count }} followers</a> |
+                <a href="">{{ user.friends_count }} friends</a> |
+                <a href="">{{ user.favourites_count }} favourites</a> |
+                <a href="">lists</a> |
+                <a href="">Direct Message</a> |
+                <a href="">Follow</a> |
+                <a href="">(Un)Block</a> |
+                <a href="">Report Spam</a>
+            </div>
+        </div>
+    {% endif %}
+    <div class="timeline">
+        {{ super() }}
+    </div>
+{% endblock main %}

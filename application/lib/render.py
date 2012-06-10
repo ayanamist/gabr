@@ -17,36 +17,36 @@ def prerender_tweet(tweet_json):
     return tweet_json
 
 
-def prerender_retweet(tweet_json):
-    retweeted_status = tweet_json.get("retweeted_status")
+def prerender_retweet(json_data):
+    retweeted_status = json_data.get("retweeted_status")
     if retweeted_status:
-        retweet = tweet_json
-        tweet_json = retweeted_status
-        tweet_json["retweet"] = retweet
-        del tweet_json["retweet"]["retweeted_status"]
-    return tweet_json
+        retweet = json_data
+        json_data = retweeted_status
+        json_data["retweet"] = retweet
+        del json_data["retweet"]["retweeted_status"]
+    return json_data
 
 
-def prerender_timestamp(tweet_json):
-    unix_timestamp = time.mktime(email.utils.parsedate(tweet_json["created_at"]))
-    tweet_json["timestamp"] = unix_timestamp
+def prerender_timestamp(json_data):
+    unix_timestamp = time.mktime(email.utils.parsedate(json_data["created_at"]))
+    json_data["timestamp"] = unix_timestamp
     unix_timestamp += 28800 # GMT+8
     t = time.gmtime(unix_timestamp)
     now_t = time.gmtime()
     date_fmt = "%m-%d %H:%M:%S"
     if now_t.tm_year != t.tm_year:
         date_fmt = "%Y-" + date_fmt
-    tweet_json["created_at_fmt"] = time.strftime(date_fmt, t)
-    return tweet_json
+    json_data["created_at_fmt"] = time.strftime(date_fmt, t)
+    return json_data
 
 
-def prerender_entities(tweet_json):
-    tweet_json["text_raw"] = tweet_json["text"]
+def prerender_entities(json_data):
+    json_data["text_raw"] = json_data["text"]
 
-    entities = tweet_json.get("entities")
+    entities = json_data.get("entities")
     if not entities:
-        return tweet_json
-    new_text = indicesreplace.IndicesReplace(tweet_json["text_raw"])
+        return json_data
+    new_text = indicesreplace.IndicesReplace(json_data["text_raw"])
 
     medias = entities.get("media", list())
     for media in medias:
@@ -86,10 +86,10 @@ def prerender_entities(tweet_json):
             }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\" title=\"%(title)s\">@%(text)s</a>" % data)
         if user_mention["screen_name"] == flask.g.screen_name:
-            tweet_json["highlight"] = True
+            json_data["highlight"] = True
 
-    tweet_json["text"] = unicode(new_text)
-    return tweet_json
+    json_data["text"] = unicode(new_text)
+    return json_data
 
 
 @jinja2.environmentfilter

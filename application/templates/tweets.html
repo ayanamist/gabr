@@ -6,11 +6,11 @@
             <img src="{{ tweet.user.profile_image_url }}"/>
         </span>
         <span class="status shift">
-            <strong>
+            <span class="bold">
                 <a href="{{ url_for("user", screen_name=tweet.user.screen_name) }}">
                     {{ tweet.user.screen_name }} ({{ tweet.user.name }})
                 </a>
-            </strong>
+            </span>
             <a href="{{ url_for("status_reply", id=tweet.id) }}">@</a>
             <a href="{{ url_for("status_replyall", id=tweet.id) }}">@@</a>
             <a href="{{ url_for("status_retweet", id=tweet.id) }}">RT</a>
