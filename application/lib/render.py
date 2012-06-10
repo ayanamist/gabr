@@ -12,6 +12,8 @@ def prerender_timeline(timeline_json):
 
 def prerender_tweet(tweet_json):
     tweet_json = prerender_retweet(tweet_json)
+    if "retweet" in tweet_json:
+        tweet_json["retweet"] = prerender_timestamp(tweet_json["retweet"])
     tweet_json = prerender_timestamp(tweet_json)
     tweet_json = prerender_entities(tweet_json)
     return tweet_json
