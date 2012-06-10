@@ -47,6 +47,15 @@ def connect_timeline():
         }
 
 
+@app.route("/activity")
+@decorators.login_required
+@decorators.templated("timeline_ex.html")
+def activity_timeline():
+    return {
+        "title": "Activity",
+        }
+
+
 @app.route("/user/<screen_name>/tweets")
 @decorators.templated("timeline.html")
 def user_timeline(screen_name):

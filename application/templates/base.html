@@ -9,22 +9,26 @@
 <body>
 <div class="page">
     <div class='menu menu-top'>
-        {% block navbar %}
-            {% if g.screen_name %}
-                <a href="{{ url_for("user", screen_name=g.screen_name) }}">{{ g.screen_name }}</a> |
-                <a href="{{ url_for("home_timeline") }}">Home</a> |
-                <a href="{{ url_for("connect_timeline") }}">Connect</a> |
-                <a href="{{ url_for("logout") }}">Logout</a>
-            {% else %}
-                <a href="http://code.google.com/p/gabr/">About</a>
-            {% endif %}
-        {% endblock navbar %}
+        {% if g.screen_name %}
+            <a href="{{ url_for("home_timeline") }}">Home</a> |
+            <a href="{{ url_for("connect_timeline") }}">Connect</a> |
+            <a href="{{ url_for("activity_timeline") }}">Activity</a> |
+            <a href="{{ url_for("user", screen_name=g.screen_name) }}">Me</a> |
+            <a href="{{ url_for("status_post") }}">Tweet</a>
+        {% else %}
+            <a href="http://code.google.com/p/gabr/">About</a>
+        {% endif %}
     </div>
     {% for message in get_flashed_messages() %}
         <div class="flash">{{ message }}</div>
     {% endfor %}
     {% block main %} {% endblock main %}
-    {% block footer %} {% endblock footer %}
+    {% if g.screen_name %}
+        <div class='menu menu-bottom'>
+            <a href="">Setting</a> |
+            <a href="{{ url_for("logout") }}">Logout</a> |
+        </div>
+    {% endif %}
 </div>
 </body>
 </html>
