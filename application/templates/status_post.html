@@ -9,7 +9,7 @@
                 <input type="hidden" value="{{ in_reply_to_id }}" name="in_reply_to_id" id="in_reply_to_id"/>
                 {% if retweet is defined %}
                     <input type="hidden" value="{{ retweet_id }}" name="retweet_id" id="retweet_id"/>
-                    <input type="submit" value="Retweet"/>
+                    <input type="submit" value="Retweet" name="retweet" id="retweet"/>
                 {% endif %}
                 <input type="submit" value="Tweet"/>
                 <span id="remaining">{{ word_count|default("140") }}</span>

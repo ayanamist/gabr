@@ -14,7 +14,7 @@ def status_post():
     if flask.request.method == "POST":
         try:
             retweet_id = flask.request.form.get("retweet_id")
-            if retweet_id:
+            if "retweet" in flask.request.form and retweet_id:
                 result = flask.g.api.create_retweet(retweet_id)
             else:
                 in_reply_to_id = flask.request.form.get("in_reply_to_id")
