@@ -166,3 +166,7 @@ body {
     text-align: center;
     margin: 0.5em auto 0
 }
+
+.menu-bottom {
+    text-align: right
+}
