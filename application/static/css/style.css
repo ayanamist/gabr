@@ -174,3 +174,7 @@ body {
 .in-reply-to {
     margin-left: 1.5em
 }
+
+.red {
+    color: red
+}

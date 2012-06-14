@@ -20,7 +20,8 @@
                     <input type="submit" value="Retweet" name="retweet" id="retweet"/>
                 {% endif %}
                 <input type="submit" value="Tweet"/>
-                <span id="remaining">{{ 140 - preset_status|default("")|length|int }}</span>
+                {% set word_count=140 - preset_status|default("")|length|int %}
+                <span id="remaining"{% if word_count|int < 0 %} class="red bold"{% endif %}>{{ word_count }}</span>
             </div>
         </fieldset>
     </form>
