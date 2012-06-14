@@ -1,12 +1,20 @@
 {% extends "base.html" %}
 {% block main %}
+    {% if in_reply_to_status is defined %}
+        <p class="in-reply-to">In reply to <a
+                href="{{ url_for("user", screen_name=in_reply_to_status.user.screen_name) }}">{{ in_reply_to_status.user.screen_name }}</a>:<br/>
+            {{ in_reply_to_status.text|safe }}
+        </p>
+    {% endif %}
     <form action="{{ url_for("status_post") }}" method="post">
         <fieldset>
             <legend>What's Happening?</legend>
             <textarea name="status" id="status">{{ preset_status }}</textarea>
 
             <div class="tweet-btn">
-                <input type="hidden" value="{{ in_reply_to_id }}" name="in_reply_to_id" id="in_reply_to_id"/>
+                {% if in_reply_to_status is defined %}
+                    <input type="hidden" value="{{ in_reply_to_status.id }}" name="in_reply_to_id" id="in_reply_to_id"/>
+                {% endif %}
                 {% if retweet is defined %}
                     <input type="hidden" value="{{ retweet_id }}" name="retweet_id" id="retweet_id"/>
                     <input type="submit" value="Retweet" name="retweet" id="retweet"/>

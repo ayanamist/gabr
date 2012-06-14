@@ -93,6 +93,7 @@ def status_reply(id):
     else:
         data["preset_status"] = "@%s " % result["user"]["screen_name"]
         data["in_reply_to_id"] = id
+        data["in_reply_to_status"] = render.prerender_tweet(result)
     return data
 
 
@@ -108,6 +109,7 @@ def status_replyall(id):
     except twitter.Error, e:
         flask.flash("Get status error: %s" % str(e))
     else:
+        data["in_reply_to_status"] = render.prerender_tweet(result)
         mentioned_screen_name = [result["user"]["screen_name"]]
         entities = result.get("entities")
         if entities:
@@ -117,7 +119,6 @@ def status_replyall(id):
         if flask.g.screen_name in mentioned_screen_name and len(mentioned_screen_name) > 1:
             mentioned_screen_name.remove(flask.g.screen_name)
         data["preset_status"] = "%s " % " ".join("@%s" % x for x in mentioned_screen_name)
-        data["in_reply_to_id"] = id
     return data
 
 

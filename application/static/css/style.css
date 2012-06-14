@@ -170,3 +170,7 @@ body {
 .menu-bottom {
     text-align: right
 }
+
+.in-reply-to {
+    margin-left: 1.5em
+}
