@@ -19,7 +19,8 @@ def user(screen_name):
         except twitter.Error, e:
             flask.flash("Can not lookup user %s: %s" % (screen_name, str(e)))
         else:
-            data["user"] = render.prerender_timestamp(result)
+            data["user"] = result
+            data["user"]["created_at_fmt"] = render.prerender_timestamp(result["created_at"])
             days_delta = (time.time() - time.mktime(email.utils.parsedate(result["created_at"]))) // 86400
             data["user"]["tweets_per_day"] = "%.4g" % (result["statuses_count"] / days_delta)
     else:
