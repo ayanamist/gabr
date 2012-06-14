@@ -7,6 +7,6 @@
         {% else %}
             {% set max_id = tweets|last|item("id_str") %}
         {% endif %}
-        <p class="more"><a href="?max_id={{ max_id }}">More</a></p>
+        <a href="?max_id={{ max_id }}"><p class="more">More</p></a>
     {% endif %}
 {% endblock main %}
