@@ -41,7 +41,11 @@ SIGNIN_URL = 'https://api.twitter.com/oauth/authenticate'
 BASE_URL = 'https://api.twitter.com/1'
 
 class Error(Exception):
-    pass
+    def __str__(self):
+        try:
+            return "%d: %s" % (self.code, self.message)
+        except AttributeError:
+            return self.message
 
 
 class BadRequestError(Exception):
