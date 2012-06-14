@@ -12,21 +12,20 @@ from ..lib import twitter
 def status_post():
     data = dict()
     if flask.request.method == "POST":
+        status_text = flask.request.form.get("status", "")
         try:
             retweet_id = flask.request.form.get("retweet_id")
             if "retweet" in flask.request.form and retweet_id:
                 result = flask.g.api.create_retweet(retweet_id)
             else:
                 in_reply_to_id = flask.request.form.get("in_reply_to_id")
-                result = flask.g.api.post_update(flask.request.form.get("status"), in_reply_to_id)
+                result = flask.g.api.post_update(status_text, in_reply_to_id)
         except twitter.Error, e:
-            data["title"] = "Post Error"
             flask.flash("Post error: %s" % str(e))
-            data["tweets"] = list()
+            data["preset_status"] = status_text
         else:
             data["title"] = "New Tweet"
-            data["tweets"] = [render.prerender_tweet(result)]
-        return flask.render_template("tweets.html", **data)
+            return flask.render_template("redirect.html", url=flask.url_for("status", id=result["id"]))
     data["title"] = "What's happening?"
     return flask.render_template("status_post.html", **data)
 
@@ -94,7 +93,6 @@ def status_reply(id):
     else:
         data["preset_status"] = "@%s " % result["user"]["screen_name"]
         data["in_reply_to_id"] = id
-        data["word_count"] = twitter.CHARACTER_LIMIT - len(data["preset_status"])
     return data
 
 
@@ -120,7 +118,6 @@ def status_replyall(id):
             mentioned_screen_name.remove(flask.g.screen_name)
         data["preset_status"] = "%s " % " ".join("@%s" % x for x in mentioned_screen_name)
         data["in_reply_to_id"] = id
-        data["word_count"] = twitter.CHARACTER_LIMIT - len(data["preset_status"])
     return data
 
 
@@ -137,7 +134,6 @@ def status_retweet(id):
         flask.flash("Get status error: %s" % str(e))
     else:
         data["preset_status"] = "RT @%s: %s" % (result["user"]["screen_name"], result["text"])
-        data["word_count"] = twitter.CHARACTER_LIMIT - len(data["preset_status"])
         data["retweet_id"] = id
         data["retweet"] = True
     return data
