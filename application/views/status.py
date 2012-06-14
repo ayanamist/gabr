@@ -43,7 +43,7 @@ def status(id):
     except twitter.Error, e:
         flask.flash("Get status error: %s" % str(e))
     else:
-        result["highlight"] = True
+        result["orig"] = True
         data["tweets"] = [result]
         related_results = list()
         try:
