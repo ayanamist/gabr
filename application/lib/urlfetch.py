@@ -1,7 +1,9 @@
+import time
 import zlib
 
 from google.appengine.api import urlfetch
 from google.appengine.api.urlfetch_errors import *
+from google.appengine.runtime import apiproxy_errors
 
 accept_encoding = "Accept-Encoding"
 content_encoding = "Content-Encoding"
@@ -41,4 +43,15 @@ def sync_wrapper(func):
 
     return invoke_func
 
-fetch = sync_wrapper(fetch_async)
+fetch_once = sync_wrapper(fetch_async)
+
+def fetch(*args, **kwargs):
+    MAX_RETRIES = 3
+    for i in range(MAX_RETRIES):
+        try:
+            return fetch_once(*args, **kwargs)
+        except apiproxy_errors.ApplicationError, e:
+            if i == MAX_RETRIES - 1:
+                raise e
+            else:
+                time.sleep(1)
