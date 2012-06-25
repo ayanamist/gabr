@@ -6,6 +6,7 @@ threadsafe: true
 
 env_variables:
   SITE_NAME: "gabr"
+  SESSION_COOKIE_PATH: "/"
   CONSUMER_KEY: ""
   CONSUMER_SECRET: ""
   SECRET_KEY: ""

@@ -1,4 +1,3 @@
-import datetime
 import os
 import sys
 
@@ -15,9 +14,8 @@ from .lib import twitter
 from .lib import render
 
 app = flask.Flask("application")
-app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=365)
-app.config["SESSION_COOKIE_PATH"] = "/"
-
+# Config from os.environ are all strings, but here only accepts integer.
+app.config["PERMANENT_SESSION_LIFETIME"] = 31536000 # one year
 # import all configs from app.yaml
 for name in (x for x in os.environ.keys() if x.isupper()):
     app.config[name] = os.environ[name]
