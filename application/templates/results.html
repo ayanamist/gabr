@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block main %}
+{% import "render.html" as render with context %}
+{% for result in results %}
+<div class="tweet {{ loop.cycle('odd', 'even') }}{% if loop.length > 1 and result.highlight %} reply{% endif %}{% if result.orig %} orig{% endif %}">
+    {% if isinstance(result, Status) %}
+        {{ render.render_tweet(result) }}
+    {% elif isinstance(result, Activity) %}
+        {% set action=result|item("action") %}
+        {% if action in ["reply", "mention"] %}
+            {{ render.render_tweet(result) }}
+        {% elif action == "follow" %}
+            {{ render.render_follow(result) }}
+        {% elif action == "favorite" %}
+            {{ render.render_favorite(result) }}
+        {% elif action == "retweet" %}
+            {{ render.render_retweet(result) }}
+        {% elif action == "list_member_added" %}
+            {{ render.render_list_member_added(result) }}
+        {% endif %}
+    {% endif %}
+</div>
+{% else %}
+<p>No tweets to display.</p>
+{% endfor %}
+{% endblock main %}

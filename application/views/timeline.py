@@ -29,7 +29,7 @@ def timeline(title, api_func):
             for i, tweet in enumerate(result):
                 if tweet["id_str"] == max_id:
                     del result[i]
-        data["tweets"] = result
+        data["results"] = result
     return data
 
 

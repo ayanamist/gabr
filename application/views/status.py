@@ -43,7 +43,7 @@ def status(id):
         flask.flash("Get status error: %s" % str(e))
     else:
         result["orig"] = True
-        data["tweets"] = [result]
+        data["results"] = [result]
         related_results = list()
         try:
             result = flask.g.api.get_related_results(id)
@@ -56,25 +56,25 @@ def status(id):
             if related_result['kind'] == 'Tweet':
                 conversation_role = related_result['annotations']['ConversationRole']
                 if conversation_role == "Ancestor":
-                    data["tweets"].insert(orig_index, related_result["value"])
+                    data["results"].insert(orig_index, related_result["value"])
                     orig_index += 1
                 else: # possible value: Descendant, Fork
-                    data["tweets"].append(related_result["value"])
-        status_id = data["tweets"][0].get("in_reply_to_status_id")
+                    data["results"].append(related_result["value"])
+        status_id = data["results"][0].get("in_reply_to_status_id")
         while orig_index < 3 and status_id:
             try:
                 result = flask.g.api.get_status(status_id)
             except twitter.NotFoundError:
-                data["tweets"][0]["in_reply_to_status_id"] = None
+                data["results"][0]["in_reply_to_status_id"] = None
                 break
             except twitter.Error:
                 break
             else:
-                data["tweets"].insert(0, result)
+                data["results"].insert(0, result)
                 status_id = result.get("in_reply_to_status_id")
                 orig_index += 1
-            # Since twitter will return misordered forks, i think sorted by timestamp will solve this problem.
-        data["tweets"].sort(key=operator.itemgetter("timestamp"))
+                # Since twitter will return misordered forks, i think sorted by timestamp will solve this problem.
+        data["results"].sort(key=operator.itemgetter("timestamp"))
     return data
 
 
@@ -154,7 +154,7 @@ def status_favorite(id):
     else:
         flask.flash("Created favorite successfully!")
         result["favorited"] = True # fucking twitter won't mark it as favorited.
-        data["tweets"] = [render.prerender_tweet(result)]
+        data["results"] = [render.prerender_tweet(result)]
     return data
 
 
@@ -173,7 +173,7 @@ def status_unfavorite(id):
     else:
         flask.flash("Destroyed favorite successfully!")
         result["favorited"] = False # fucking twitter won't mark it as not favorited.
-        data["tweets"] = [render.prerender_tweet(result)]
+        data["results"] = [render.prerender_tweet(result)]
     return data
 
 
@@ -194,6 +194,6 @@ def status_delete(id):
     else:
         flask.flash("Destroyed status successfully!")
         result["deleted"] = True
-        data["tweets"] = [render.prerender_tweet(result)]
-    return flask.render_template("tweets.html", **data)
+        data["results"] = [render.prerender_tweet(result)]
+    return flask.render_template("results.html", **data)
 

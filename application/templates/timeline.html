@@ -1,11 +1,12 @@
-{% extends "tweets.html" %}
+{% extends "results.html" %}
 {% block main %}
     {{ super() }}
-    {% if tweets|length|int > 0 %}
-        {% if tweets|last|item("retweet") %}
-            {% set max_id = tweets|last|item("retweet")|item("id_str") %}
+    {% if results|length|int > 0 %}
+        {% set last_result = results|last %}
+        {% if last_result|item("retweet") %}
+            {% set max_id = last_result|item("retweet")|item("id_str") %}
         {% else %}
-            {% set max_id = tweets|last|item("id_str") %}
+            {% set max_id = last_result|item("id_str") %}
         {% endif %}
         <a href="?max_id={{ max_id }}"><p class="more">More</p></a>
     {% endif %}

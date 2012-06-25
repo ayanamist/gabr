@@ -39,7 +39,7 @@ def user(screen_name):
     try:
         tweets_result = flask.g.api.get_user_timeline(screen_name=screen_name, **params)
     except twitter.Error, e:
-        data["tweets"] = list()
+        data["results"] = list()
         flask.flash("Can not get timeline: %s" % str(e))
     else:
         max_id = flask.request.args.get("max_id")
@@ -47,5 +47,5 @@ def user(screen_name):
             for i, tweet in enumerate(tweets_result):
                 if tweet["id_str"] == max_id:
                     del tweets_result[i]
-        data["tweets"] = tweets_result
+        data["results"] = tweets_result
     return data
