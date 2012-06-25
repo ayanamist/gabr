@@ -4,13 +4,9 @@ from application import app
 from ..lib import decorators
 from ..lib import twitter
 
-
-@app.route("/")
-@decorators.login_required
-@decorators.templated("timeline.html")
-def home_timeline():
+def timeline(title, api_func):
     data = {
-        "title": "Home",
+        "title": title,
         "tweets": tuple(),
         }
     params = dict()
@@ -24,7 +20,7 @@ def home_timeline():
                 pass
 
     try:
-        result = flask.g.api.get_home_timeline(**params)
+        result = api_func(**params)
     except twitter.Error, e:
         flask.flash("Error: %s" % str(e))
     else:
@@ -37,22 +33,25 @@ def home_timeline():
     return data
 
 
+@app.route("/")
+@decorators.login_required
+@decorators.templated("timeline.html")
+def home_timeline():
+    return timeline("Home", flask.g.api.get_home_timeline)
+
+
 @app.route("/connect")
 @decorators.login_required
-@decorators.templated("timeline_ex.html")
+@decorators.templated("timeline.html")
 def connect_timeline():
-    return {
-        "title": "Connect",
-        }
+    return timeline("Connect", flask.g.api.get_connect)
 
 
 @app.route("/activity")
 @decorators.login_required
-@decorators.templated("timeline_ex.html")
+@decorators.templated("timeline.html")
 def activity_timeline():
-    return {
-        "title": "Activity",
-        }
+    return timeline("Activity", flask.g.api.get_activity)
 
 
 @app.route("/search")
