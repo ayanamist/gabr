@@ -50,7 +50,9 @@
                     retweeted
                 </a>
                 by
-                <a href="{{ url_for("user", screen_name=tweet.retweet.user.screen_name) }}">{{ tweet.retweet.user.screen_name }}</a>
+                <a href="{{ url_for("user", screen_name=tweet.retweet.user.screen_name) }}">
+                    {{ tweet.retweet.user.screen_name }}
+                </a>
                 from {{ tweet.retweet.source|safe }}
                 {% if tweet.retweet_count > 1 %}
                     and {{ tweet.retweet_count - 1 }} other(s)
@@ -131,7 +133,9 @@
                 <br/>
             {% endfor %}
         {% endif %}
-        <a href="{{ url_for("status", id=tweet.id) }}" class="time">{{ render_created_at(tweet.created_at) }}</a>
+        <a href="{{ url_for("status", id=tweet.id) }}" class="time">
+            {{ render_created_at(tweet.created_at) }}
+        </a>
         <span class="small">
             from {{ tweet.source|safe }}
             {% if tweet.in_reply_to_status_id %}
@@ -175,7 +179,9 @@
                 <br/>
             {% endfor %}
         {% endif %}
-        <a href="{{ url_for("status", id=tweet.id) }}" class="time">{{ render_created_at(tweet.created_at) }}</a>
+        <a href="{{ url_for("status", id=tweet.id) }}" class="time">
+            {{ render_created_at(tweet.created_at) }}
+        </a>
         <span class="small">
             from {{ tweet.source|safe }}
             {% if tweet.in_reply_to_status_id %}
@@ -214,8 +220,11 @@
             {% endfor %}
         {% endif %}
         <br/>
-        to list <a
-            href="{{ result.target_objects|first|item("uri") }}">{{ result.target_objects|first|item("full_name") }}</a>
+        to list
+        <a href="{{ result.target_objects|first|item("uri") }}">
+            {{ result.target_objects|first|item("full_name") }}
+        </a>
+        <br/>
         <span class="time">{{ render_created_at(result.created_at) }}</span>
     </span>
 {%- endmacro %}
