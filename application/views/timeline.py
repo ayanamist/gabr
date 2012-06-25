@@ -2,7 +2,6 @@ import flask
 
 from application import app
 from ..lib import decorators
-from ..lib import render
 from ..lib import twitter
 
 
@@ -34,7 +33,7 @@ def home_timeline():
             for i, tweet in enumerate(result):
                 if tweet["id_str"] == max_id:
                     del result[i]
-        data["tweets"] = render.prerender_timeline(result)
+        data["tweets"] = result
     return data
 
 

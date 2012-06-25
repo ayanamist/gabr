@@ -73,8 +73,7 @@ def status(id):
                 data["tweets"].insert(0, result)
                 status_id = result.get("in_reply_to_status_id")
                 orig_index += 1
-        data["tweets"] = render.prerender_timeline(data["tweets"])
-        # Since twitter will return misordered forks, i think sorted by timestamp will solve this problem.
+            # Since twitter will return misordered forks, i think sorted by timestamp will solve this problem.
         data["tweets"].sort(key=operator.itemgetter("timestamp"))
     return data
 

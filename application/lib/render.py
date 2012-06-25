@@ -2,13 +2,8 @@ import email
 import time
 
 import flask
-import jinja2
 
 from . import indicesreplace
-
-def prerender_timeline(timeline_json):
-    return [prerender_tweet(x) for x in timeline_json]
-
 
 def screen_name_exists(screen_name, entities):
     for user_mention in entities.get("user_mentions", list()):
@@ -99,21 +94,3 @@ def prerender_entities(text, entities):
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\" title=\"%(title)s\">@%(text)s</a>" % data)
 
     return unicode(new_text)
-
-
-@jinja2.environmentfilter
-def do_item(environment, obj, name):
-    try:
-        name = str(name)
-    except UnicodeError:
-        pass
-    else:
-        try:
-            value = obj[name]
-        except (TypeError, KeyError):
-            pass
-        else:
-            return value
-    return environment.undefined(obj=obj, name=name)
-
-jinja2.filters.FILTERS["item"] = do_item

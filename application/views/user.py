@@ -47,5 +47,5 @@ def user(screen_name):
             for i, tweet in enumerate(tweets_result):
                 if tweet["id_str"] == max_id:
                     del tweets_result[i]
-        data["tweets"] = render.prerender_timeline(tweets_result)
+        data["tweets"] = tweets_result
     return data

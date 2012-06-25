@@ -9,8 +9,10 @@ for egg in os.listdir(egg_path):
     sys.path.append(os.path.join(egg_path, egg))
 
 import flask
+import jinja2
 
 from .lib import twitter
+from .lib import render
 
 app = flask.Flask("application")
 app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=365)
@@ -29,4 +31,31 @@ def before_request():
     g.api = twitter.Api(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
     if g.screen_name:
         g.api.set_access_token(flask.session["oauth_token"], flask.session["oauth_token_secret"])
+
+
+@jinja2.environmentfilter
+def do_item(environment, obj, name):
+    try:
+        name = str(name)
+    except UnicodeError:
+        pass
+    else:
+        try:
+            value = obj[name]
+        except (TypeError, KeyError):
+            pass
+        else:
+            return value
+    return environment.undefined(obj=obj, name=name)
+
+jinja2.filters.FILTERS["item"] = do_item
+
+app.jinja_env.globals.update(
+    prerender_tweet=render.prerender_tweet,
+    isinstance=isinstance,
+    Status=twitter.Status,
+    Activity=twitter.Activity,
+)
+
+
 
