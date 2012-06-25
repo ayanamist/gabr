@@ -40,6 +40,8 @@ SIGNIN_URL = 'https://api.twitter.com/oauth/authenticate'
 
 BASE_URL = 'https://api.twitter.com/1'
 
+BASE_URL_NEW = 'https://api.twitter.com/i'
+
 class Error(Exception):
     def __str__(self):
         try:
@@ -168,7 +170,7 @@ class Api(object):
         return [Activity(x) for x in self._fetch_url(url, parameters=parameters)]
 
     def get_activity(self, since_id=None, max_id=None, page=None, count=None):
-        url = 'https://api.twitter.com/i/activity/by_friends.json'
+        url = '%s/activity/by_friends.json' % BASE_URL_NEW
         parameters = {
             'include_entities': 1,
             }
@@ -182,6 +184,20 @@ class Api(object):
             parameters['page'] = int(page)
         return [Activity(x) for x in self._fetch_url(url, parameters=parameters)]
 
+    def get_connect(self, since_id=None, max_id=None, page=None, count=None):
+        url = '%s/activity/about_me.json' % BASE_URL_NEW
+        parameters = {
+            'include_entities': 1,
+            }
+        if since_id:
+            parameters['since_id'] = since_id
+        if max_id:
+            parameters['max_id'] = max_id
+        if count:
+            parameters['count'] = int(count)
+        if page:
+            parameters['page'] = int(page)
+        return [Activity(x) for x in self._fetch_url(url, parameters=parameters)]
 
     def get_status(self, id, include_entities=True):
         url = '%s/statuses/show/%s.json' % (self.base_url, str(id))
