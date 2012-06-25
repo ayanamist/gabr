@@ -3,11 +3,15 @@
     {{ super() }}
     {% if results|length|int > 0 %}
         {% set last_result = results|last %}
-        {% if last_result|item("retweet") %}
-            {% set max_id = last_result|item("retweet")|item("id_str") %}
-        {% else %}
-            {% set max_id = last_result|item("id_str") %}
+        {% if isinstance(last_result, Status) %}
+            {% if last_result.retweet %}
+                {% set max_id = last_result.retweet.id_str %}
+            {% else %}
+                {% set max_id = last_result.id_str %}
+            {% endif %}
+        {% elif isinstance(last_result, Activity) %}
+            {% set max_id = last_result.max_position %}
         {% endif %}
-        <a href="?max_id={{ max_id }}"><p class="more">More</p></a>
+        <div class="more"><a href="?max_id={{ max_id }}">More</a></div>
     {% endif %}
 {% endblock main %}

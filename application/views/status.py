@@ -31,7 +31,7 @@ def status_post():
 
 
 @app.route("/status/<int:id>")
-@decorators.templated("tweets.html")
+@decorators.templated("results.html")
 def status(id):
     data = {
         "title": "Status %d" % id,
@@ -74,7 +74,7 @@ def status(id):
                 status_id = result.get("in_reply_to_status_id")
                 orig_index += 1
                 # Since twitter will return misordered forks, i think sorted by timestamp will solve this problem.
-        data["results"].sort(key=operator.itemgetter("timestamp"))
+        data["results"].sort(key=operator.itemgetter("id"))
     return data
 
 
@@ -141,7 +141,7 @@ def status_retweet(id):
 
 @app.route("/status/<int:id>/favorite")
 @decorators.login_required
-@decorators.templated("tweets.html")
+@decorators.templated("results.html")
 def status_favorite(id):
     data = {
         "title": "Favorite",
@@ -160,7 +160,7 @@ def status_favorite(id):
 
 @app.route("/status/<int:id>/unfavorite")
 @decorators.login_required
-@decorators.templated("tweets.html")
+@decorators.templated("results.html")
 def status_unfavorite(id):
     data = {
         "title": "Unfavorite",

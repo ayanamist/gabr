@@ -1,4 +1,3 @@
-import email.utils
 import time
 
 import flask
@@ -20,9 +19,8 @@ def user(screen_name):
             flask.flash("Can not lookup user %s: %s" % (screen_name, str(e)))
         else:
             data["user"] = result
-            data["user"]["created_at_fmt"] = render.prerender_timestamp(result["created_at"])
-            days_delta = (time.time() - time.mktime(email.utils.parsedate(result["created_at"]))) // 86400
-            data["user"]["tweets_per_day"] = "%.4g" % (result["statuses_count"] / days_delta)
+            days_delta = (time.time() - render.prerender_timestamp(result["created_at"])) // 86400
+            data["user"]["tweets_per_day"] = "%.4g" % (result["statuses_count"] / days_delta) if days_delta > 0 else 0
     else:
         data["title"] = "User %s Timeline" % screen_name
 

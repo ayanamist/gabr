@@ -143,6 +143,11 @@ body {
     font-size: 1.2em
 }
 
+.more a {
+    width: 100%;
+    display: block
+}
+
 .dialog {
     text-align: center
 }

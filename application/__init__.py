@@ -50,6 +50,7 @@ jinja2.filters.FILTERS["item"] = do_item
 
 app.jinja_env.globals.update(
     prerender_tweet=render.prerender_tweet,
+    render_created_at=render.render_created_at,
     isinstance=isinstance,
     Status=twitter.Status,
     Activity=twitter.Activity,

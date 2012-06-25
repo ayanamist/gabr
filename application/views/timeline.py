@@ -7,7 +7,7 @@ from ..lib import twitter
 def timeline(title, api_func):
     data = {
         "title": title,
-        "tweets": tuple(),
+        "results": tuple(),
         }
     params = dict()
     for access_param in ("max_id", "page", "since_id", "count"):
@@ -20,16 +20,17 @@ def timeline(title, api_func):
                 pass
 
     try:
-        result = api_func(**params)
+        results = api_func(**params)
     except twitter.Error, e:
         flask.flash("Error: %s" % str(e))
     else:
         max_id = flask.request.args.get("max_id")
         if max_id:
-            for i, tweet in enumerate(result):
-                if tweet["id_str"] == max_id:
-                    del result[i]
-        data["results"] = result
+            for i, result in enumerate(results):
+                if (isinstance(result, twitter.Status) and result["id_str"] == max_id) or\
+                   (isinstance(result, twitter.Activity) and result["max_position"]):
+                    del results[i]
+        data["results"] = results
     return data
 
 

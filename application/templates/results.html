@@ -6,16 +6,17 @@
     {% if isinstance(result, Status) %}
         {{ render.render_tweet(result) }}
     {% elif isinstance(result, Activity) %}
-        {% set action=result|item("action") %}
-        {% if action in ["reply", "mention"] %}
-            {{ render.render_tweet(result) }}
-        {% elif action == "follow" %}
+        {% if result.action == "mention" %}
+            {{ render.render_tweet(result.target_objects|first) }}
+        {% elif result.action == "reply" %}
+            {{ render.render_tweet(result.targets|first) }}
+        {% elif result.action == "follow" %}
             {{ render.render_follow(result) }}
-        {% elif action == "favorite" %}
+        {% elif result.action == "favorite" %}
             {{ render.render_favorite(result) }}
-        {% elif action == "retweet" %}
+        {% elif result.action == "retweet" %}
             {{ render.render_retweet(result) }}
-        {% elif action == "list_member_added" %}
+        {% elif result.action == "list_member_added" %}
             {{ render.render_list_member_added(result) }}
         {% endif %}
     {% endif %}

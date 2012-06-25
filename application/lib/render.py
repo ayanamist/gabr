@@ -16,8 +16,6 @@ def prerender_tweet(tweet_json):
     tweet_json = prerender_retweet(tweet_json)
     if "retweet" in tweet_json:
         tweet_json["retweet"] = prerender_tweet(tweet_json["retweet"])
-    tweet_json["timestamp"] = prerender_timestamp(tweet_json["created_at"])
-    tweet_json["created_at_fmt"] = prerender_created_at(tweet_json["created_at"])
     tweet_json["text_raw"] = tweet_json["text"]
     entities = tweet_json.get("entities")
     if entities:
@@ -40,7 +38,7 @@ def prerender_timestamp(created_at):
     return time.mktime(email.utils.parsedate(created_at))
 
 
-def prerender_created_at(created_at):
+def render_created_at(created_at):
     unix_timestamp = prerender_timestamp(created_at)
     unix_timestamp += 28800 # GMT+8
     t = time.gmtime(unix_timestamp)
