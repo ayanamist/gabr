@@ -28,7 +28,7 @@ def timeline(title, api_func):
         if max_id:
             for i, result in enumerate(results):
                 if (isinstance(result, twitter.Status) and result["id_str"] == max_id) or\
-                   (isinstance(result, twitter.Activity) and result["max_position"]):
+                   (isinstance(result, twitter.Activity) and result["max_position"] == max_id):
                     del results[i]
         data["results"] = results
     return data
