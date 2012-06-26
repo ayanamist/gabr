@@ -56,10 +56,10 @@ def status(id):
             if related_result['kind'] == 'Tweet':
                 conversation_role = related_result['annotations']['ConversationRole']
                 if conversation_role == "Ancestor":
-                    data["results"].insert(orig_index, related_result["value"])
+                    data["results"].insert(orig_index, twitter.Status(related_result["value"]))
                     orig_index += 1
                 else: # possible value: Descendant, Fork
-                    data["results"].append(related_result["value"])
+                    data["results"].append(twitter.Status(related_result["value"]))
         status_id = data["results"][0].get("in_reply_to_status_id")
         while orig_index < 3 and status_id:
             try:
