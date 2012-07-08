@@ -32,7 +32,7 @@
         {% if tweet.entities %}
             {% for media in tweet.entities.media %}
                 <a href="{{ media.media_url }}">
-                    <img src="{{ media.preview_url }}"/>
+                    <img class="preview" src="{{ media.preview_url }}"/>
                 </a>
                 <br/>
             {% endfor %}
@@ -128,7 +128,7 @@
         {% if tweet.entities %}
             {% for media in tweet.entities.media %}
                 <a href="{{ media.media_url }}">
-                    <img src="{{ media.preview_url }}"/>
+                    <img class="preview" src="{{ media.preview_url }}"/>
                 </a>
                 <br/>
             {% endfor %}
@@ -174,7 +174,7 @@
         {% if tweet.entities %}
             {% for media in tweet.entities.media %}
                 <a href="{{ media.media_url }}">
-                    <img src="{{ media.preview_url }}"/>
+                    <img class="preview" src="{{ media.preview_url }}"/>
                 </a>
                 <br/>
             {% endfor %}

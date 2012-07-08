@@ -119,6 +119,10 @@ body {
         margin-left: 1.875em !important;
         min-height: 1.5em !important;
     }
+
+    img.preview {
+        width: 200px;
+    }
 }
 
 .from {

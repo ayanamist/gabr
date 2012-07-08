@@ -61,7 +61,7 @@ def prerender_entities(text, entities):
             "text": media["display_url"],
             }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\">%(text)s</a>" % data)
-        media["preview_url"] = "%s:thumb" % media["media_url"]
+        media["preview_url"] = "%s:small" % media["media_url"]
 
     hashtags = entities.get("hashtags", list())
     for hashtag in hashtags:
