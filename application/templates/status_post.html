@@ -7,17 +7,28 @@
         </p>
     {% endif %}
     <form action="{{ url_for("status_post") }}" method="post">
+        {% if retweet is defined %}
+            <fieldset>
+                <legend>Twitter's new style retweet:</legend>
+                <div class="tweet-btn">
+                    <input type="hidden" value="{{ retweet_id }}" name="retweet_id" id="retweet_id"/>
+                    <input type="submit" value="Twitter Retweet" name="retweet" id="retweet"/>
+                </div>
+            </fieldset>
+        {% endif %}
         <fieldset>
-            <legend>What's Happening?</legend>
+            <legend>
+                {% if retweet is defined %}
+                    Old style editable retweet:
+                {% else %}
+                    What's Happening?
+                {% endif %}
+            </legend>
             <textarea name="status" id="status">{{ preset_status }}</textarea>
 
             <div class="tweet-btn">
                 {% if in_reply_to_status is defined %}
                     <input type="hidden" value="{{ in_reply_to_status.id }}" name="in_reply_to_id" id="in_reply_to_id"/>
-                {% endif %}
-                {% if retweet is defined %}
-                    <input type="hidden" value="{{ retweet_id }}" name="retweet_id" id="retweet_id"/>
-                    <input type="submit" value="Retweet" name="retweet" id="retweet"/>
                 {% endif %}
                 <input type="submit" value="Tweet"/>
                 {% set word_count=140 - preset_status|default("")|length|int %}
