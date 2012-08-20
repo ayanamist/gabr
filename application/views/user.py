@@ -22,11 +22,16 @@ def user(screen_name):
             days_delta = (time.time() - render.prerender_timestamp(result["created_at"])) // 86400
             data["user"]["tweets_per_day"] = "%.4g" % (result["statuses_count"] / days_delta) if days_delta > 0 else 0
         try:
-            result = flask.g.api.showFriendships(source_screen_name=flask.g.screen_name)
+            result = flask.g.api.showFriendships(source_screen_name=flask.g.screen_name,
+                target_screen_name=data["user"]["screen_name"])
         except twitter.Error:
             pass
         else:
-            data["user"]["blocking"] = result["relationship"]["source"]["blocking"]
+            source = result["relationship"]["source"]
+            del source["id_str"]
+            del source["id"]
+            del source["screen_name"]
+            data["user"].update(source)
     else:
         data["title"] = "User %s Timeline" % screen_name
 
