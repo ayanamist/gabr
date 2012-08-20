@@ -36,12 +36,17 @@
                 {% if user.screen_name != g.screen_name %}|
                     <a href="">Direct Message</a> |
                     {% if user.following %}
-                        <a href="">Unfollow</a> |
+                        <a href="{{ url_for("user_unfollow", screen_name=user.screen_name) }}">Unfollow</a> |
                     {% else %}
-                        <a href="">Follow</a> |
+                        <a href="{{ url_for("user_follow", screen_name=user.screen_name) }}">Follow</a>
+                        {% if user.follow_request_sent %}<span class="small">Request Sent</span>{% endif %}|
                     {% endif %}
-                    <a href="">(Un)Block</a> |
-                    <a href="">Report Spam</a>
+                    {% if user.blocking %}
+                        <a href="{{ url_for("user_unblock", screen_name=user.screen_name) }}">Unblock</a> |
+                    {% else %}
+                        <a href="{{ url_for("user_block", screen_name=user.screen_name) }}">Block</a> |
+                    {% endif %}
+                    <a href="{{ url_for("user_reportspam", screen_name=user.screen_name) }}">Report Spam</a>
                 {% endif %}
             </div>
         </div>

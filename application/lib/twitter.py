@@ -403,6 +403,19 @@ class Api(object):
             parameters['include_entities'] = True
         return [Status(x) for x in self._fetch_url(url, parameters=parameters)]
 
+    def showFriendships(self, source_id=None, source_screen_name=None, target_id=None, target_screen_name=None):
+        url = "%s/friendships/show.json" % self.base_url
+        parameters = dict()
+        if source_id:
+            parameters["source_id"] = source_id
+        if source_screen_name:
+            parameters["source_screen_name"] = source_screen_name
+        if target_id:
+            parameters["target_id"] = target_id
+        if target_screen_name:
+            parameters["target_screen_name"] = target_screen_name
+        return self._fetch_url(url, parameters=parameters)
+
     def _build_url(self, url, path_elements=None, extra_params=None):
         (scheme, netloc, path, params, query, fragment) = urlparse.urlparse(url)
         if path_elements:

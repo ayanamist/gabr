@@ -21,6 +21,12 @@ def user(screen_name):
             data["user"] = result
             days_delta = (time.time() - render.prerender_timestamp(result["created_at"])) // 86400
             data["user"]["tweets_per_day"] = "%.4g" % (result["statuses_count"] / days_delta) if days_delta > 0 else 0
+        try:
+            result = flask.g.api.showFriendships(source_screen_name=flask.g.screen_name)
+        except twitter.Error:
+            pass
+        else:
+            data["user"]["blocking"] = result["relationship"]["source"]["blocking"]
     else:
         data["title"] = "User %s Timeline" % screen_name
 
@@ -47,3 +53,59 @@ def user(screen_name):
                     del tweets_result[i]
         data["results"] = tweets_result
     return data
+
+
+@app.route("/user/<screen_name>/follow")
+def user_follow(screen_name):
+    try:
+        result = flask.g.api.create_friendship(screen_name)
+    except twitter.Error, e:
+        flask.flash("Error: %s" % str(e))
+    else:
+        flask.flash("Following user %s." % result["screen_name"])
+    return flask.redirect(flask.url_for("user", screen_name=screen_name))
+
+
+@app.route("/user/<screen_name>/unfollow")
+def user_unfollow(screen_name):
+    try:
+        result = flask.g.api.destroy_friendship(screen_name)
+    except twitter.Error, e:
+        flask.flash("Error: %s" % str(e))
+    else:
+        flask.flash("Unfollowed user %s." % result["screen_name"])
+    return flask.redirect(flask.url_for("user", screen_name=screen_name))
+
+
+@app.route("/user/<screen_name>/block")
+def user_block(screen_name):
+    try:
+        result = flask.g.api.create_block(screen_name)
+    except twitter.Error, e:
+        flask.flash("Error: %s" % str(e))
+    else:
+        flask.flash("Blocking user %s." % result["screen_name"])
+    return flask.redirect(flask.url_for("user", screen_name=screen_name))
+
+
+@app.route("/user/<screen_name>/unblock")
+def user_unblock(screen_name):
+    try:
+        result = flask.g.api.destroy_block(screen_name)
+    except twitter.Error, e:
+        flask.flash("Error: %s" % str(e))
+    else:
+        flask.flash("Unblocked user %s." % result["screen_name"])
+    return flask.redirect(flask.url_for("user", screen_name=screen_name))
+
+
+@app.route("/user/<screen_name>/reportspam")
+def user_reportspam(screen_name):
+    try:
+        result = flask.g.api.report_spam(screen_name)
+    except twitter.Error, e:
+        flask.flash("Error: %s" % str(e))
+    else:
+        flask.flash("Reported user %s as spam." % result["screen_name"])
+    return flask.redirect(flask.url_for("user", screen_name=screen_name))
+
