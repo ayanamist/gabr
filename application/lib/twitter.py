@@ -487,7 +487,7 @@ class Api(object):
             raise Error('%d: %s' % (response.status_code, str(error_message)))
 
     def _fetch_url(self, url, post_data=None, parameters=None, http_method='GET'):
-        headers = dict()
+        headers = {}
         extra_params = dict()
         if parameters is not None:
             extra_params.update(parameters)

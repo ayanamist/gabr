@@ -27,6 +27,12 @@ class Future(object):
 def fetch_async(url, method="GET", payload=None, headers=None):
     if headers is None:
         headers = dict()
+    headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.83 Safari/537.1"
+        ,
+        "Accept": "*/*",
+        "Referer": "https://api.twitter.com/receiver.html",
+        })
     if accept_encoding.lower() not in [x.lower() for x in headers.keys()]:
         headers[accept_encoding] = "gzip"
     if payload is not None:
