@@ -10,7 +10,8 @@
         {% for result in results %}
             <item>
                 <title>@{{ result.user.screen_name }}: {{ result.text }}</title>
-                <description><![CDATA[{{ render.render_tweet(result) }}]]></description>
+                <description><![CDATA[<style>.avatar{display:block; height:3em; width: 3em; overflow:hidden; position:absolute; margin:0}.avatar img{height:3em; width:3em}.shift{margin-left:3.5em}.status{display:block}</style>
+                {{ render.render_tweet(result) }}]]></description>
                 <link>{{ abs_url_for("status", id=result.id) }}</link>
                 <guid>{{ abs_url_for("status", id=result.id) }}</guid>
                 <pubDate>{{ result.created_at }}</pubDate>
