@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -6,6 +7,9 @@ import sys
 lib_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "lib"))
 for zip_file in os.listdir(lib_path):
     sys.path.insert(0, os.path.join(lib_path, zip_file))
+
+# Mute noisy requests logging.
+logging.getLogger('requests').setLevel(logging.CRITICAL)
 
 import flask
 import jinja2
