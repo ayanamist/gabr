@@ -25,7 +25,8 @@ def status_post():
             data["preset_status"] = status_text
         else:
             data["title"] = "New Tweet"
-            return flask.render_template("redirect.html", url=flask.url_for("status", id=result["id"]))
+            return flask.render_template("redirect.html",
+                url="%s#t%s" % (flask.url_for("status", id=result["id"]), result["id_str"]))
     data["title"] = "What's happening?"
     return flask.render_template("status_post.html", **data)
 
