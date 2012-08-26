@@ -3,17 +3,6 @@ import logging
 import os
 import sys
 
-# Mute noisy requests logging.
-# In fact following statements have no effect on Google App Engine. requests still log.
-class MyLogger(logging.Logger):
-    def _log(self, level, msg, args, exc_info=None, extra=None):
-        if not self.name.startswith("requests"):
-            return super(MyLogger, self)._log(level, msg, args, exc_info, extra)
-
-logging.setLoggerClass(MyLogger)
-logging.getLogger("requests").setLevel(logging.CRITICAL)
-logging.getLogger('requests').addHandler(logging.NullHandler())
-
 # add all egg files to sys.path
 # use egg files instead of plain directory for beautiful directory structure and faster upload
 lib_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "lib"))
@@ -24,6 +13,12 @@ import flask
 import jinja2
 import twython
 from werkzeug.contrib import securecookie
+
+# Mute noisy requests logging.
+logging.getLogger("requests").setLevel(logging.CRITICAL)
+from requests.packages.oauthlib.oauth1 import rfc5849
+
+rfc5849.logging.debug = lambda msg: None
 
 @jinja2.environmentfilter
 def do_item(environment, obj, name):
