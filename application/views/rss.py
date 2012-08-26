@@ -1,5 +1,4 @@
 import base64
-import email.utils
 import os
 
 import flask
@@ -24,7 +23,6 @@ def home_rss():
     if g.screen_name:
         g.api.set_access_token(session["oauth_token"], session["oauth_token_secret"])
     results = timeline.timeline("Home", g.api.get_home_timeline)
-    results["pub_date"] = email.utils.formatdate()
     results["abs_url_for"] = abs_url_for
     resp = flask.make_response(flask.render_template("rss.xml", **results))
     resp.headers["Content-Type"] = "application/rss+xml"

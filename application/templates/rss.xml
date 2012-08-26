@@ -1,58 +1,19 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>{% import "render.html" as render with context %}
 <rss version="2.0">
     <channel>
         <title>Twitter Home @{{ g.screen_name }}</title>
         <description>Twitter home timeline exported as a RSS feed.</description>
         <link>http://twitter.com</link>
-        <lastBuildDate>{{ pub_date }}</lastBuildDate>
-        <pubDate>{{ pub_date }}</pubDate>
+        <lastBuildDate>{{ (results|first).created_at }}</lastBuildDate>
+        <pubDate>{{ (results|first).created_at }}</pubDate>
         <ttl>60</ttl>
         {% for result in results %}
-            {% set tweet=prerender_tweet(result) %}
             <item>
-                <title>@{{ tweet.user.screen_name }}: {{ result.text_raw }}</title>
-                <description><![CDATA[
-                <span class="bold">
-                    <a href="{{ abs_url_for("user", screen_name=tweet.user.screen_name) }}">
-                        {{ tweet.user.screen_name }} ({{ tweet.user.name }})
-                    </a>
-                </span>
-                {{ tweet.text|safe }}
-                        {% if tweet.entities %}
-                            {% for media in tweet.entities.media %}
-                        <br/>
-                        <a href="{{ media.media_url }}">
-                            <img class="preview" src="{{ media.preview_url }}"/>
-                        </a>
-                    {% endfor %}
-                        {% endif %}
-                <br />
-                <a href="{{ abs_url_for("status", id=tweet.id) }}" class="time">{{ render_created_at(tweet.created_at) }}</a>
-                <span class="small">
-                    from {{ tweet.source|safe }}
-                        {% if tweet.in_reply_to_status_id %}
-                        <a href="{{ abs_url_for("status", id=tweet.id) }}">&gt;&gt;</a>
-                    {% endif %}
-                        {% if tweet.retweet %}
-                        <br/>
-                        <a href="{{ abs_url_for("status", id=tweet.retweet.id) }}">
-                            <span class="time">{{ render_created_at(tweet.retweet.created_at) }}</span>
-                            retweeted
-                        </a>
-                        by
-                        <a href="{{ abs_url_for("user", screen_name=tweet.retweet.user.screen_name) }}">
-                            {{ tweet.retweet.user.screen_name }}
-                        </a>
-                        from {{ tweet.retweet.source|safe }}
-                            {% if tweet.retweet_count > 1 %}
-                            and {{ tweet.retweet_count - 1 }} other(s)
-                        {% endif %}
-                        {% endif %}
-                </span>
-                        ]]></description>
-                <link>{{ abs_url_for("status", id=tweet.id) }}</link>
-                <guid>{{ abs_url_for("status", id=tweet.id) }}</guid>
-                <pubDate>{{ tweet.created_at }}</pubDate>
+                <title>@{{ result.user.screen_name }}: {{ result.text }}</title>
+                <description><![CDATA[{{ render.render_tweet(result) }}]]></description>
+                <link>{{ abs_url_for("status", id=result.id) }}</link>
+                <guid>{{ abs_url_for("status", id=result.id) }}</guid>
+                <pubDate>{{ result.created_at }}</pubDate>
             </item>
         {% endfor %}
     </channel>
