@@ -3,7 +3,7 @@
     <channel>
         <title>Twitter Home @{{ g.screen_name }}</title>
         <description>Twitter home timeline exported as a RSS feed.</description>
-        <link>http://twitter.com</link>
+        <link>{{ request.host_url }}</link>
         <lastBuildDate>{{ (results|first).created_at }}</lastBuildDate>
         <pubDate>{{ (results|first).created_at }}</pubDate>
         <ttl>60</ttl>
