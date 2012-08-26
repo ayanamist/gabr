@@ -16,6 +16,8 @@ from werkzeug.contrib import securecookie
 
 # Mute noisy requests logging.
 logging.getLogger("requests").setLevel(logging.CRITICAL)
+
+# It's a confirmed bug of requests, fixed in the develop branch, delete the following after version bump.
 from requests.packages.oauthlib.oauth1 import rfc5849
 
 rfc5849.logging.debug = lambda msg: None
