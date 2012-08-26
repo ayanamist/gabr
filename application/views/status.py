@@ -1,11 +1,11 @@
 import operator
 
 import flask
+import twython
 
+from ..utils import decorators
+from ..utils import render
 from application import app
-from ..lib import decorators
-from ..lib import render
-from ..lib import twitter
 
 @app.route("/post", methods=["GET", "POST"])
 @decorators.login_required
@@ -16,11 +16,11 @@ def status_post():
         try:
             retweet_id = flask.request.form.get("retweet_id")
             if "retweet" in flask.request.form and retweet_id:
-                result = flask.g.api.create_retweet(retweet_id)
+                result = flask.g.api.reTweet(id=retweet_id, include_entities=1)
             else:
                 in_reply_to_id = flask.request.form.get("in_reply_to_id")
-                result = flask.g.api.post_update(status_text, in_reply_to_id)
-        except twitter.Error, e:
+                result = flask.g.api.postUpdate(status_text, in_reply_to_id=in_reply_to_id, include_entities=1)
+        except twython.TwythonError, e:
             flask.flash("Post error: %s" % str(e))
             data["preset_status"] = status_text
         else:
@@ -35,46 +35,66 @@ def status_post():
 def status(id):
     data = {
         "title": "Status %d" % id,
-        "tweets": tuple(),
+        "tweets": list(),
         }
     try:
-        result = flask.g.api.get_status(id)
-    except twitter.Error, e:
+        origin_status = flask.g.api.showStatus(id=id, include_entities=1)
+    except twython.TwythonError, e:
         flask.flash("Get status error: %s" % str(e))
     else:
-        result["orig"] = True
-        data["results"] = [result]
-        related_results = list()
+        tweets = list()
         try:
-            result = flask.g.api.get_related_results(id)
-            if result:
-                related_results = result[0]['results']
-        except twitter.Error:
-            pass
-        orig_index = 0
-        for related_result in related_results:
-            if related_result['kind'] == 'Tweet':
-                conversation_role = related_result['annotations']['ConversationRole']
-                if conversation_role == "Ancestor":
-                    data["results"].insert(orig_index, twitter.Status(related_result["value"]))
-                    orig_index += 1
-                else: # possible value: Descendant, Fork
-                    data["results"].append(twitter.Status(related_result["value"]))
-        status_id = data["results"][0].get("in_reply_to_status_id")
-        while orig_index < 3 and status_id:
-            try:
-                result = flask.g.api.get_status(status_id)
-            except twitter.NotFoundError:
-                data["results"][0]["in_reply_to_status_id"] = None
-                break
-            except twitter.Error:
-                break
+            related_result = flask.g.api.get("related_results/show/%d" % id, include_entities=1)
+        except twython.TwythonError, e:
+            flask.flash("Get related status error: %s" % str(e))
+        else:
+            if related_result:
+                last_conversation_role = 'Ancestor' # possible value: Ancestor, Descendant, Fork
+                related_result = related_result[0]['results']
+                for result in related_result:
+                    if result['kind'] == 'Tweet':
+                        conversation_role = result['annotations']['ConversationRole']
+                        if conversation_role != last_conversation_role:
+                            tweets.insert(0, origin_status)
+                            origin_status = None
+                            last_conversation_role = conversation_role
+                        tweets.insert(0, result["value"])
+        if origin_status:
+            tweets.insert(0, origin_status)
+        previous_ids = set(x["id"] for x in tweets)
+        for i, status in enumerate(tweets):
+            if "retweeted_status" not in status:
+                current_id = status["in_reply_to_status_id"]
             else:
-                data["results"].insert(0, result)
-                status_id = result.get("in_reply_to_status_id")
-                orig_index += 1
-                # Since twitter will return misordered forks, i think sorted by timestamp will solve this problem.
-        data["results"].sort(key=operator.itemgetter("id"))
+                current_id = status["retweeted_status"]["in_reply_to_status_id"]
+            if current_id and current_id not in previous_ids:
+                try:
+                    status = flask.g.api.showStatus(id=current_id, include_entities=1)
+                except twython.TwythonError:
+                    pass
+                else:
+                    tweets.insert(i + 1, status)
+                    previous_ids.add(status["id"])
+        first_short = tweets[0]['id_str'] == id
+        while len(tweets) <= 4 or first_short:
+            first_short = False
+            status = tweets[0]
+            if status['in_reply_to_status_id_str']:
+                current_id = status['in_reply_to_status_id_str']
+                try:
+                    status = flask.g.api.showStatus(id=current_id, include_entities=1)
+                except twython.TwythonError:
+                    break
+            else:
+                break
+            if 'retweeted_status' in status and status["retweeted_status"]["id"] not in previous_ids:
+                tweets.append(status['retweeted_status'])
+                previous_ids.add(status['retweeted_status']["id"])
+            elif status["id"] not in previous_ids:
+                tweets.append(status)
+                previous_ids.add(status["id"])
+        tweets.sort(key=operator.itemgetter("id"))
+        data["tweets"] = tweets
     return data
 
 
@@ -86,8 +106,8 @@ def status_reply(id):
         "title": "Reply",
         }
     try:
-        result = flask.g.api.get_status(id)
-    except twitter.Error, e:
+        result = flask.g.api.showStatus(id=id, include_entities=1)
+    except twython.TwythonError, e:
         flask.flash("Get status error: %s" % str(e))
     else:
         data["preset_status"] = "@%s " % result["user"]["screen_name"]
@@ -104,8 +124,8 @@ def status_replyall(id):
         "title": "Reply to All",
         }
     try:
-        result = flask.g.api.get_status(id)
-    except twitter.Error, e:
+        result = flask.g.api.showStatus(id=id, include_entities=1)
+    except twython.TwythonError, e:
         flask.flash("Get status error: %s" % str(e))
     else:
         data["in_reply_to_status"] = render.prerender_tweet(result)
@@ -129,8 +149,8 @@ def status_retweet(id):
         "title": "Retweet",
         }
     try:
-        result = flask.g.api.get_status(id)
-    except twitter.Error, e:
+        result = flask.g.api.showStatus(id=id, include_entities=1)
+    except twython.TwythonError, e:
         flask.flash("Get status error: %s" % str(e))
     else:
         data["preset_status"] = "RT @%s: %s" % (result["user"]["screen_name"], result["text"])
@@ -148,8 +168,8 @@ def status_favorite(id):
         "tweets": tuple(),
         }
     try:
-        result = flask.g.api.create_favorite(id)
-    except twitter.Error, e:
+        result = flask.g.api.createFavorite(id=id, include_entities=1)
+    except twython.TwythonError, e:
         flask.flash("Create favorite error: %s" % str(e))
     else:
         flask.flash("Created favorite successfully!")
@@ -167,8 +187,8 @@ def status_unfavorite(id):
         "tweets": tuple(),
         }
     try:
-        result = flask.g.api.destroy_favorite(id)
-    except twitter.Error, e:
+        result = flask.g.api.destroyFavorite(id=id, include_entities=1)
+    except twython.TwythonError, e:
         flask.flash("Destroy favorite error: %s" % str(e))
     else:
         flask.flash("Destroyed favorite successfully!")
@@ -188,8 +208,8 @@ def status_delete(id):
         data["status_id"] = id
         return flask.render_template("status_delete.html", **data)
     try:
-        result = flask.g.api.destroy_status(id)
-    except twitter.Error, e:
+        result = flask.g.api.destroyStatus(id=id, include_entities=1)
+    except twython.TwythonError, e:
         flask.flash("Destroy status error: %s" % str(e))
     else:
         flask.flash("Destroyed status successfully!")

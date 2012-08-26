@@ -1,36 +1,23 @@
-import flask
+import functools
 
+import flask
+import twython
+
+from .. import utils
+from ..utils import decorators
 from application import app
-from ..lib import decorators
-from ..lib import twitter
 
 def timeline(title, api_func):
     data = {
         "title": title,
         "results": tuple(),
         }
-    params = dict()
-    for access_param in ("max_id", "page", "since_id", "count"):
-        param = flask.request.args.get(access_param)
-        if param:
-            try:
-                param = int(param, 10)
-                params[access_param] = param
-            except ValueError:
-                pass
-
     try:
-        results = api_func(**params)
-    except twitter.Error, e:
+        results = api_func()
+    except twython.TwythonError, e:
         flask.flash("Error: %s" % str(e))
     else:
-        max_id = flask.request.args.get("max_id")
-        if max_id:
-            for i, result in enumerate(results):
-                if (isinstance(result, twitter.Status) and result["id_str"] == max_id) or\
-                   (isinstance(result, twitter.Activity) and result["max_position"] == max_id):
-                    del results[i]
-        data["results"] = results
+        data["results"] = utils.remove_max_id(results, flask.request.args.get("max_id"))
     return data
 
 
@@ -38,21 +25,29 @@ def timeline(title, api_func):
 @decorators.login_required
 @decorators.templated("timeline.html")
 def home_timeline():
-    return timeline("Home", flask.g.api.get_home_timeline)
+    params = utils.parse_params()
+    params["include_entities"] = 1
+    return timeline("Home", functools.partial(flask.g.api.getHomeTimeline, **params))
 
 
 @app.route("/connect")
 @decorators.login_required
 @decorators.templated("timeline.html")
 def connect_timeline():
-    return timeline("Connect", flask.g.api.get_connect)
+    params = utils.parse_params()
+    params["include_entities"] = 1
+    return timeline("Connect", functools.partial(flask.g.api.get, "activity/about_me",
+        params=params, version="i"))
 
 
 @app.route("/activity")
 @decorators.login_required
 @decorators.templated("timeline.html")
 def activity_timeline():
-    return timeline("Activity", flask.g.api.get_activity)
+    params = utils.parse_params()
+    params["include_entities"] = 1
+    return timeline("Activity", functools.partial(flask.g.api.get, "activity/by_friends",
+        params=params, version="i"))
 
 
 @app.route("/search")

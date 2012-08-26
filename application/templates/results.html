@@ -3,9 +3,7 @@
 {% import "render.html" as render with context %}
 {% for result in results %}
 <div class="tweet {{ loop.cycle('odd', 'even') }}{% if loop.length > 1 and result.highlight %} reply{% endif %}{% if result.orig %} orig{% endif %}">
-    {% if isinstance(result, Status) %}
-        {{ render.render_tweet(result) }}
-    {% elif isinstance(result, Activity) %}
+    {% if result.max_position %}
         {% if result.action == "mention" %}
             {{ render.render_tweet(result.target_objects|first) }}
         {% elif result.action == "reply" %}
@@ -19,6 +17,8 @@
         {% elif result.action == "list_member_added" %}
             {{ render.render_list_member_added(result) }}
         {% endif %}
+    {% else %}
+        {{ render.render_tweet(result) }}
     {% endif %}
 </div>
 {% else %}
