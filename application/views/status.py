@@ -42,6 +42,7 @@ def status(id):
     except twython.TwythonError, e:
         flask.flash("Get status error: %s" % str(e))
     else:
+        origin_status["orig"] = True
         tweets = list()
         try:
             related_result = flask.g.api.get("related_results/show/%d" % id, params={"include_entities": 1})
