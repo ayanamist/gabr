@@ -20,6 +20,16 @@ from requests.packages.oauthlib.oauth1 import rfc5849
 
 rfc5849.logging.debug = lambda msg: None
 
+# Patch requests not to verify SSL, it's unnecessary for GAE.
+def requests_wrap(f):
+    def wrapped(**kwargs):
+        kwargs["verify"] = False
+        return f(**kwargs)
+
+    return wrapped
+
+twython.twython.requests.session = requests_wrap(twython.twython.requests.session)
+
 @jinja2.environmentfilter
 def do_item(environment, obj, name):
     try:

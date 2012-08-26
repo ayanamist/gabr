@@ -35,7 +35,7 @@ def status_post():
 def status(id):
     data = {
         "title": "Status %d" % id,
-        "tweets": list(),
+        "results": list(),
         }
     try:
         origin_status = flask.g.api.showStatus(id=id, include_entities=1)
@@ -44,7 +44,7 @@ def status(id):
     else:
         tweets = list()
         try:
-            related_result = flask.g.api.get("related_results/show/%d" % id, include_entities=1)
+            related_result = flask.g.api.get("related_results/show/%d" % id, params={"include_entities": 1})
         except twython.TwythonError, e:
             flask.flash("Get related status error: %s" % str(e))
         else:
@@ -75,10 +75,8 @@ def status(id):
                 else:
                     tweets.insert(i + 1, status)
                     previous_ids.add(status["id"])
-        first_short = tweets[0]['id_str'] == id
-        while len(tweets) <= 4 or first_short:
-            first_short = False
-            status = tweets[0]
+        while len(tweets) <= 4:
+            status = tweets[-1]
             if status['in_reply_to_status_id_str']:
                 current_id = status['in_reply_to_status_id_str']
                 try:
@@ -94,7 +92,7 @@ def status(id):
                 tweets.append(status)
                 previous_ids.add(status["id"])
         tweets.sort(key=operator.itemgetter("id"))
-        data["tweets"] = tweets
+        data["results"] = tweets
     return data
 
 
