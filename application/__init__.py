@@ -14,13 +14,10 @@ import jinja2
 import twython
 from werkzeug.contrib import securecookie
 
-# Mute noisy requests logging.
+# Mute noisy logging.
+# Use my own mod oauthlib instead of original one, because the original author is not friendly with developers.
 logging.getLogger("requests").setLevel(logging.CRITICAL)
-
-# It's a confirmed bug of requests, fixed in the develop branch, delete the following after version bump.
-from requests.packages.oauthlib.oauth1 import rfc5849
-
-rfc5849.logging.debug = lambda msg: None
+logging.getLogger("oauthlib").setLevel(logging.CRITICAL)
 
 # Patch requests not to verify SSL, it's unnecessary for GAE.
 def requests_wrap(f):

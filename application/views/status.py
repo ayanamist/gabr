@@ -15,13 +15,17 @@ def status_post():
         status_text = flask.request.form.get("status", "")
         try:
             retweet_id = flask.request.form.get("retweet_id")
-            # It's requests' bug, why must i unicode the parameters first?
             if "retweet" in flask.request.form and retweet_id:
-                result = flask.g.api.reTweet(id=unicode(retweet_id), include_entities=u"1")
+                result = flask.g.api.reTweet(id=retweet_id, include_entities=1)
             else:
                 in_reply_to_id = flask.request.form.get("in_reply_to_id")
-                result = flask.g.api.updateStatus(status=status_text, in_reply_to_id=unicode(in_reply_to_id),
-                    include_entities=u"1")
+                kwargs = {
+                    "status": status_text,
+                    "include_entities": 1,
+                    }
+                if in_reply_to_id:
+                    kwargs["in_reply_to_id"] = in_reply_to_id
+                result = flask.g.api.updateStatus(**kwargs)
         except twython.TwythonError, e:
             flask.flash("Post error: %s" % str(e))
             data["preset_status"] = status_text
