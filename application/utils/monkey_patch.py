@@ -22,7 +22,7 @@ def patch_jinja2(app):
         prerender_tweet=render.prerender_tweet,
         render_created_at=render.render_created_at,
     )
-    jinja2.filters.FILTERS["item"] = jinja2.environmentfilter(do_item)
+    app.jinja_env.filters['item'] = do_item
 
 # Patch requests not to verify SSL, it's unnecessary for GAE.
 def _requests_wrap(f):
