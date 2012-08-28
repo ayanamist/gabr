@@ -170,7 +170,7 @@ def status_retweet(id):
 def status_favorite(id):
     data = {
         "title": "Favorite",
-        "tweets": tuple(),
+        "tweets": list(),
         }
     try:
         result = flask.g.api.createFavorite(id=id, include_entities=1)
@@ -189,7 +189,7 @@ def status_favorite(id):
 def status_unfavorite(id):
     data = {
         "title": "Unfavorite",
-        "tweets": tuple(),
+        "tweets": list(),
         }
     try:
         result = flask.g.api.destroyFavorite(id=id, include_entities=1)
@@ -207,7 +207,7 @@ def status_unfavorite(id):
 def status_delete(id):
     data = {
         "title": "Delete",
-        "tweets": tuple(),
+        "tweets": list(),
         }
     if flask.request.method == "GET":
         data["status_id"] = id

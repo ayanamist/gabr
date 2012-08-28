@@ -10,7 +10,7 @@ from application import app
 def timeline(title, api_func):
     data = {
         "title": title,
-        "results": tuple(),
+        "results": list(),
         }
     try:
         results = api_func()
