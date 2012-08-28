@@ -17,19 +17,13 @@ def remove_status_by_id(iterable, max_id):
     return iterable
 
 
-def do_item(environment, obj, name):
+def do_item(obj, name):
     try:
-        name = str(name)
-    except UnicodeError:
+        value = obj[name]
+    except (TypeError, KeyError):
         pass
     else:
-        try:
-            value = obj[name]
-        except (TypeError, KeyError):
-            pass
-        else:
-            return value
-    return environment.undefined(obj=obj, name=name)
+        return value
 
 
 def build_next_page_url(data, params, key_name="id_str"):

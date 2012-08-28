@@ -31,7 +31,7 @@
                     <input type="hidden" value="{{ in_reply_to_status.id }}" name="in_reply_to_id" id="in_reply_to_id"/>
                 {% endif %}
                 <span>
-                    <input type="file" name="pic-file" id="pic-file"/>
+                    <input type="file" name="pic-file" id="pic-file" size="1"/>
                 </span>
                 <span class="tweet-btn">
                     {% set word_count=140 - preset_status|default("")|length|int %}
