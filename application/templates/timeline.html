@@ -1,17 +1,7 @@
 {% extends "results.html" %}
 {% block main %}
     {{ super() }}
-    {% if results|length|int > 0 %}
-        {% set last_result = results|last %}
-        {% if last_result.max_position %}
-            {% set max_id = last_result.max_position %}
-        {% else %}
-            {% if last_result.retweet %}
-                {% set max_id = last_result.retweet.id_str %}
-            {% else %}
-                {% set max_id = last_result.id_str %}
-            {% endif %}
-        {% endif %}
-        <div class="more"><a href="?max_id={{ max_id }}">More</a></div>
+    {% if next_page_url %}
+        <div class="more"><a href="{{ next_page_url }}">More</a></div>
     {% endif %}
 {% endblock main %}

@@ -29,6 +29,7 @@ def home_timeline():
     params["include_entities"] = 1
     data = timeline("Home", functools.partial(flask.g.api.getHomeTimeline, **params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
+    data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict())
     return data
 
 
@@ -41,6 +42,8 @@ def connect_timeline():
     data = timeline("Connect", functools.partial(flask.g.api.get, "activity/about_me",
         params=params, version="i"))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
+    data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict(),
+        key_name="max_position")
     return data
 
 
@@ -53,6 +56,8 @@ def activity_timeline():
     data = timeline("Activity", functools.partial(flask.g.api.get, "activity/by_friends",
         params=params, version="i"))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
+    data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict(),
+        key_name="max_position")
     return data
 
 
@@ -72,4 +77,5 @@ def search_tweets():
                 "id_str": result["from_user_id_str"],
                 "profile_image_url": result["profile_image_url"],
                 }
+    data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict())
     return data

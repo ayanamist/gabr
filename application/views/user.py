@@ -46,6 +46,7 @@ def user(screen_name):
         flask.flash("Can not get timeline: %s" % str(e))
     else:
         data["results"] = utils.remove_status_by_id(tweets_result, flask.request.args.get("max_id"))
+    data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict())
     return data
 
 

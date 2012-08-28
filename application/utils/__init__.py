@@ -1,3 +1,6 @@
+import copy
+import urllib
+
 import flask
 
 abs_url_for = lambda endpoint, **values: flask.request.host_url + flask.url_for(endpoint, **values)
@@ -27,3 +30,12 @@ def do_item(environment, obj, name):
         else:
             return value
     return environment.undefined(obj=obj, name=name)
+
+
+def build_next_page_url(data, params, key_name="id_str"):
+    new_params = copy.copy(params)
+    try:
+        new_params["max_id"] = data[-1][key_name]
+        return "?" + urllib.urlencode(new_params)
+    except IndexError:
+        pass
