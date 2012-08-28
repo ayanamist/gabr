@@ -17,7 +17,7 @@ def before_request():
 
     g = flask.g
     g.screen_name = None
-    g.api = None
+    g.api = twython.Twython(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
 
     oauth_token = None
     oauth_token_secret = None

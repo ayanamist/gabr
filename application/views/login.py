@@ -16,7 +16,7 @@ def login():
 
 @app.route("/oauth")
 def oauth_login():
-    flask.g.api.callback_url = "%s%s" % (flask.request.host_url, abs_url_for("oauth_callback"))
+    flask.g.api.callback_url = abs_url_for("oauth_callback")
     flask.g.api.authenticate_url = flask.g.api.authorize_url
     try:
         redirect_url = flask.g.api.get_authentication_tokens()['auth_url']
@@ -28,8 +28,8 @@ def oauth_login():
 
 @app.route("/oauth_callback")
 def oauth_callback():
-    flask.g.api.oauth_token = flask.request.args.get("oauth_token")
-    flask.g.api.oauth_token_secret = flask.request.args.get("oauth_verifier")
+    flask.g.api = twython.Twython(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"],
+        flask.request.args.get("oauth_token"), flask.request.args.get("oauth_verifier"))
     try:
         flask.session.update(flask.g.api.get_authorized_tokens())
     except twython.Twython, e:
