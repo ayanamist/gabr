@@ -9,6 +9,7 @@ from ..utils import render
 from application import app
 
 @app.route("/user/<screen_name>")
+@decorators.login_required
 @decorators.templated("user_show.html")
 def user(screen_name):
     data = {
@@ -44,11 +45,12 @@ def user(screen_name):
     except twython.TwythonError, e:
         flask.flash("Can not get timeline: %s" % str(e))
     else:
-        data["results"] = utils.remove_max_id(tweets_result, flask.request.args.get("max_id"))
+        data["results"] = utils.remove_status_by_id(tweets_result, flask.request.args.get("max_id"))
     return data
 
 
 @app.route("/user/<screen_name>/follow")
+@decorators.login_required
 def user_follow(screen_name):
     try:
         result = flask.g.api.createFriendship(screen_name=screen_name)
@@ -60,6 +62,7 @@ def user_follow(screen_name):
 
 
 @app.route("/user/<screen_name>/unfollow")
+@decorators.login_required
 def user_unfollow(screen_name):
     try:
         result = flask.g.api.destroyFriendship(screen_name=screen_name)
@@ -71,6 +74,7 @@ def user_unfollow(screen_name):
 
 
 @app.route("/user/<screen_name>/block")
+@decorators.login_required
 def user_block(screen_name):
     try:
         result = flask.g.api.createBlock(screen_name=screen_name)
@@ -82,6 +86,7 @@ def user_block(screen_name):
 
 
 @app.route("/user/<screen_name>/unblock")
+@decorators.login_required
 def user_unblock(screen_name):
     try:
         result = flask.g.api.destroyBlock(screen_name=screen_name)
@@ -93,6 +98,7 @@ def user_unblock(screen_name):
 
 
 @app.route("/user/<screen_name>/reportspam")
+@decorators.login_required
 def user_reportspam(screen_name):
     try:
         result = flask.g.api.reportSpam(screen_name=screen_name)

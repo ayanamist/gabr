@@ -17,7 +17,7 @@ def timeline(title, api_func):
     except twython.TwythonError, e:
         flask.flash("Error: %s" % str(e))
     else:
-        data["results"] = utils.remove_max_id(results, flask.request.args.get("max_id"))
+        data["results"] = results
     return data
 
 
@@ -27,7 +27,9 @@ def timeline(title, api_func):
 def home_timeline():
     params = utils.parse_params()
     params["include_entities"] = 1
-    return timeline("Home", functools.partial(flask.g.api.getHomeTimeline, **params))
+    data = timeline("Home", functools.partial(flask.g.api.getHomeTimeline, **params))
+    data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
+    return data
 
 
 @app.route("/connect")
@@ -36,8 +38,10 @@ def home_timeline():
 def connect_timeline():
     params = utils.parse_params()
     params["include_entities"] = 1
-    return timeline("Connect", functools.partial(flask.g.api.get, "activity/about_me",
+    data = timeline("Connect", functools.partial(flask.g.api.get, "activity/about_me",
         params=params, version="i"))
+    data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
+    return data
 
 
 @app.route("/activity")
@@ -46,11 +50,26 @@ def connect_timeline():
 def activity_timeline():
     params = utils.parse_params()
     params["include_entities"] = 1
-    return timeline("Activity", functools.partial(flask.g.api.get, "activity/by_friends",
+    data = timeline("Activity", functools.partial(flask.g.api.get, "activity/by_friends",
         params=params, version="i"))
+    data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
+    return data
 
 
 @app.route("/search")
+@decorators.login_required
 @decorators.templated("timeline.html")
 def search_tweets():
-    return {}
+    params = utils.parse_params()
+    params["include_entities"] = 1
+    data = timeline("Search", functools.partial(flask.g.api.search, **params))
+    if data["results"]:
+        results = data["results"] = utils.remove_status_by_id(data["results"]["results"], params.get("max_id"))
+        for result in results:
+            result["user"] = {
+                "screen_name": result["from_user"],
+                "id": result["from_user_id"],
+                "id_str": result["from_user_id_str"],
+                "profile_image_url": result["profile_image_url"],
+                }
+    return data

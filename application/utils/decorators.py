@@ -6,6 +6,7 @@ def login_required(func):
     @functools.wraps(func)
     def decorated_view(*args, **kwargs):
         if not flask.g.screen_name:
+            flask.session["last_url"] = flask.request.url
             return flask.redirect(flask.url_for("login"))
         return func(*args, **kwargs)
 

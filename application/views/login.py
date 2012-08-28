@@ -5,6 +5,7 @@ from ..utils import decorators
 from ..utils import abs_url_for
 from application import app
 
+
 @app.route("/login")
 @decorators.templated()
 def login():
@@ -27,23 +28,25 @@ def oauth_login():
 
 @app.route("/oauth_callback")
 def oauth_callback():
-    flask.session.permanent = True
     flask.g.api.oauth_token = flask.request.args.get("oauth_token")
     flask.g.api.oauth_token_secret = flask.request.args.get("oauth_verifier")
     try:
         flask.session.update(flask.g.api.get_authorized_tokens())
-        return flask.redirect(flask.url_for("home_timeline"))
     except twython.Twython, e:
         flask.flash("OAuth error:%s, please try again." % str(e))
         return flask.redirect(flask.url_for("login"))
+    else:
+        last_url = flask.session.get("last_url")
+        if last_url:
+            return flask.redirect(last_url)
+        else:
+            return flask.redirect(flask.url_for("home_timeline"))
 
 
 @app.route("/logout")
 def logout():
-    flask.session.permanent = True
-    flask.session["screen_name"] = ""
-    flask.session["oauth_token"] = ""
-    flask.session["oauth_token_secret"] = ""
-    flask.g.screen_name = None
+    del flask.session["screen_name"]
+    del flask.session["oauth_token"]
+    del flask.session["oauth_token_secret"]
     flask.flash("Logout successfully!")
     return flask.redirect(flask.url_for("login"))

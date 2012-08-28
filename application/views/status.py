@@ -10,6 +10,7 @@ from application import app
 
 @app.route("/post", methods=["GET", "POST"])
 @decorators.login_required
+@decorators.login_required
 def status_post():
     data = dict()
     if flask.request.method == "POST":
@@ -44,6 +45,7 @@ def status_post():
 
 
 @app.route("/status/<int:id>")
+@decorators.login_required
 @decorators.templated("results.html")
 def status(id):
     data = {
