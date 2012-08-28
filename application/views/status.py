@@ -1,3 +1,4 @@
+import base64
 import operator
 
 import flask
@@ -13,6 +14,7 @@ def status_post():
     data = dict()
     if flask.request.method == "POST":
         status_text = flask.request.form.get("status", "")
+        pic_file = flask.request.files.get("pic-file")
         try:
             retweet_id = flask.request.form.get("retweet_id")
             if "retweet" in flask.request.form and retweet_id:
@@ -25,7 +27,12 @@ def status_post():
                     }
                 if in_reply_to_id:
                     kwargs["in_reply_to_id"] = in_reply_to_id
-                result = flask.g.api.updateStatus(**kwargs)
+                if pic_file:
+                    url = "https://upload.twitter.com/1/statuses/update_with_media.json"
+                    kwargs["media_data[]"] = base64.b64encode(pic_file.read())
+                    result = flask.g.api.post(url, params=kwargs)
+                else:
+                    result = flask.g.api.updateStatus(**kwargs)
         except twython.TwythonError, e:
             flask.flash("Post error: %s" % str(e))
             data["preset_status"] = status_text

@@ -171,9 +171,16 @@ body {
     height: 8em;
 }
 
-.tweet-btn {
-    text-align: center;
+.tweet-btn, .retweet-btn {
     margin: 0 auto;
+}
+
+.tweet-btn {
+    float: right;
+}
+
+.retweet-btn {
+    text-align: center;
 }
 
 .menu-bottom {

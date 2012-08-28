@@ -6,12 +6,12 @@
             {{ in_reply_to_status.text|safe }}
         </p>
     {% endif %}
-    <form action="{{ url_for("status_post") }}" method="post">
+    <form action="{{ url_for("status_post") }}" method="post" enctype="multipart/form-data">
         {% if retweet is defined %}
+            <input type="hidden" value="{{ retweet_id }}" name="retweet_id" id="retweet_id"/>
             <fieldset>
                 <legend>Twitter's new style retweet:</legend>
-                <div class="tweet-btn">
-                    <input type="hidden" value="{{ retweet_id }}" name="retweet_id" id="retweet_id"/>
+                <div class="retweet-btn">
                     <input type="submit" value="Twitter Retweet" name="retweet" id="retweet"/>
                 </div>
             </fieldset>
@@ -26,13 +26,21 @@
             </legend>
             <textarea name="status" id="status">{{ preset_status }}</textarea>
 
-            <div class="tweet-btn">
+            <div class="box">
                 {% if in_reply_to_status is defined %}
                     <input type="hidden" value="{{ in_reply_to_status.id }}" name="in_reply_to_id" id="in_reply_to_id"/>
                 {% endif %}
-                <input type="submit" value="Tweet"/>
-                {% set word_count=140 - preset_status|default("")|length|int %}
-                <span id="remaining"{% if word_count|int < 0 %} class="red bold"{% endif %}>{{ word_count }}</span>
+                <span>
+                    <input type="file" name="pic-file" id="pic-file"/>
+                </span>
+                <span class="tweet-btn">
+                    {% set word_count=140 - preset_status|default("")|length|int %}
+                    <span id="remaining"{% if word_count|int < 0 %} class="red bold"{% endif %}>{{ word_count }}</span>
+                    <input type="submit" value="Tweet"/>
+                </span>
+            </div>
+
+            <div class="tweet-btn">
             </div>
         </fieldset>
     </form>
