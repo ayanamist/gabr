@@ -1,5 +1,4 @@
 import base64
-import logging
 import os
 import sys
 
@@ -10,43 +9,14 @@ for zip_file in os.listdir(lib_path):
     sys.path.insert(0, os.path.join(lib_path, zip_file))
 
 import flask
-import jinja2
 import twython
 from werkzeug.contrib import securecookie
 
-# Mute noisy logging.
-# Use my own mod oauthlib instead of original one, because the original author is not friendly with developers.
-logging.getLogger("requests").setLevel(logging.CRITICAL)
-logging.getLogger("oauthlib").setLevel(logging.CRITICAL)
-
-# Patch requests not to verify SSL, it's unnecessary for GAE.
-def requests_wrap(f):
-    def wrapped(**kwargs):
-        kwargs["verify"] = False
-        return f(**kwargs)
-
-    return wrapped
-
-twython.twython.requests.session = requests_wrap(twython.twython.requests.session)
-
-@jinja2.environmentfilter
-def do_item(environment, obj, name):
-    try:
-        name = str(name)
-    except UnicodeError:
-        pass
-    else:
-        try:
-            value = obj[name]
-        except (TypeError, KeyError):
-            pass
-        else:
-            return value
-    return environment.undefined(obj=obj, name=name)
-
-jinja2.filters.FILTERS["item"] = do_item
+from utils import monkey_patch
 
 app = flask.Flask("application")
+monkey_patch.patch_all(app)
+
 # Config from os.environ are all strings, but here only accepts integer.
 app.config["PERMANENT_SESSION_LIFETIME"] = 31536000 # one year
 # import all configs from app.yaml

@@ -1,11 +1,6 @@
 import flask
 
-from application import app
-
 abs_url_for = lambda endpoint, **values: flask.request.host_url + flask.url_for(endpoint, **values)
-app.jinja_env.globals.update(
-    abs_url_for=abs_url_for
-)
 
 def parse_params():
     params = dict()
@@ -27,3 +22,17 @@ def remove_max_id(iterable, max_id):
                 del iterable[i]
     return iterable
 
+
+def do_item(environment, obj, name):
+    try:
+        name = str(name)
+    except UnicodeError:
+        pass
+    else:
+        try:
+            value = obj[name]
+        except (TypeError, KeyError):
+            pass
+        else:
+            return value
+    return environment.undefined(obj=obj, name=name)

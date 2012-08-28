@@ -4,7 +4,6 @@ import time
 import flask
 
 from . import indicesreplace
-from application import app
 
 def screen_name_exists(screen_name, entities):
     for user_mention in entities.get("user_mentions", list()):
@@ -94,7 +93,3 @@ def prerender_entities(text, entities):
 
     return unicode(new_text)
 
-app.jinja_env.globals.update(
-    prerender_tweet=prerender_tweet,
-    render_created_at=render_created_at,
-)
