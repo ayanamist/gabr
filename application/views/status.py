@@ -27,7 +27,7 @@ def status_post():
                     "include_entities": 1,
                     }
                 if in_reply_to_id:
-                    kwargs["in_reply_to_id"] = in_reply_to_id
+                    kwargs["in_reply_to_status_id"] = in_reply_to_id
                 if pic_file:
                     url = "https://upload.twitter.com/1/statuses/update_with_media.json"
                     kwargs["media_data[]"] = base64.b64encode(pic_file.read())
