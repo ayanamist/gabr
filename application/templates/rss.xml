@@ -4,8 +4,8 @@
         <title>Twitter Home @{{ g.screen_name }}</title>
         <description>Twitter home timeline exported as a RSS feed.</description>
         <link>{{ request.host_url }}</link>
-        <lastBuildDate>{{ (results|first).created_at }}</lastBuildDate>
-        <pubDate>{{ (results|first).created_at }}</pubDate>
+        <lastBuildDate>{{ now }}</lastBuildDate>
+        <pubDate>{{ now }}</pubDate>
         <ttl>60</ttl>
         {% for result in results %}
             <item>

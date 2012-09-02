@@ -1,3 +1,4 @@
+import email.utils
 import functools
 
 import flask
@@ -12,6 +13,7 @@ def home_rss():
     params["include_entities"] = 1
     data = timeline.timeline("Home", functools.partial(flask.g.api.getHomeTimeline, **params))
     data["results"].reverse() # Google Reader will not sort it themselves.
+    data["now"] = email.utils.formatdate()
     resp = flask.make_response(flask.render_template("rss.xml", **data))
     resp.headers["Content-Type"] = "application/rss+xml"
     return resp
