@@ -31,6 +31,11 @@ body {
     margin: 0
 }
 
+.page {
+    max-width: 960px;
+    margin: 0 auto;
+}
+
 .odd {
     background: #fff
 }
@@ -86,7 +91,7 @@ body {
     left: 0.3em;
     margin: 0;
     overflow: hidden;
-    position: absolute;
+    float: left;
 }
 
 .avatar img {
@@ -142,6 +147,7 @@ body {
 }
 
 .more {
+    border: 1px solid #138;
     margin: 0.5em;
     text-align: center;
     font-size: 1.2em
