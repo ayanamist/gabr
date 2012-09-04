@@ -200,3 +200,10 @@ body {
 .red {
     color: red
 }
+
+.preview {
+    min-height: 2em;
+    min-width: 2em;
+    background-color: #138;
+    border-radius: 0.5em;
+}
