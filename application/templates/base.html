@@ -25,8 +25,7 @@
     {% block main %} {% endblock main %}
     {% if g.screen_name %}
         <div class='small menu menu-bottom'>
-            <a href="">Setting</a> |
-            <a href="{{ url_for("logout") }}">Logout</a> |
+            <a href="{{ url_for("logout") }}">Logout</a>
         </div>
     {% endif %}
 </div>
