@@ -1,11 +1,10 @@
 import logging
 
-import jinja2
 import requests
 
-from . import render
-from . import do_item
-from . import abs_url_for
+from .import render
+from .import do_item
+from .import abs_url_for
 
 def patch_logging():
     # Mute noisy logging.
