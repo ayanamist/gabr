@@ -1,9 +1,11 @@
+import copy
 import functools
+import urllib
 
 import flask
 import twython
 
-from .. import utils
+from ..import utils
 from ..utils import decorators
 from application import app
 
@@ -11,7 +13,7 @@ def timeline(title, api_func):
     data = {
         "title": title,
         "results": list(),
-        }
+    }
     try:
         results = api_func()
     except twython.TwythonError, e:
@@ -66,6 +68,8 @@ def activity_timeline():
 @decorators.templated("timeline.html")
 def search_tweets():
     params = utils.parse_params()
+    params["q"] = urllib.unquote(params["q"]).encode("utf8")
+    args = copy.copy(params)
     params["include_entities"] = 1
     data = timeline("Search", functools.partial(flask.g.api.search, **params))
     if data["results"]:
@@ -76,6 +80,6 @@ def search_tweets():
                 "id": result["from_user_id"],
                 "id_str": result["from_user_id_str"],
                 "profile_image_url": result["profile_image_url"],
-                }
-    data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict())
+            }
+    data["next_page_url"] = utils.build_next_page_url(data["results"], args)
     return data
