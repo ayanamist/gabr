@@ -38,6 +38,7 @@ def home_timeline():
 @decorators.templated("timeline.html")
 def connect_timeline():
     params = utils.parse_params()
+    params["include_entities"] = 1
     data = timeline("Connect", functools.partial(flask.g.api.get, "activity/about_me",
         params=params, version="i"))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
@@ -51,6 +52,7 @@ def connect_timeline():
 @decorators.templated("timeline.html")
 def activity_timeline():
     params = utils.parse_params()
+    params["include_entities"] = 1
     data = timeline("Activity", functools.partial(flask.g.api.get, "activity/by_friends",
         params=params, version="i"))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
