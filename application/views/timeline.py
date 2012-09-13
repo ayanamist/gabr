@@ -1,4 +1,3 @@
-import copy
 import functools
 import urllib
 
@@ -28,7 +27,6 @@ def timeline(title, api_func):
 @decorators.templated("timeline.html")
 def home_timeline():
     params = utils.parse_params()
-    params["include_entities"] = 1
     data = timeline("Home", functools.partial(flask.g.api.getHomeTimeline, **params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict())
@@ -40,7 +38,6 @@ def home_timeline():
 @decorators.templated("timeline.html")
 def connect_timeline():
     params = utils.parse_params()
-    params["include_entities"] = 1
     data = timeline("Connect", functools.partial(flask.g.api.get, "activity/about_me",
         params=params, version="i"))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
@@ -54,7 +51,6 @@ def connect_timeline():
 @decorators.templated("timeline.html")
 def activity_timeline():
     params = utils.parse_params()
-    params["include_entities"] = 1
     data = timeline("Activity", functools.partial(flask.g.api.get, "activity/by_friends",
         params=params, version="i"))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
@@ -69,8 +65,6 @@ def activity_timeline():
 def search_tweets():
     params = utils.parse_params()
     params["q"] = urllib.unquote(params["q"]).encode("utf8")
-    args = copy.copy(params)
-    params["include_entities"] = 1
     data = timeline("Search", functools.partial(flask.g.api.search, **params))
     if data["results"]:
         results = data["results"] = utils.remove_status_by_id(data["results"]["results"], params.get("max_id"))
@@ -81,5 +75,5 @@ def search_tweets():
                 "id_str": result["from_user_id_str"],
                 "profile_image_url": result["profile_image_url"],
             }
-    data["next_page_url"] = utils.build_next_page_url(data["results"], args)
+    data["next_page_url"] = utils.build_next_page_url(data["results"], params)
     return data

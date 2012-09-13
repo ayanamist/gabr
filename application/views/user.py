@@ -3,7 +3,7 @@ import time
 import flask
 import twython
 
-from .. import utils
+from ..import utils
 from ..utils import decorators
 from ..utils import render
 from application import app
@@ -14,7 +14,7 @@ from application import app
 def user(screen_name):
     data = {
         "results": list(),
-        }
+    }
     if not flask.request.args:
         data["title"] = "User %s" % screen_name
         try:
@@ -39,7 +39,6 @@ def user(screen_name):
     else:
         data["title"] = "User %s Timeline" % screen_name
     params = utils.parse_params()
-    params["include_entities"] = 1
     try:
         tweets_result = flask.g.api.getUserTimeline(screen_name=screen_name, **params)
     except twython.TwythonError, e:
