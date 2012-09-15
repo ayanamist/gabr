@@ -28,3 +28,10 @@ def media_imgly(url):
     matched = _imgly_regex.match(url)
     if matched:
         return ("%sshow/%s/%s" % (url[:matched.start(2)], t, url[matched.start(2):]) for t in ("medium", "full"))
+
+_yfrog_regex = re.compile(r"(http(?:s)?://yfrog\.com/[0-9a-z]+)", re.I)
+
+def media_yfrog(url):
+    matched = _yfrog_regex.match(url)
+    if matched:
+        return ("%s:%s" % (matched.group(0), t) for t in ("iphone", "medium"))
