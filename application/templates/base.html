@@ -10,10 +10,10 @@
 <div class="page">
     <div class='menu menu-top'>
         {% if g.screen_name %}
-            <a href="{{ url_for("home_timeline") }}">Home</a> |
-            <a href="{{ url_for("connect_timeline") }}">Connect</a> |
-            <a href="{{ url_for("activity_timeline") }}">Activity</a> |
-            <a href="{{ url_for("user", screen_name=g.screen_name) }}">Me</a> |
+            <a href="{{ url_for("home_timeline") }}">Home</a>
+            <a href="{{ url_for("connect_timeline") }}">Connect</a>
+            <a href="{{ url_for("activity_timeline") }}">Activity</a>
+            <a href="{{ url_for("user", screen_name=g.screen_name) }}">Me</a>
             <a href="{{ url_for("status_post") }}">Tweet</a>
         {% else %}
             <a href="http://code.google.com/p/gabr/">About</a>

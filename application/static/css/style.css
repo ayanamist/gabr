@@ -65,6 +65,8 @@ body {
 
 .menu a {
     color: #fff;
+    border: 1px solid;
+    padding: 0 2px;
     text-decoration: none
 }
 
