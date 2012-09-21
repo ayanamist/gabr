@@ -11,7 +11,7 @@ from application import app
 def login():
     return {
         "title": "Login",
-        }
+    }
 
 
 @app.route("/oauth")
@@ -38,6 +38,7 @@ def oauth_callback():
     else:
         last_url = flask.session.get("last_url")
         if last_url:
+            flask.session["last_url"] = ""
             return flask.redirect(last_url)
         else:
             return flask.redirect(flask.url_for("home_timeline"))
