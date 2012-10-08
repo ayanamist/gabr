@@ -1,9 +1,10 @@
 import copy
 import urllib
+import urlparse
 
 import flask
 
-abs_url_for = lambda endpoint, **values: flask.request.host_url + flask.url_for(endpoint, **values)
+abs_url_for = lambda endpoint, **values: urlparse.urljoin(flask.request.host_url, flask.url_for(endpoint, **values))
 
 def parse_params():
     return flask.request.args.to_dict()
