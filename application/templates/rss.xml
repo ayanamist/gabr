@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>{% import "render.html" as render with context %}
 <rss version="2.0">
     <channel>
-        <title>Twitter Home @{{ g.screen_name }}</title>
+        <title>Twitter Home</title>
         <description>Twitter home timeline exported as a RSS feed.</description>
         <link>{{ request.host_url }}</link>
         <lastBuildDate>{{ now }}</lastBuildDate>
