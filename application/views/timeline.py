@@ -83,3 +83,16 @@ def search_tweets():
             }
     data["next_page_url"] = utils.build_next_page_url(data["results"], args)
     return data
+
+
+@app.route("/user/<screen_name>/favorites")
+@decorators.login_required
+@decorators.templated("timeline.html")
+def user_favorites(screen_name):
+    params = utils.parse_params()
+    params["include_entities"] = 1
+    data = timeline("%s Favorites" % screen_name, functools.partial(flask.g.api.getFavorites, screen_name=screen_name,
+        **params))
+    data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
+    data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict())
+    return data

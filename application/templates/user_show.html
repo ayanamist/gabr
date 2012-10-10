@@ -32,7 +32,8 @@
             <div class="features">{{ user.statuses_count }} tweets |
                 <a href="">{{ user.followers_count }} followers</a> |
                 <a href="">{{ user.friends_count }} friends</a> |
-                <a href="">{{ user.favourites_count }} favourites</a> |
+                <a href="{{ url_for("user_favorites", screen_name=user.screen_name) }}">{{ user.favourites_count }}
+                    favourites</a> |
                 <a href="">lists</a>
                 {% if user.screen_name != g.screen_name %}|
                     <a href="">Direct Message</a> |
