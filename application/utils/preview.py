@@ -35,3 +35,11 @@ def media_yfrog(url):
     matched = _yfrog_regex.match(url)
     if matched:
         return ("%s:%s" % (matched.group(0), t) for t in ("iphone", "medium"))
+
+_plixi_regex = re.compile(r"(http://(?:lockerz|plixi)?\.com/[ps]/[0-9]+)", re.I)
+
+def media_plixi(url):
+    matched = _plixi_regex.match(url)
+    if matched:
+        return ("http://api.plixi.com/api/tpapi.svc/imagefromurl?url=%s&size=%s" % (matched.group(0), t) for t in (
+        "mobile", "big"))
