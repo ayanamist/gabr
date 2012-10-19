@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block main %}
+    <div class="login">
+        <p>
+            <label for="rss">Your RSS:</label>
+            <br/>
+            <input id="rss" type="text" readonly="readonly" size="80" value="{{ rss_url }}"/>
+        </p>
+    </div>
+{% endblock main %}

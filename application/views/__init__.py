@@ -1,11 +1,9 @@
-import base64
 import os
 
 import flask
 import twython
 
 from application import app
-from application.utils import crypto
 
 # import all views
 for view in (x[:-3] for x in os.listdir(os.path.dirname(__file__)) if x != "__init__.py"):
@@ -18,12 +16,6 @@ def before_request():
     flask.g.screen_name = flask.session.get("screen_name")
     oauth_token = flask.session.get("oauth_token")
     oauth_token_secret = flask.session.get("oauth_token_secret")
-    if oauth_token and oauth_token_secret:
-        flask.g.sid = base64.urlsafe_b64encode(crypto.encrypt("%s:%s" % (oauth_token, oauth_token_secret),
-            app.config["SECRET_KEY"]))
-    else:
-        flask.g.sid = ""
-
     flask.g.api = twython.Twython(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"],
         oauth_token, oauth_token_secret)
 

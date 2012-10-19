@@ -12,7 +12,20 @@ from application.utils import crypto
 
 from .import timeline
 from ..import utils
+from ..utils import decorators
 from application import app
+
+@app.route("/rss")
+@decorators.login_required
+@decorators.templated("rss.html")
+def rss_url():
+    return {
+        "title": "RSS",
+        "rss_url": utils.abs_url_for("home_rss", sid=base64.urlsafe_b64encode(
+            crypto.encrypt(
+                "%s:%s" % (flask.g.api.oauth_token, flask.g.api.oauth_token_secret), app.config["SECRET_KEY"]))),
+    }
+
 
 @app.route("/rss/<sid>")
 def home_rss(sid):
