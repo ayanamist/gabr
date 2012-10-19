@@ -5,7 +5,7 @@
         <description>Twitter home timeline exported as a RSS feed.</description>
         <link>{{ request.host_url }}</link>
         <lastBuildDate>{{ now }}</lastBuildDate>
-        <pubDate>{{ now }}</pubDate>
+        <pubDate>{{ results|first|item("created_at") }}</pubDate>
         <ttl>60</ttl>
         {% for result in results %}
             <item>
