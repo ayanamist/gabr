@@ -25,6 +25,9 @@
     {% block main %} {% endblock main %}
     {% if g.screen_name %}
         <div class='small menu menu-bottom'>
+            {% if g.sid %}
+                <a href="{{ url_for("home_rss", sid=g.sid) }}">RSS</a>
+            {% endif %}
             <a href="{{ url_for("logout") }}">Logout</a>
         </div>
     {% endif %}
