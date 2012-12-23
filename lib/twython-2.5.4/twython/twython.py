@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
     Twython is a library for Python that wraps the Twitter API.
     It aims to abstract away all the API endpoints, so that additions to the library
@@ -9,7 +7,7 @@
 """
 
 __author__ = "Ryan McGrath <ryan@venodesigns.net>"
-__version__ = "2.3.3"
+__version__ = "2.5.4"
 
 import urllib
 import re
@@ -165,12 +163,15 @@ class Twython(object):
             raise TwythonError('Method must be of GET or POST')
 
         params = params or {}
+        # requests doesn't like items that can't be converted to unicode,
+        # so let's be nice and do that for the user
+        for k, v in params.items():
+            if isinstance(v, (int, bool)):
+                params[k] = u'%s' % v
 
         func = getattr(self.client, method)
         if method == 'get':
-            # Still wasn't fixed in `requests` 0.13.2? :(
-            url = url + '?' + urllib.urlencode(params)
-            response = func(url)
+            response = func(url, params=params)
         else:
             response = func(url, data=params, files=files)
         content = response.content.decode('utf-8')
@@ -187,10 +188,14 @@ class Twython(object):
             'content': content,
         }
 
+        #  wrap the json loads in a try, and defer an error
+        #  why? twitter will return invalid json with an error code in the headers
+        json_error = False
         try:
             content = simplejson.loads(content)
         except ValueError:
-            raise TwythonError('Response was not valid JSON, unable to decode.')
+            json_error = True
+            content = {}
 
         if response.status_code > 304:
             # If there is no error message, use a default.
@@ -198,14 +203,15 @@ class Twython(object):
                 'error', 'An error occurred processing your request.')
             self._last_call['api_error'] = error_msg
 
-            if response.status_code == 420:
-                exceptionType = TwythonRateLimitError
-            else:
-                exceptionType = TwythonError
+            exceptionType = TwythonRateLimitError if response.status_code == 420 else TwythonError
 
             raise exceptionType(error_msg,
                                 error_code=response.status_code,
                                 retry_after=response.headers.get('retry-after'))
+
+        # if we have a json error here, then it's not an official TwitterAPI error
+        if json_error and not response.status_code in (200, 201, 202):
+            raise TwythonError('Response was not valid JSON, unable to decode.')
 
         return content
 
@@ -216,7 +222,7 @@ class Twython(object):
     we haven't gotten around to putting it in Twython yet. :)
     '''
 
-    def request(self, endpoint, method='GET', params=None, files=None, version=1):
+    def request(self, endpoint, method='GET', params=None, files=None, version='1.1'):
         # In case they want to pass a full Twitter URL
         # i.e. https://search.twitter.com/
         if endpoint.startswith('http://') or endpoint.startswith('https://'):
@@ -228,10 +234,10 @@ class Twython(object):
 
         return content
 
-    def get(self, endpoint, params=None, version=1):
+    def get(self, endpoint, params=None, version='1.1'):
         return self.request(endpoint, params=params, version=version)
 
-    def post(self, endpoint, params=None, files=None, version=1):
+    def post(self, endpoint, params=None, files=None, version='1.1'):
         return self.request(endpoint, 'POST', params=params, files=files, version=version)
 
     # End Dynamic Request Methods
@@ -262,8 +268,7 @@ class Twython(object):
         if self.callback_url:
             request_args['oauth_callback'] = self.callback_url
 
-        req_url = self.request_token_url + '?' + urllib.urlencode(request_args)
-        response = self.client.get(req_url)
+        response = self.client.get(self.request_token_url, params=request_args)
 
         if response.status_code != 200:
             raise TwythonAuthError("Seems something couldn't be verified with your OAuth junk. Error: %s, Message: %s" % (response.status_code, response.content))
@@ -359,7 +364,7 @@ class Twython(object):
             e.g x.search(q='jjndf', page='2')
         """
 
-        return self.get('https://search.twitter.com/search.json', params=kwargs)
+        return self.get('https://api.twitter.com/1.1/search/tweets.json', params=kwargs)
 
     def searchGen(self, search_query, **kwargs):
         """ Returns a generator of tweets that match a specified query.
@@ -373,7 +378,7 @@ class Twython(object):
                     print result
         """
         kwargs['q'] = search_query
-        content = self.get('https://search.twitter.com/search.json', params=kwargs)
+        content = self.get('https://api.twitter.com/1.1/search/tweets.json', params=kwargs)
 
         if not content['results']:
             raise StopIteration
@@ -394,23 +399,6 @@ class Twython(object):
         for tweet in self.searchGen(search_query, **kwargs):
             yield tweet
 
-    # The following methods are apart from the other Account methods,
-    # because they rely on a whole multipart-data posting function set.
-    def updateProfileBackgroundImage(self, file_, tile=True, version=1):
-        """Updates the authenticating user's profile background image.
-
-            :param file_: (required) A string to the location of the file
-                          (less than 800KB in size, larger than 2048px width will scale down)
-            :param tile: (optional) Default ``True`` If set to true the background image
-                         will be displayed tiled. The image will not be tiled otherwise.
-            :param version: (optional) A number, default 1 because that's the
-                            only API version Twitter has now
-        """
-        url = 'https://api.twitter.com/%d/account/update_profile_background_image.json' % version
-        return self._media_update(url,
-                                  {'image': (file_, open(file_, 'rb'))},
-                                  **{'tile': tile})
-
     def bulkUserLookup(self, **kwargs):
         """Stub for a method that has been deprecated, kept for now to raise errors
             properly if people are relying on this (which they are...).
@@ -421,36 +409,79 @@ class Twython(object):
             stacklevel=2
         )
 
-    def updateProfileImage(self, file_, version=1):
-        """Updates the authenticating user's profile image (avatar).
+    # The following methods are apart from the other Account methods,
+    # because they rely on a whole multipart-data posting function set.
 
-            :param file_: (required) A string to the location of the file
-            :param version: (optional) A number, default 1 because that's the
-                            only API version Twitter has now
-        """
-        url = 'https://api.twitter.com/%d/account/update_profile_image.json' % version
-        return self._media_update(url,
-                                  {'image': (file_, open(file_, 'rb'))})
-
-    def updateStatusWithMedia(self, file_, version=1, **params):
-        """Updates the users status with media
-
-            :param file_: (required) A string to the location of the file
-            :param version: (optional) A number, default 1 because that's the
-                            only API version Twitter has now
-
-            **params - You may pass items that are taken in this doc
-                       (https://dev.twitter.com/docs/api/1/post/statuses/update_with_media)
-        """
-        url = 'https://upload.twitter.com/%d/statuses/update_with_media.json' % version
-        return self._media_update(url,
-                                  {'media': (file_, open(file_, 'rb'))},
-                                  **params)
+    ## Media Uploading functions ##############################################
 
     def _media_update(self, url, file_, **params):
         return self.post(url, params=params, files=file_)
 
-    def getProfileImageUrl(self, username, size='normal', version=1):
+    def updateProfileBackgroundImage(self, file_, version='1.1', **params):
+        """Updates the authenticating user's profile background image.
+
+            :param file_: (required) A string to the location of the file
+                          (less than 800KB in size, larger than 2048px width will scale down)
+            :param version: (optional) A number, default 1.1 because that's the
+                            current API version for Twitter (Legacy = 1)
+
+            **params - You may pass items that are stated in this doc
+                       (https://dev.twitter.com/docs/api/1.1/post/account/update_profile_background_image)
+        """
+        url = 'https://api.twitter.com/%s/account/update_profile_background_image.json' % version
+        return self._media_update(url,
+                                  {'image': (file_, open(file_, 'rb'))},
+                                  **params)
+
+    def updateProfileImage(self, file_, version='1.1', **params):
+        """Updates the authenticating user's profile image (avatar).
+
+            :param file_: (required) A string to the location of the file
+            :param version: (optional) A number, default 1.1 because that's the
+                            current API version for Twitter (Legacy = 1)
+
+            **params - You may pass items that are stated in this doc
+                       (https://dev.twitter.com/docs/api/1.1/post/account/update_profile_image)
+        """
+        url = 'https://api.twitter.com/%s/account/update_profile_image.json' % version
+        return self._media_update(url,
+                                  {'image': (file_, open(file_, 'rb'))},
+                                  **params)
+
+    def updateStatusWithMedia(self, file_, version='1.1', **params):
+        """Updates the users status with media
+
+            :param file_: (required) A string to the location of the file
+            :param version: (optional) A number, default 1.1 because that's the
+                            current API version for Twitter (Legacy = 1)
+
+            **params - You may pass items that are taken in this doc
+                       (https://dev.twitter.com/docs/api/1.1/post/statuses/update_with_media)
+        """
+        subdomain = 'upload' if version == '1' else 'api'
+        url = 'https://%s.twitter.com/%s/statuses/update_with_media.json' % (subdomain, version)
+        return self._media_update(url,
+                                  {'media': (file_, open(file_, 'rb'))},
+                                  **params)
+
+    def updateProfileBannerImage(self, file_, version=1, **params):
+        """Updates the users profile banner
+
+            :param file_: (required) A string to the location of the file
+            :param version: (optional) A number, default 1 because that's the
+                            only API version for Twitter that supports this call
+
+            **params - You may pass items that are taken in this doc
+                       (https://dev.twitter.com/docs/api/1/post/account/update_profile_banner)
+        """
+        url = 'https://api.twitter.com/%d/account/update_profile_banner.json' % version
+        return self._media_update(url,
+                                  {'banner': (file_, open(file_, 'rb'))},
+                                  **params)
+
+    ###########################################################################
+
+    def getProfileImageUrl(self, username, size='normal', version='1'):
         """Gets the URL for the user's profile image.
 
             :param username: (required) Username, self explanatory.
@@ -459,13 +490,13 @@ class Twython(object):
                             mini - 24px by 24px
                             original - undefined, be careful -- images may be
                                        large in bytes and/or size.
-            :param version: A number, default 1 because that's the only API
-                            version Twitter has now
+            :param version: (optional) A number, default 1 because that's the
+                            only API version for Twitter that supports this call
         """
         endpoint = 'users/profile_image/%s' % username
-        url = self.api_url % version + '/' + endpoint + '?' + urllib.urlencode({'size': size})
+        url = self.api_url % version + '/' + endpoint
 
-        response = self.client.get(url, allow_redirects=False)
+        response = self.client.get(url, params={'size': size}, allow_redirects=False)
         image_url = response.headers.get('location')
 
         if response.status_code in (301, 302, 303, 307) and image_url is not None:

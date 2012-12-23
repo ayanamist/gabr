@@ -62,6 +62,14 @@ api_table = {
         'url': '/followers/ids.json',
         'method': 'GET',
     },
+    'getFriendsList': {
+        'url': '/friends/list.json',
+        'method': 'GET',
+    },
+    'getFollowersList': {
+        'url': '/followers/list.json',
+        'method': 'GET',
+    },
     'getIncomingFriendshipIDs': {
         'url': '/friendships/incoming.json',
         'method': 'GET',
@@ -157,6 +165,14 @@ api_table = {
     },
     'updateProfileColors': {
         'url': '/account/update_profile_colors.json',
+        'method': 'POST',
+    },
+    'myTotals': {
+        'url': '/account/totals.json',
+        'method': 'GET',
+    },
+    'removeProfileBanner': {
+        'url': '/account/remove_profile_banner.json',
         'method': 'POST',
     },
 
@@ -322,6 +338,10 @@ api_table = {
     'reportSpam': {
         'url': '/report_spam.json',
         'method': 'POST',
+    },
+    'getOembedTweet': {
+    'url': '/statuses/oembed.json',
+        'method': 'GET',
     },
 }
 
