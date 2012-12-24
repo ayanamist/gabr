@@ -13,6 +13,7 @@ from application.utils import crypto
 from .import timeline
 from ..import utils
 from ..utils import decorators
+from ..utils import indicesreplace
 from application import app
 
 @app.route("/rss")
@@ -49,9 +50,16 @@ def home_rss(sid):
         params["count"] = 200
         data = timeline.timeline("Home", functools.partial(flask.g.api.getHomeTimeline, **params))
         data["results"].sort(key=operator.itemgetter("id"), reverse=True)
+        for tweet in data["results"]:
+            urls = tweet.get("entities", {}).get("urls", [])
+            new_text = indicesreplace.IndicesReplace(tweet["text"])
+            for url in urls:
+                start, stop = url["indices"]
+                new_text.replace_indices(start, stop, url["display_url"])
+            tweet["rss_title"] = unicode(new_text)
         memcache.set(sid + str(params), json.dumps(data["results"]), time=60)
     data["now"] = email.utils.formatdate()
     resp = flask.make_response(flask.render_template("rss.xml", **data))
-    resp.headers["Content-Type"] = "application/rss+xml"
+    resp.headers["Content-Type"] = "application/rss+xml; charset=utf-8"
     return resp
 
