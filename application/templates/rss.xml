@@ -72,7 +72,7 @@
                     </span>
                 ]]></description>
                 <link>https://twitter.com/{{ result.user.screen_name }}/status/{{ result.id }}</link>
-                <guid>{{ abs_url_for("status", id=result.id) }}#t{{ result.id }}</guid>
+                <guid>https://twitter.com/{{ result.user.screen_name }}/status/{{ result.id }}</guid>
                 <pubDate>{{ result.created_at }}</pubDate>
             </item>
         {% endfor %}
