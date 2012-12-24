@@ -10,8 +10,8 @@
         {% for result in results %}
             <item>
                 <title>@{{ result.user.screen_name }}: {{ result.rss_title }}</title>
-                <description>
-                    {% set tweet=prerender_tweet(result) %}
+                <description><![CDATA[
+                        {% set tweet=prerender_tweet(result) %}
                     <span class="status shift">
                         <span class="bold">
                             <a href="{{ url_for("user", screen_name=tweet.user.screen_name) }}">
@@ -39,21 +39,21 @@
                         {{ tweet.text|safe }}
                         <br/>
                         {% if tweet.entities %}
-                            {% for media in tweet.entities.media %}
+                    {% for media in tweet.entities.media %}
                                 <a href="{{ media.media_url }}">
                                     <img class="preview" src="{{ media.preview_url }}"/>
                                 </a>
                                 <br/>
                             {% endfor %}
-                        {% endif %}
+                {% endif %}
                         <a href="{{ url_for("status", id=tweet.id) }}#t{{ tweet.id }}"
                            class="time">{{ render_created_at(tweet.created_at) }}</a>
                         <span class="small">
                             from {{ tweet.source|safe }}
-                            {% if tweet.in_reply_to_status_id %}
+                        {% if tweet.in_reply_to_status_id %}
                                 <a href="{{ url_for("status", id=tweet.id) }}#t{{ tweet.id }}">&gt;&gt;</a>
                             {% endif %}
-                            {% if tweet.retweet %}
+                        {% if tweet.retweet %}
                                 <br/>
                                 <a href="{{ url_for("status", id=tweet.retweet.id) }}">
                                     <span class="time">{{ render_created_at(tweet.retweet.created_at) }}</span>
@@ -64,13 +64,13 @@
                                     {{ tweet.retweet.user.screen_name }}
                                 </a>
                                 from {{ tweet.retweet.source|safe }}
-                                {% if tweet.retweet_count > 1 %}
+                            {% if tweet.retweet_count > 1 %}
                                     and {{ tweet.retweet_count - 1 }} other(s)
                                 {% endif %}
-                            {% endif %}
+                        {% endif %}
                         </span>
                     </span>
-                </description>
+                ]]></description>
                 <link>https://twitter.com/{{ result.user.screen_name }}/status/{{ result.id }}</link>
                 <guid>{{ abs_url_for("status", id=result.id) }}#t{{ result.id }}</guid>
                 <pubDate>{{ result.created_at }}</pubDate>
