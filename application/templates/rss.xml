@@ -12,7 +12,7 @@
                 <title>@{{ result.user.screen_name }}: {{ result.text }}</title>
                 <description><![CDATA[
                         {{ render.render_tweet(result) }}]]></description>
-                <link>{{ abs_url_for("status", id=result.id) }}#t{{ result.id }}</link>
+                <link>https://twitter.com/{{ result.user.screen_name }}/status/{{ result.id }}</link>
                 <guid>{{ abs_url_for("status", id=result.id) }}#t{{ result.id }}</guid>
                 <pubDate>{{ result.created_at }}</pubDate>
             </item>
