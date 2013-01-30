@@ -9,7 +9,7 @@
         <ttl>60</ttl>
         {% for result in results %}
             <item>
-                <title>@{{ result.user.screen_name }}: {{ result.rss_title }}</title>
+                <title>@{{ result.user.screen_name }}: {{ result.rss_title|e }}</title>
                 <description><![CDATA[
                         {% set tweet=prerender_tweet(result) %}
                     <span class="status shift">
