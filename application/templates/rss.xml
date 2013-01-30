@@ -14,17 +14,17 @@
                         {% set tweet=prerender_tweet(result) %}
                     <span class="status shift">
                         <span class="bold">
-                            <a href="{{ url_for("user", screen_name=tweet.user.screen_name) }}">
+                            <a href="{{ abs_url_for("user", screen_name=tweet.user.screen_name) }}">
                                 {{ tweet.user.screen_name }} ({{ tweet.user.name }})
                             </a>
                         </span>
-                        <a href="{{ url_for("status_reply", id=tweet.id) }}">@</a>
-                        <a href="{{ url_for("status_replyall", id=tweet.id) }}">@@</a>
-                        <a href="{{ url_for("status_retweet", id=tweet.id) }}">RT</a>
+                        <a href="{{ abs_url_for("status_reply", id=tweet.id) }}">@</a>
+                        <a href="{{ abs_url_for("status_replyall", id=tweet.id) }}">@@</a>
+                        <a href="{{ abs_url_for("status_retweet", id=tweet.id) }}">RT</a>
                         {% if tweet.favorited %}
-                            <a href="{{ url_for("status_unfavorite", id=tweet.id) }}">UNFAV</a>
+                            <a href="{{ abs_url_for("status_unfavorite", id=tweet.id) }}">UNFAV</a>
                         {% else %}
-                            <a href="{{ url_for("status_favorite", id=tweet.id) }}">FAV</a>
+                            <a href="{{ abs_url_for("status_favorite", id=tweet.id) }}">FAV</a>
                         {% endif %}
                         {% if not tweet.deleted and tweet.user.screen_name == g.screen_name %}
                             {% set del_id = tweet.id %}
@@ -32,7 +32,7 @@
                             {% set del_id = tweet.retweet.id %}
                         {% endif %}
                         {% if del_id %}
-                            <a href="{{ url_for("status_delete", id=del_id) }}">DEL</a>
+                            <a href="{{ abs_url_for("status_delete", id=del_id) }}">DEL</a>
                         {% endif %}
                         {% set del_id = 0 %}
                         <br/>
@@ -46,21 +46,21 @@
                                 <br/>
                             {% endfor %}
                 {% endif %}
-                        <a href="{{ url_for("status", id=tweet.id) }}#t{{ tweet.id }}"
+                        <a href="{{ abs_url_for("status", id=tweet.id) }}#t{{ tweet.id }}"
                            class="time">{{ render_created_at(tweet.created_at) }}</a>
                         <span class="small">
                             from {{ tweet.source|safe }}
                         {% if tweet.in_reply_to_status_id %}
-                                <a href="{{ url_for("status", id=tweet.id) }}#t{{ tweet.id }}">&gt;&gt;</a>
+                                <a href="{{ abs_url_for("status", id=tweet.id) }}#t{{ tweet.id }}">&gt;&gt;</a>
                             {% endif %}
                         {% if tweet.retweet %}
                                 <br/>
-                                <a href="{{ url_for("status", id=tweet.retweet.id) }}">
+                                <a href="{{ abs_url_for("status", id=tweet.retweet.id) }}">
                                     <span class="time">{{ render_created_at(tweet.retweet.created_at) }}</span>
                                     retweeted
                                 </a>
                                 by
-                                <a href="{{ url_for("user", screen_name=tweet.retweet.user.screen_name) }}">
+                                <a href="{{ abs_url_for("user", screen_name=tweet.retweet.user.screen_name) }}">
                                     {{ tweet.retweet.user.screen_name }}
                                 </a>
                                 from {{ tweet.retweet.source|safe }}
