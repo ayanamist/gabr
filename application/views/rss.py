@@ -2,7 +2,7 @@ import base64
 import email.utils
 import functools
 import json
-import operator
+import time
 
 from google.appengine.api import memcache
 
@@ -50,7 +50,10 @@ def home_rss(sid):
         params["include_entities"] = 1
         params["count"] = 200
         data = timeline.timeline("Home", functools.partial(flask.g.api.getHomeTimeline, **params))
-        data["results"].sort(key=operator.itemgetter("id"), reverse=True)
+        data["results"].sort(
+            cmp=lambda a, b: int(time.mktime(email.utils.parsedate(a["created_at"])) - time.mktime(
+                email.utils.parsedate(b["created_at"]))),
+            reverse=True)
         for tweet in data["results"]:
             urls = tweet.get("entities", {}).get("urls", [])
             new_text = indicesreplace.IndicesReplace(tweet["text"])
