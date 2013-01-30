@@ -39,7 +39,6 @@ handlers:
 
 - url: /.*
   script: application.app
-  secure: always
 
 skip_files:
 - ^(.*/)?.*\.py[co]
