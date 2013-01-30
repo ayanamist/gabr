@@ -10,11 +10,12 @@ import flask
 import twython
 from application.utils import crypto
 
-from .import timeline
-from ..import utils
+from . import timeline
+from .. import utils
 from ..utils import decorators
 from ..utils import indicesreplace
 from application import app
+
 
 @app.route("/rss")
 @decorators.login_required
@@ -37,7 +38,7 @@ def home_rss(sid):
     except (ValueError, TypeError):
         return "Invalid sid."
     flask.g.api = twython.Twython(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"],
-        oauth_token, oauth_token_secret)
+                                  oauth_token, oauth_token_secret)
     params = utils.parse_params()
     cached = memcache.get(sid + str(params))
     if cached:
@@ -56,7 +57,7 @@ def home_rss(sid):
             for url in urls:
                 start, stop = url["indices"]
                 new_text.replace_indices(start, stop, url["display_url"])
-            tweet["rss_title"] = unicode(new_text)
+            tweet["rss_title"] = unicode(new_text).replace("\r\n", " ").replace("\r", " ").replace("\n", " ")
         memcache.set(sid + str(params), json.dumps(data["results"]), time=60)
     data["now"] = email.utils.formatdate()
     resp = flask.make_response(flask.render_template("rss.xml", **data))
