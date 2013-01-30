@@ -5,8 +5,9 @@
         <description>Twitter home timeline exported as a RSS feed.</description>
         <link>{{ request.host_url }}</link>
         <lastBuildDate>{{ now }}</lastBuildDate>
-        <pubDate>{{ results|first|item("created_at") }}</pubDate>
+        <pubDate>{{ results|first|item("created_at")|rfc822 }}</pubDate>
         <ttl>60</ttl>
+        <atom:link href="{{ request.url }}" rel="self" type="application/rss+xml"/>
         {% for result in results %}
             <item>
                 <title>@{{ result.user.screen_name }}: {{ result.rss_title|e }}</title>
@@ -73,9 +74,8 @@
                 ]]></description>
                 <link>https://twitter.com/{{ result.user.screen_name }}/status/{{ result.id }}</link>
                 <guid>https://twitter.com/{{ result.user.screen_name }}/status/{{ result.id }}</guid>
-                <pubDate>{{ result.created_at }}</pubDate>
+                <pubDate>{{ result.created_at|rfc822 }}</pubDate>
             </item>
         {% endfor %}
-        <atom:link href="{{ request.url }}" rel="self" type="application/rss+xml"/>
     </channel>
 </rss>

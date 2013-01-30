@@ -2,9 +2,11 @@ import logging
 
 import requests
 
-from .import render
-from .import do_item
-from .import abs_url_for
+from . import render
+from . import do_item
+from . import do_rfc822
+from . import abs_url_for
+
 
 def patch_logging():
     # Mute noisy logging.
@@ -22,6 +24,7 @@ def patch_jinja2(app):
         render_created_at=render.render_created_at,
     )
     app.jinja_env.filters['item'] = do_item
+    app.jinja_env.filters['rfc822'] = do_rfc822
 
 # Patch requests not to verify SSL, it's unnecessary for GAE.
 def _requests_wrap(f):
