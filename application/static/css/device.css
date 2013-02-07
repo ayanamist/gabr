@@ -1,0 +1,20 @@
+@media screen and (max-device-width: 360px) {
+    .avatar {
+        height: 1.5em;
+        width: 1.5em;
+    }
+
+    .avatar img {
+        height: 1.5em;
+        width: 1.5em;
+    }
+
+    .shift {
+        margin-left: 1.875em;
+        min-height: 1.5em;
+    }
+
+    img.preview {
+        max-width: 300px;
+    }
+}
