@@ -110,7 +110,7 @@ body {
     min-height: 3em;
 }
 
-@media screen and (max-device-width: 320px) {
+@media screen and (max-device-width: 360px) {
     .avatar {
         height: 1.5em !important;
         width: 1.5em !important;
@@ -127,7 +127,7 @@ body {
     }
 
     img.preview {
-        width: 180px;
+        max-width: 300px;
     }
 }
 
