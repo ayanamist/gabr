@@ -41,11 +41,11 @@ def home_rss(sid):
     flask.g.api = twython.Twython(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"],
                                   oauth_token, oauth_token_secret)
     params = utils.parse_params()
-    cached = zlib.decompress(memcache.get(sid + str(params)))
+    cached = memcache.get(sid + str(params))
     if cached:
         data = {
             "title": "Home",
-            "results": json.loads(cached)
+            "results": json.loads(zlib.decompress(cached))
         }
     else:
         params["include_entities"] = 1
