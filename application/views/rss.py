@@ -3,6 +3,7 @@ import email.utils
 import functools
 import json
 import time
+import zlib
 
 from google.appengine.api import memcache
 
@@ -40,7 +41,7 @@ def home_rss(sid):
     flask.g.api = twython.Twython(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"],
                                   oauth_token, oauth_token_secret)
     params = utils.parse_params()
-    cached = memcache.get(sid + str(params))
+    cached = zlib.decompress(memcache.get(sid + str(params)))
     if cached:
         data = {
             "title": "Home",
@@ -61,7 +62,7 @@ def home_rss(sid):
                 start, stop = url["indices"]
                 new_text.replace_indices(start, stop, url["display_url"])
             tweet["rss_title"] = unicode(new_text).replace("\r\n", " ").replace("\r", " ").replace("\n", " ")
-        memcache.set(sid + str(params), json.dumps(data["results"]), time=60)
+        memcache.set(sid + str(params), zlib.compress(json.dumps(data["results"]), 9), time=120)
     data["now"] = email.utils.formatdate()
     resp = flask.make_response(flask.render_template("rss.xml", **data))
     resp.headers["Content-Type"] = "application/rss+xml; charset=utf-8"
