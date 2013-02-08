@@ -49,7 +49,7 @@ def home_rss(sid):
         }
     else:
         params["include_entities"] = 1
-        params["count"] = 200
+        params["count"] = 100
         data = timeline.timeline("Home", functools.partial(flask.g.api.getHomeTimeline, **params))
         data["results"].sort(
             cmp=lambda a, b: int(time.mktime(email.utils.parsedate(a["created_at"])) - time.mktime(
