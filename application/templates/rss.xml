@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>{% import "render.html" as render with context %}
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
+        <atom:link href="{{ request.url }}" rel="self" type="application/rss+xml"/>
+        <atom:link rel="hub" href="http://pubsubhubbub.appspot.com"/>
         <title>Twitter Home</title>
         <description>Twitter home timeline exported as a RSS feed.</description>
         <link>{{ request.host_url }}</link>
         <lastBuildDate>{{ now }}</lastBuildDate>
         <pubDate>{{ results|first|item("created_at")|rfc822 }}</pubDate>
         <ttl>60</ttl>
-        <atom:link href="{{ request.url }}" rel="self" type="application/rss+xml"/>
         {% for result in results %}
             <item>
                 <title>@{{ result.user.screen_name }}: {{ result.rss_title|e }}</title>
