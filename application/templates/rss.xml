@@ -41,7 +41,7 @@
                         <br/>
                         {% if tweet.entities %}
                     {% for media in tweet.entities.media %}
-                                <a href="{{ media.media_url }}">
+                                <a href="{{ media.original_url }}">
                                     <img class="preview" src="{{ media.preview_url }}"/>
                                 </a>
                                 <br/>

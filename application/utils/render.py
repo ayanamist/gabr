@@ -8,6 +8,7 @@ from . import preview
 
 preview_builders = [getattr(preview, f) for f in dir(preview) if f.startswith("media_")]
 
+
 def screen_name_exists(screen_name, entities):
     for user_mention in entities.get("user_mentions", list()):
         if user_mention["screen_name"] == screen_name:
@@ -43,7 +44,7 @@ def prerender_timestamp(created_at):
 
 def render_created_at(created_at):
     unix_timestamp = prerender_timestamp(created_at)
-    unix_timestamp += 28800 # GMT+8
+    unix_timestamp += 28800  # GMT+8
     t = time.gmtime(unix_timestamp)
     now_t = time.gmtime()
     date_fmt = "%m-%d %H:%M:%S"
@@ -54,9 +55,9 @@ def render_created_at(created_at):
 
 def get_preview_url(url):
     for func in preview_builders:
-        preview_url = func(url)
-        if preview_url:
-            return preview_url
+        result = func(url)
+        if result:
+            return result
 
 
 def prerender_entities(text, entities):
@@ -69,7 +70,7 @@ def prerender_entities(text, entities):
         data = {
             "url": "%s?q=%s" % (flask.url_for("search_tweets"), hashtag["text"]),
             "text": hashtag["text"],
-            }
+        }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\">#%(text)s</a>" % data)
 
     user_mentions = entities.get("user_mentions", list())
@@ -79,38 +80,33 @@ def prerender_entities(text, entities):
             "url": flask.url_for("user", screen_name=user_mention["screen_name"]),
             "title": user_mention["name"],
             "text": user_mention["screen_name"],
-            }
+        }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\" title=\"%(title)s\">@%(text)s</a>" % data)
 
     if "media" not in entities:
         entities["media"] = list()
     medias = entities["media"]
-
-    urls = entities.get("urls", list())
-    for url in urls:
-        preview_urls = get_preview_url(url["expanded_url"])
-        if preview_urls:
-            thumbnail_url, image_url = preview_urls
-            url["preview_url"] = thumbnail_url
-            url["media_url"] = image_url
-            medias.append(url)
-        else:
-            start, stop = url["indices"]
-            data = {
-                "url": url["expanded_url"],
-                "text": url["display_url"],
-                }
-            new_text.replace_indices(start, stop, "<a href=\"%(url)s\">%(text)s</a>" % data)
-
     for media in medias:
         start, stop = media["indices"]
         data = {
             "url": media["expanded_url"],
             "text": media["display_url"],
-            }
+        }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\">%(text)s</a>" % data)
-        if "preview_url" not in media:
-            media["preview_url"] = "%s:small" % media["media_url"]
+        media["preview_url"] = "%s:small" % media["media_url"]
+        media["original_url"] = "%s:large" % media["media_url"]
+
+    urls = entities.get("urls", list())
+    for url in urls:
+        preview_urls = get_preview_url(url["expanded_url"])
+        if preview_urls:
+            url["preview_url"], url["original_url"] = preview_urls
+            medias.append(url)
+        start, stop = url["indices"]
+        data = {
+            "url": url["expanded_url"],
+            "text": url["display_url"],
+        }
+        new_text.replace_indices(start, stop, "<a href=\"%(url)s\">%(text)s</a>" % data)
 
     return unicode(new_text)
-
