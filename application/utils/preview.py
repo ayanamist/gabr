@@ -54,3 +54,12 @@ def media_plixi(url):
     if matched:
         return ("http://api.plixi.com/api/tpapi.svc/imagefromurl?url=%s&size=%s" % (matched.group(0), t) for t in (
             "mobile", "big"))
+
+
+_twimg_regex = re.compile(r"(http(?:s)?://pbs.twimg.com/media/[A-Za-z0-9\.]+)", re.I)
+
+
+def media_twimg(url):
+    matched = _twimg_regex.match(url)
+    if matched:
+        return ("%s:%s" % (matched.group(0), t) for t in ("small", "large"))
