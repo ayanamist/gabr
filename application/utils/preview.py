@@ -56,7 +56,7 @@ def media_plixi(url):
             "mobile", "big"))
 
 
-_twimg_regex = re.compile(r"(http(?:s)?://pbs.twimg.com/media/[A-Za-z0-9\.]+)", re.I)
+_twimg_regex = re.compile(r"(http(?:s)?://pbs.twimg.com/media/[A-Za-z0-9\._]+)", re.I)
 
 
 def media_twimg(url):
