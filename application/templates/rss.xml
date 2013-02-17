@@ -6,7 +6,8 @@
         <description>Twitter home timeline exported as a RSS feed.</description>
         <link>{{ request.host_url }}</link>
         <lastBuildDate>{{ now }}</lastBuildDate>
-        <pubDate>{{ results|first|item("created_at")|rfc822 }}</pubDate>
+        <pubDate>
+            {% if results|length %}{{ results|first|item("created_at")|rfc822 }}{% else %}{{ now }}{% endif %}</pubDate>
         <ttl>60</ttl>
         {% for result in results %}
             <item>
