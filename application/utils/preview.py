@@ -16,7 +16,9 @@ _sina_regex = re.compile(r"(http(?:s)?://ww(\d)\.sinaimg\.cn/([a-z]+)/[a-z0-9]+\
 def media_sina(url):
     matched = _sina_regex.match(url)
     if matched:
-        return ("%s%s%s" % (url[:matched.start(2)], t, url[matched.end(2):]) for t in ("small", "large"))
+        return ("%s4%s%s%s" % (
+            url[:matched.start(1)], url[matched.end(1):matched.start(2)], t, url[matched.end(2):]) for t in (
+            "small", "large"))
 
 
 _twitpic_regex = re.compile(r"(http(?:s)?://twitpic\.com/([0-9a-z]+))", re.I)
