@@ -17,7 +17,7 @@ def media_sina(url):
     matched = _sina_regex.match(url)
     if matched:
         return ("%s4%s%s%s" % (
-            url[:matched.start(1)], url[matched.end(1):matched.start(2)], t, url[matched.end(2):]) for t in (
+            url[:matched.start(2)], url[matched.end(2):matched.start(3)], t, url[matched.end(3):]) for t in (
             "small", "large"))
 
 
