@@ -50,7 +50,7 @@ def status_post():
 @decorators.templated("results.html")
 def status(status_id):
     data = {
-        "title": "Status %d" % status_id,
+        "title": "Status %s" % status_id,
         "results": list(),
     }
     try:
@@ -61,7 +61,7 @@ def status(status_id):
         origin_status["orig"] = True
         tweets = list()
         try:
-            related_result = flask.g.api.get("related_results/show/%d" % status_id,
+            related_result = flask.g.api.get("related_results/show/%s" % status_id,
                                              params={"include_entities": 1}, version="1")
         except twython.TwythonError, e:
             flask.flash("Get related status error: %s" % str(e))
