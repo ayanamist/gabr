@@ -8,6 +8,7 @@ from ..utils import decorators
 from ..utils import render
 from application import app
 
+
 @app.route("/post", methods=["GET", "POST"])
 @decorators.login_required
 @decorators.login_required
@@ -44,24 +45,24 @@ def status_post():
     return flask.render_template("status_post.html", **data)
 
 
-@app.route("/status/<int:id>")
+@app.route("/status/<status_id>")
 @decorators.login_required
 @decorators.templated("results.html")
-def status(id):
+def status(status_id):
     data = {
-        "title": "Status %d" % id,
+        "title": "Status %d" % status_id,
         "results": list(),
     }
     try:
-        origin_status = flask.g.api.showStatus(id=id, include_entities=1)
+        origin_status = flask.g.api.showStatus(id=status_id, include_entities=1)
     except twython.TwythonError, e:
         flask.flash("Get status error: %s" % str(e))
     else:
         origin_status["orig"] = True
         tweets = list()
         try:
-            related_result = flask.g.api.get("related_results/show/%d" % id,
-                params={"include_entities": 1}, version="1")
+            related_result = flask.g.api.get("related_results/show/%d" % status_id,
+                                             params={"include_entities": 1}, version="1")
         except twython.TwythonError, e:
             flask.flash("Get related status error: %s" % str(e))
         else:
@@ -113,33 +114,33 @@ def status(id):
     return data
 
 
-@app.route("/status/<int:id>/reply", methods=["GET", "POST"])
+@app.route("/status/<status_id>/reply", methods=["GET", "POST"])
 @decorators.login_required
 @decorators.templated("status_post.html")
-def status_reply(id):
+def status_reply(status_id):
     data = {
         "title": "Reply",
     }
     try:
-        result = flask.g.api.showStatus(id=id, include_entities=1)
+        result = flask.g.api.showStatus(id=status_id, include_entities=1)
     except twython.TwythonError, e:
         flask.flash("Get status error: %s" % str(e))
     else:
         data["preset_status"] = "@%s " % result["user"]["screen_name"]
-        data["in_reply_to_id"] = id
+        data["in_reply_to_id"] = status_id
         data["in_reply_to_status"] = render.prerender_tweet(result)
     return data
 
 
-@app.route("/status/<int:id>/replyall")
+@app.route("/status/<status_id>/replyall")
 @decorators.login_required
 @decorators.templated("status_post.html")
-def status_replyall(id):
+def status_replyall(status_id):
     data = {
         "title": "Reply to All",
     }
     try:
-        result = flask.g.api.showStatus(id=id, include_entities=1)
+        result = flask.g.api.showStatus(id=status_id, include_entities=1)
     except twython.TwythonError, e:
         flask.flash("Get status error: %s" % str(e))
     else:
@@ -156,34 +157,32 @@ def status_replyall(id):
     return data
 
 
-@app.route("/status/<int:id>/retweet", methods=["GET", "POST"])
+@app.route("/status/<status_id>/retweet", methods=["GET", "POST"])
 @decorators.login_required
 @decorators.templated("status_post.html")
-def status_retweet(id):
+def status_retweet(status_id):
     data = {
         "title": "Retweet",
     }
     try:
-        result = flask.g.api.showStatus(id=id, include_entities=1)
+        result = flask.g.api.showStatus(id=status_id, include_entities=1)
     except twython.TwythonError, e:
         flask.flash("Get status error: %s" % str(e))
     else:
-        data["preset_status"] = "RT @%s: %s" % (result["user"]["screen_name"], result["text"])
-        data["retweet_id"] = id
-        data["retweet"] = True
+        data["retweet_status"] = result
     return data
 
 
-@app.route("/status/<int:id>/favorite")
+@app.route("/status/<status_id>/favorite")
 @decorators.login_required
 @decorators.templated("results.html")
-def status_favorite(id):
+def status_favorite(status_id):
     data = {
         "title": "Favorite",
         "tweets": list(),
     }
     try:
-        result = flask.g.api.createFavorite(id=id, include_entities=1)
+        result = flask.g.api.createFavorite(id=status_id, include_entities=1)
     except twython.TwythonError, e:
         flask.flash("Create favorite error: %s" % str(e))
     else:
@@ -193,16 +192,16 @@ def status_favorite(id):
     return data
 
 
-@app.route("/status/<int:id>/unfavorite")
+@app.route("/status/<status_id>/unfavorite")
 @decorators.login_required
 @decorators.templated("results.html")
-def status_unfavorite(id):
+def status_unfavorite(status_id):
     data = {
         "title": "Unfavorite",
         "tweets": list(),
     }
     try:
-        result = flask.g.api.destroyFavorite(id=id, include_entities=1)
+        result = flask.g.api.destroyFavorite(id=status_id, include_entities=1)
     except twython.TwythonError, e:
         flask.flash("Destroy favorite error: %s" % str(e))
     else:
@@ -212,18 +211,18 @@ def status_unfavorite(id):
     return data
 
 
-@app.route("/status/<int:id>/delete", methods=['GET', 'POST'])
+@app.route("/status/<status_id>/delete", methods=['GET', 'POST'])
 @decorators.login_required
-def status_delete(id):
+def status_delete(status_id):
     data = {
         "title": "Delete",
         "tweets": list(),
     }
     if flask.request.method == "GET":
-        data["status_id"] = id
+        data["status_id"] = status_id
         return flask.render_template("status_delete.html", **data)
     try:
-        result = flask.g.api.destroyStatus(id=id, include_entities=1)
+        result = flask.g.api.destroyStatus(id=status_id, include_entities=1)
     except twython.TwythonError, e:
         flask.flash("Destroy status error: %s" % str(e))
     else:

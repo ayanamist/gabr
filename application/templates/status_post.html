@@ -7,8 +7,8 @@
         </p>
     {% endif %}
     <form action="{{ url_for("status_post") }}" method="post" enctype="multipart/form-data">
-        {% if retweet is defined %}
-            <input type="hidden" value="{{ retweet_id }}" name="retweet_id" id="retweet_id"/>
+        {% if retweet_status is defined and retweet_status.user.protected %}
+            <input type="hidden" value="{{ retweet_status.id_str }}" name="retweet_id" id="retweet_id"/>
             <fieldset>
                 <legend>Twitter's new style retweet:</legend>
                 <div class="retweet-btn">
@@ -18,13 +18,14 @@
         {% endif %}
         <fieldset>
             <legend>
-                {% if retweet is defined %}
+                {% if retweet_status is defined %}
                     Old style editable retweet:
                 {% else %}
                     What's Happening?
                 {% endif %}
             </legend>
-            <textarea name="status" id="status">{{ preset_status }}</textarea>
+            <textarea name="status" id="status">RT
+                @{{ retweet_status.user.screen_name }}: {{ retweet_status.text }}</textarea>
 
             <div class="box">
                 {% if in_reply_to_status is defined %}

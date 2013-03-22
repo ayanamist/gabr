@@ -6,7 +6,7 @@
             <li>Tweet ID: <strong>{{ status_id }}</strong></li>
             <li>There is no way to undo this action.</li>
         </ul>
-        <form action="{{ url_for("status_delete", id=status_id) }}" method="post">
+        <form action="{{ url_for("status_delete", status_id=status_id) }}" method="post">
             <input type="submit" value="Yes please"/>
         </form>
     </div>
