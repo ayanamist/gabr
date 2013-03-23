@@ -3,6 +3,7 @@ import logging
 import urlparse
 
 import oauthlib.common
+import twython
 
 from . import render
 from . import do_item
@@ -46,9 +47,18 @@ def patch_oauthlib():
     oauthlib.common.urldecode = urldecode
 
 
+def patch_twython():
+    def str_exception(self):
+        return "%s %s" % (
+            self.error_code, twython.twitter_endpoints.twitter_http_status_codes.get(self.error_code, ["Unknown"])[0])
+
+    twython.TwythonError.__str__ = str_exception
+
+
 def patch_all(app=None):
     patch_logging()
     patch_oauthlib()
+    patch_twython()
     if app:
         patch_jinja2(app)
 
