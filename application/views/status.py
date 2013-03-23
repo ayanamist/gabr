@@ -58,23 +58,24 @@ def status(status_id):
     else:
         origin_status["orig"] = True
         tweets = list()
-        try:
-            related_result = flask.g.api.get("related_results/show/%s" % status_id,
-                                             params={"include_entities": 1}, version="1")
-        except twython.TwythonError, e:
-            flask.flash("Get related status error: %s" % str(e))
-        else:
-            if related_result:
-                last_conversation_role = 'Ancestor' # possible value: Ancestor, Descendant, Fork
-                related_result = related_result[0]['results']
-                for result in related_result:
-                    if result['kind'] == 'Tweet':
-                        conversation_role = result['annotations']['ConversationRole']
-                        if conversation_role != last_conversation_role:
-                            tweets.insert(0, origin_status)
-                            origin_status = None
-                            last_conversation_role = conversation_role
-                        tweets.insert(0, result["value"])
+        if origin_status and not origin_status["user"]["protected"]:
+            try:
+                related_result = flask.g.api.get("related_results/show/%s" % status_id,
+                                                 params={"include_entities": 1}, version="1")
+            except twython.TwythonError, e:
+                flask.flash("Get related status error: %s" % str(e))
+            else:
+                if related_result:
+                    last_conversation_role = 'Ancestor' # possible value: Ancestor, Descendant, Fork
+                    related_result = related_result[0]['results']
+                    for result in related_result:
+                        if result['kind'] == 'Tweet':
+                            conversation_role = result['annotations']['ConversationRole']
+                            if conversation_role != last_conversation_role:
+                                tweets.insert(0, origin_status)
+                                origin_status = None
+                                last_conversation_role = conversation_role
+                            tweets.insert(0, result["value"])
         if origin_status:
             tweets.insert(0, origin_status)
         previous_ids = set(x["id"] for x in tweets)
