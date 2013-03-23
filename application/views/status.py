@@ -37,7 +37,7 @@ def status_post():
                         result = flask.g.api.updateStatus(**kwargs)
             except twython.TwythonError, e:
                 flask.flash("Post error: %s" % str(e))
-                data["last_status"] = status_text
+                data["preset_status"] = status_text
             else:
                 data["title"] = "New Tweet"
                 return flask.redirect("%s#t%s" % (flask.url_for("status", status_id=result["id"]), result["id_str"]))
@@ -171,6 +171,7 @@ def status_retweet(status_id):
         flask.flash("Get status error: %s" % str(e))
     else:
         data["retweet_status"] = result
+        data["preset_status"] = "RT @%s: %s" % (result["user"]["screen_name"], result["text"])
     return data
 
 
@@ -189,7 +190,7 @@ def status_favorite(status_id):
     else:
         flask.flash("Created favorite successfully!")
         result["favorited"] = True # fucking twitter won't mark it as favorited.
-        data["results"] = [render.prerender_tweet(result)]
+        data["results"] = [result]
     return data
 
 
@@ -208,7 +209,7 @@ def status_unfavorite(status_id):
     else:
         flask.flash("Destroyed favorite successfully!")
         result["favorited"] = False # fucking twitter won't mark it as not favorited.
-        data["results"] = [render.prerender_tweet(result)]
+        data["results"] = [result]
     return data
 
 
@@ -229,6 +230,6 @@ def status_delete(status_id):
     else:
         flask.flash("Destroyed status successfully!")
         result["deleted"] = True
-        data["results"] = [render.prerender_tweet(result)]
+        data["results"] = [result]
     return flask.render_template("results.html", **data)
 
