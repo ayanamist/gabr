@@ -1,6 +1,5 @@
+import inspect
 import logging
-
-import requests
 
 from . import render
 from . import do_item
@@ -9,8 +8,16 @@ from . import abs_url_for
 
 
 def patch_logging():
+    def logger_debug(*args, **kwargs):
+        caller_frame = inspect.currentframe().f_back
+        caller_name = caller_frame.f_globals["__package__"]
+        logger = logging.getLogger(caller_name)
+        logger.debug(*args, **kwargs)
+
+    # Replace all direct function callings to logger methods.
+    logging.debug = logger_debug
+
     # Mute noisy logging.
-    # Use my own mod oauthlib instead of original one, because the original author is not friendly with developers.
     logging.getLogger("requests").setLevel(logging.CRITICAL)
     logging.getLogger("oauthlib").setLevel(logging.CRITICAL)
 
@@ -26,22 +33,9 @@ def patch_jinja2(app):
     app.jinja_env.filters['item'] = do_item
     app.jinja_env.filters['rfc822'] = do_rfc822
 
-# Patch requests not to verify SSL, it's unnecessary for GAE.
-def _requests_wrap(f):
-    def wrapped(**kwargs):
-        kwargs["verify"] = False
-        return f(**kwargs)
-
-    return wrapped
-
-
-def patch_requests():
-    requests.session = _requests_wrap(requests.session)
-
 
 def patch_all(app=None):
     patch_logging()
-    patch_requests()
     if app:
         patch_jinja2(app)
 
