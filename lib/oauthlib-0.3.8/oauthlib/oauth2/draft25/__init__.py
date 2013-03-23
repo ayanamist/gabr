@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
+
 """
 oauthlib.oauth2.draft_25
 ~~~~~~~~~~~~~~
@@ -5,16 +8,33 @@ oauthlib.oauth2.draft_25
 This module is an implementation of various logic needed
 for signing and checking OAuth 2.0 draft 25 requests.
 """
-from tokens import prepare_bearer_uri, prepare_bearer_headers
-from tokens import prepare_bearer_body, prepare_mac_header
-from parameters import prepare_grant_uri, prepare_token_request
-from parameters import parse_authorization_code_response
-from parameters import parse_implicit_response, parse_token_response
+import datetime
+import logging
+
+from oauthlib.common import Request
+from oauthlib.oauth2.draft25 import tokens, grant_types
+from .errors import TokenExpiredError
+from .parameters import prepare_grant_uri, prepare_token_request
+from .parameters import parse_authorization_code_response
+from .parameters import parse_implicit_response, parse_token_response
 
 
-AUTH_HEADER = u'auth_header'
-URI_QUERY = u'query'
-BODY = u'body'
+AUTH_HEADER = 'auth_header'
+URI_QUERY = 'query'
+BODY = 'body'
+
+log = logging.getLogger('oauthlib')
+
+# Add a NullHandler to prevent warnings for users who don't wish
+# to configure logging.
+try:
+    log.addHandler(logging.NullHandler())
+# NullHandler gracefully backported to 2.6
+except AttributeError:
+    class NullHandler(logging.Handler):
+        def emit(self, record):
+            pass
+    log.addHandler(NullHandler())
 
 
 class Client(object):
@@ -26,9 +46,12 @@ class Client(object):
 
     def __init__(self, client_id,
             default_token_placement=AUTH_HEADER,
-            token_type=u'Bearer',
+            token_type='Bearer',
             access_token=None,
             refresh_token=None,
+            mac_key=None,
+            mac_algorithm=None,
+            token=None,
             **kwargs):
         """Initialize a client with commonly used attributes."""
 
@@ -37,6 +60,11 @@ class Client(object):
         self.token_type = token_type
         self.access_token = access_token
         self.refresh_token = refresh_token
+        self.mac_key = mac_key
+        self.mac_algorithm = mac_algorithm
+        self.token = token or {}
+        self._expires_at = None
+        self._populate_attributes(self.token)
 
     @property
     def token_types(self):
@@ -50,12 +78,12 @@ class Client(object):
         is experimental and currently matching version 00 of the spec.
         """
         return {
-            u'Bearer': self._add_bearer_token,
-            u'MAC': self._add_mac_token
+            'Bearer': self._add_bearer_token,
+            'MAC': self._add_mac_token
         }
 
-    def add_token(self, uri, http_method=u'GET', body=None, headers=None,
-            token_placement=None):
+    def add_token(self, uri, http_method='GET', body=None, headers=None,
+            token_placement=None, **kwargs):
         """Add token to the request uri, body or authorization header.
 
         The access token type provides the client with the information
@@ -93,10 +121,13 @@ class Client(object):
         if not self.access_token:
             raise ValueError("Missing access token.")
 
-        return self.token_types[self.token_type](uri, http_method, body,
-                    headers, token_placement)
+        if self._expires_at and self._expires_at < datetime.datetime.now():
+            raise TokenExpiredError()
 
-    def prepare_refresh_body(self, body=u'', refresh_token=None, scope=None):
+        return self.token_types[self.token_type](uri, http_method, body,
+                    headers, token_placement, **kwargs)
+
+    def prepare_refresh_body(self, body='', refresh_token=None, scope=None, **kwargs):
         """Prepare an access token request, using a refresh token.
 
         If the authorization server issued a refresh token to the client, the
@@ -116,53 +147,61 @@ class Client(object):
                 resource owner.
         """
         refresh_token = refresh_token or self.refresh_token
-        return prepare_token_request(u'refresh_token', body=body, scope=scope,
-                refresh_token=refresh_token)
+        return prepare_token_request('refresh_token', body=body, scope=scope,
+                refresh_token=refresh_token, **kwargs)
 
-    def _add_bearer_token(self, uri, http_method=u'GET', body=None,
+    def _add_bearer_token(self, uri, http_method='GET', body=None,
             headers=None, token_placement=None):
         """Add a bearer token to the request uri, body or authorization header."""
         if token_placement == AUTH_HEADER:
-            headers = prepare_bearer_headers(self.access_token, headers)
+            headers = tokens.prepare_bearer_headers(self.access_token, headers)
 
         elif token_placement == URI_QUERY:
-            uri = prepare_bearer_uri(self.access_token, uri)
+            uri = tokens.prepare_bearer_uri(self.access_token, uri)
 
         elif token_placement == BODY:
-            body = prepare_bearer_body(self.access_token, body)
+            body = tokens.prepare_bearer_body(self.access_token, body)
 
         else:
             raise ValueError("Invalid token placement.")
         return uri, headers, body
 
-    def _add_mac_token(self, uri, http_method=u'GET', body=None,
-            headers=None, token_placement=AUTH_HEADER):
+    def _add_mac_token(self, uri, http_method='GET', body=None,
+            headers=None, token_placement=AUTH_HEADER, ext=None, **kwargs):
         """Add a MAC token to the request authorization header.
 
         Warning: MAC token support is experimental as the spec is not yet stable.
         """
-        headers = prepare_mac_header(self.access_token, uri, self.key, http_method,
-                        headers=headers, body=body, ext=self.ext,
-                        hash_algorithm=self.hash_algorithm)
+        headers = tokens.prepare_mac_header(self.access_token, uri,
+                self.mac_key, http_method, headers=headers, body=body, ext=ext,
+                hash_algorithm=self.mac_algorithm, **kwargs)
         return uri, headers, body
 
     def _populate_attributes(self, response):
         """Add commonly used values such as access_token to self."""
 
-        if u'access_token' in response:
-            self.access_token = response.get(u'access_token')
+        if 'access_token' in response:
+            self.access_token = response.get('access_token')
 
-        if u'refresh_token' in response:
-            self.refresh_token = response.get(u'refresh_token')
+        if 'refresh_token' in response:
+            self.refresh_token = response.get('refresh_token')
 
-        if u'token_type' in response:
-            self.token_type = response.get(u'token_type')
+        if 'token_type' in response:
+            self.token_type = response.get('token_type')
 
-        if u'expires_in' in response:
-            self.expires_in = response.get(u'expires_in')
+        if 'expires_in' in response:
+            self.expires_in = response.get('expires_in')
+            self._expires_at = datetime.datetime.now() + datetime.timedelta(
+                    seconds=int(self.expires_in))
 
-        if u'code' in response:
-            self.code = response.get(u'code')
+        if 'code' in response:
+            self.code = response.get('code')
+
+        if 'mac_key' in response:
+            self.mac_key = response.get('mac_key')
+
+        if 'mac_algorithm' in response:
+            self.mac_algorithm = response.get('mac_algorithm')
 
     def prepare_request_uri(self, *args, **kwargs):
         """Abstract method used to create request URIs."""
@@ -199,8 +238,7 @@ class WebApplicationClient(Client):
 
     def __init__(self, client_id, code=None, **kwargs):
         super(WebApplicationClient, self).__init__(client_id, **kwargs)
-        if code:
-            self.code = code
+        self.code = code
 
     def prepare_request_uri(self, uri, redirect_uri=None, scope=None,
             state=None, **kwargs):
@@ -233,10 +271,10 @@ class WebApplicationClient(Client):
         .. _`Section 3.3`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-3.3
         .. _`Section 10.12`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-10.12
         """
-        return prepare_grant_uri(uri, self.client_id, u'code',
+        return prepare_grant_uri(uri, self.client_id, 'code',
                 redirect_uri=redirect_uri, scope=scope, state=state, **kwargs)
 
-    def prepare_request_body(self, code=None, body=u'', redirect_uri=None, **kwargs):
+    def prepare_request_body(self, code=None, body='', redirect_uri=None, **kwargs):
         """Prepare the access token request body.
 
         The client makes a request to the token endpoint by adding the
@@ -256,8 +294,8 @@ class WebApplicationClient(Client):
         .. _`Section 4.1.1`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-4.1.1
         """
         code = code or self.code
-        return prepare_token_request(u'authorization_code', code=code, body=body,
-                                          redirect_uri=redirect_uri, **kwargs)
+        return prepare_token_request('authorization_code', code=code, body=body,
+                client_id=self.client_id, redirect_uri=redirect_uri, **kwargs)
 
     def parse_request_uri_response(self, uri, state=None):
         """Parse the URI query for code and state.
@@ -299,9 +337,9 @@ class WebApplicationClient(Client):
         .. `Section 5.1`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-5.1
         .. `Section 5.2`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-5.2
         """
-        response = parse_token_response(body, scope=scope)
-        self._populate_attributes(response)
-        return response
+        self.token = parse_token_response(body, scope=scope)
+        self._populate_attributes(self.token)
+        return self.token
 
 
 class UserAgentClient(Client):
@@ -361,7 +399,7 @@ class UserAgentClient(Client):
                 to the client.  The parameter SHOULD be used for preventing
                 cross-site request forgery as described in Section 10.12.
         """
-        return prepare_grant_uri(uri, self.client_id, u'token',
+        return prepare_grant_uri(uri, self.client_id, 'token',
                 redirect_uri=redirect_uri, state=state, scope=scope, **kwargs)
 
     def parse_request_uri_response(self, uri, state=None, scope=None):
@@ -395,9 +433,9 @@ class UserAgentClient(Client):
         .. _`Section 7.1`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-7.1
         .. _`Section 3.3`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-3.3
         """
-        response = parse_implicit_response(uri, state=state, scope=scope)
-        self._populate_attributes(response)
-        return response
+        self.token = parse_implicit_response(uri, state=state, scope=scope)
+        self._populate_attributes(self.token)
+        return self.token
 
 
 class ClientCredentialsClient(Client):
@@ -417,7 +455,7 @@ class ClientCredentialsClient(Client):
     no additional authorization request is needed.
     """
 
-    def prepare_request_body(self, body=u'', scope=None, **kwargs):
+    def prepare_request_body(self, body='', scope=None, **kwargs):
         """Add the client credentials to the request body.
 
         The client makes a request to the token endpoint by adding the
@@ -432,7 +470,7 @@ class ClientCredentialsClient(Client):
 
         .. _`Section 3.3`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-3.3
         """
-        return prepare_token_request(u'client_credentials', body=body,
+        return prepare_token_request('client_credentials', body=body,
                                      scope=scope, **kwargs)
 
     def parse_request_body_response(self, body, scope=None):
@@ -447,9 +485,9 @@ class ClientCredentialsClient(Client):
         .. `Section 5.1`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-5.1
         .. `Section 5.2`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-5.2
         """
-        response = parse_token_response(body, scope=scope)
-        self._populate_attributes(response)
-        return response
+        self.token = parse_token_response(body, scope=scope)
+        self._populate_attributes(self.token)
+        return self.token
 
 
 class PasswordCredentialsClient(Client):
@@ -479,7 +517,7 @@ class PasswordCredentialsClient(Client):
         self.username = username
         self.password = password
 
-    def prepare_request_body(self, body=u'', scope=None, **kwargs):
+    def prepare_request_body(self, body='', scope=None, **kwargs):
         """Add the resource owner password and username to the request body.
 
         The client makes a request to the token endpoint by adding the
@@ -498,7 +536,7 @@ class PasswordCredentialsClient(Client):
 
         .. _`Section 3.3`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-3.3
         """
-        return prepare_token_request(u'password', body=body, username=self.username,
+        return prepare_token_request('password', body=body, username=self.username,
                 password=self.password, scope=scope, **kwargs)
 
     def parse_request_body_response(self, body, scope=None):
@@ -513,10 +551,254 @@ class PasswordCredentialsClient(Client):
         .. `Section 5.1`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-5.1
         .. `Section 5.2`: http://tools.ietf.org/html/draft-ietf-oauth-v2-28#section-5.2
         """
-        response = parse_token_response(body, scope=scope)
-        self._populate_attributes(response)
-        return response
+        self.token = parse_token_response(body, scope=scope)
+        self._populate_attributes(self.token)
+        return self.token
 
 
-class Server(object):
-    pass
+class AuthorizationEndpoint(object):
+    """Authorization endpoint - used by the client to obtain authorization
+    from the resource owner via user-agent redirection.
+
+    The authorization endpoint is used to interact with the resource
+    owner and obtain an authorization grant.  The authorization server
+    MUST first verify the identity of the resource owner.  The way in
+    which the authorization server authenticates the resource owner (e.g.
+    username and password login, session cookies) is beyond the scope of
+    this specification.
+
+    The endpoint URI MAY include an "application/x-www-form-urlencoded"
+    formatted (per Appendix B) query component ([RFC3986] section 3.4),
+    which MUST be retained when adding additional query parameters.  The
+    endpoint URI MUST NOT include a fragment component.
+
+    Since requests to the authorization endpoint result in user
+    authentication and the transmission of clear-text credentials (in the
+    HTTP response), the authorization server MUST require the use of TLS
+    as described in Section 1.6 when sending requests to the
+    authorization endpoint.
+
+    The authorization server MUST support the use of the HTTP "GET"
+    method [RFC2616] for the authorization endpoint, and MAY support the
+    use of the "POST" method as well.
+
+    Parameters sent without a value MUST be treated as if they were
+    omitted from the request.  The authorization server MUST ignore
+    unrecognized request parameters.  Request and response parameters
+    MUST NOT be included more than once.
+    """
+
+    def __init__(self, default_response_type, default_token_type,
+            response_types):
+        self._response_types = response_types
+        self._default_response_type = default_response_type
+        self._default_token_type = default_token_type
+
+    @property
+    def response_types(self):
+        return self._response_types
+
+    @property
+    def default_response_type(self):
+        return self._default_response_type
+
+    @property
+    def default_response_type_handler(self):
+        return self.response_types.get(self.default_response_type)
+
+    @property
+    def default_token_type(self):
+        return self._default_token_type
+
+    def create_authorization_response(self, uri, http_method='GET', body=None,
+            headers=None, scopes=None, credentials=None):
+        """Extract response_type and route to the designated handler."""
+        request = Request(uri, http_method=http_method, body=body, headers=headers)
+        request.authorized_scopes = scopes  # TODO: implement/test/doc this
+        # TODO: decide whether this should be a required argument
+        request.user = None     # TODO: explain this in docs
+        for k, v in (credentials or {}).items():
+            setattr(request, k, v)
+        response_type_handler = self.response_types.get(
+                request.response_type, self.default_response_type_handler)
+        log.debug('Dispatching response_type %s request to %r.',
+                  request.response_type, response_type_handler)
+        return response_type_handler.create_authorization_response(
+                        request, self.default_token_type)
+
+    def validate_authorization_request(self, uri, http_method='GET', body=None,
+            headers=None):
+        """Extract response_type and route to the designated handler."""
+        request = Request(uri, http_method=http_method, body=body, headers=headers)
+        response_type_handler = self.response_types.get(
+                request.response_type, self.default_response_type_handler)
+        return response_type_handler.validate_authorization_request(request)
+
+
+class TokenEndpoint(object):
+
+    def __init__(self, default_grant_type, default_token_type, grant_types):
+        self._grant_types = grant_types
+        self._default_token_type = default_token_type
+        self._default_grant_type = default_grant_type
+
+    @property
+    def grant_types(self):
+        return self._grant_types
+
+    @property
+    def default_grant_type(self):
+        return self._default_grant_type
+
+    @property
+    def default_grant_type_handler(self):
+        return self.grant_types.get(self.default_grant_type)
+
+    @property
+    def default_token_type(self):
+        return self._default_token_type
+
+    def create_token_response(self, uri, http_method='GET', body=None,
+            headers=None, credentials=None):
+        """Extract grant_type and route to the designated handler."""
+        request = Request(uri, http_method=http_method, body=body, headers=headers)
+        request.extra_credentials = credentials
+        grant_type_handler = self.grant_types.get(request.grant_type,
+                self.default_grant_type_handler)
+        log.debug('Dispatching grant_type %s request to %r.',
+                  request.grant_type, grant_type_handler)
+        return grant_type_handler.create_token_response(
+                request, self.default_token_type)
+
+
+class ResourceEndpoint(object):
+
+    def __init__(self, default_token, token_types):
+        self._tokens = token_types
+        self._default_token = default_token
+
+    @property
+    def default_token(self):
+        return self._default_token
+
+    @property
+    def default_token_type_handler(self):
+        return self.tokens.get(self.default_token)
+
+    @property
+    def tokens(self):
+        return self._tokens
+
+    def verify_request(self, uri, http_method='GET', body=None, headers=None,
+            scopes=None):
+        """Validate client, code etc, return body + headers"""
+        request = Request(uri, http_method, body, headers)
+        request.token_type = self.find_token_type(request)
+        request.scopes = scopes
+        token_type_handler = self.tokens.get(request.token_type,
+                self.default_token_type_handler)
+        log.debug('Dispatching token_type %s request to %r.',
+                  request.token_type, token_type_handler)
+        return token_type_handler.validate_request(request), request
+
+    def find_token_type(self, request):
+        """Token type identification.
+
+        RFC 6749 does not provide a method for easily differentiating between
+        different token types during protected resource access. We estimate
+        the most likely token type (if any) by asking each known token type
+        to give an estimation based on the request.
+        """
+        estimates = sorted(((t.estimate_type(request), n) for n, t in self.tokens.items()))
+        return estimates[0][1] if len(estimates) else None
+
+
+class Server(AuthorizationEndpoint, TokenEndpoint, ResourceEndpoint):
+    """An all-in-one endpoint featuring all four major grant types."""
+
+    def __init__(self, request_validator, *args, **kwargs):
+        auth_grant = grant_types.AuthorizationCodeGrant(request_validator)
+        implicit_grant = grant_types.ImplicitGrant(request_validator)
+        password_grant = grant_types.ResourceOwnerPasswordCredentialsGrant(request_validator)
+        credentials_grant = grant_types.ClientCredentialsGrant(request_validator)
+        refresh_grant = grant_types.RefreshTokenGrant(request_validator)
+        bearer = tokens.BearerToken(request_validator)
+        AuthorizationEndpoint.__init__(self, default_response_type='code',
+                response_types={
+                    'code': auth_grant,
+                    'token': implicit_grant,
+                },
+                default_token_type=bearer)
+        TokenEndpoint.__init__(self, default_grant_type='authorization_code',
+                grant_types={
+                    'authorization_code': auth_grant,
+                    'password': password_grant,
+                    'client_credentials': credentials_grant,
+                    'refresh_token': refresh_grant,
+                },
+                default_token_type=bearer)
+        ResourceEndpoint.__init__(self, default_token='Bearer',
+                token_types={'Bearer': bearer})
+
+
+class WebApplicationServer(AuthorizationEndpoint, TokenEndpoint, ResourceEndpoint):
+    """An all-in-one endpoint featuring Authorization code grant and Bearer tokens."""
+
+    def __init__(self, request_validator, token_generator=None, **kwargs):
+        auth_grant = grant_types.AuthorizationCodeGrant(request_validator)
+        refresh_grant = grant_types.RefreshTokenGrant(request_validator)
+        bearer = tokens.BearerToken(request_validator, token_generator)
+        AuthorizationEndpoint.__init__(self, default_response_type='code',
+                response_types={'code': auth_grant},
+                default_token_type=bearer)
+        TokenEndpoint.__init__(self, default_grant_type='authorization_code',
+                grant_types={
+                    'authorization_code': auth_grant,
+                    'refresh_token': refresh_grant,
+                },
+                default_token_type=bearer)
+        ResourceEndpoint.__init__(self, default_token='Bearer',
+                token_types={'Bearer': bearer})
+
+
+class MobileApplicationServer(AuthorizationEndpoint, ResourceEndpoint):
+    """An all-in-one endpoint featuring Implicit code grant and Bearer tokens."""
+
+    def __init__(self, request_validator, token_generator=None, **kwargs):
+        implicit_grant = grant_types.ImplicitGrant(request_validator)
+        bearer = tokens.BearerToken(request_validator, token_generator)
+        AuthorizationEndpoint.__init__(self, default_response_type='token',
+                response_types={'token': implicit_grant},
+                default_token_type=bearer)
+        ResourceEndpoint.__init__(self, default_token='Bearer',
+                token_types={'Bearer': bearer})
+
+
+class LegacyApplicationServer(TokenEndpoint, ResourceEndpoint):
+    """An all-in-one endpoint featuring Authorization code grant and Bearer tokens."""
+
+    def __init__(self, request_validator, token_generator=None, **kwargs):
+        password_grant = grant_types.ResourceOwnerPasswordCredentialsGrant(request_validator)
+        refresh_grant = grant_types.RefreshTokenGrant(request_validator)
+        bearer = tokens.BearerToken(request_validator, token_generator)
+        TokenEndpoint.__init__(self, default_grant_type='password',
+                grant_types={
+                    'password': password_grant,
+                    'refresh_token': refresh_grant,
+                },
+                default_token_type=bearer)
+        ResourceEndpoint.__init__(self, default_token='Bearer',
+                token_types={'Bearer': bearer})
+
+
+class BackendApplicationServer(TokenEndpoint, ResourceEndpoint):
+    """An all-in-one endpoint featuring Authorization code grant and Bearer tokens."""
+
+    def __init__(self, request_validator, token_generator=None, **kwargs):
+        credentials_grant = grant_types.ClientCredentialsGrant(request_validator)
+        bearer = tokens.BearerToken(request_validator, token_generator)
+        TokenEndpoint.__init__(self, default_grant_type='client_credentials',
+                grant_types={'client_credentials': credentials_grant},
+                default_token_type=bearer)
+        ResourceEndpoint.__init__(self, default_token='Bearer',
+                token_types={'Bearer': bearer})

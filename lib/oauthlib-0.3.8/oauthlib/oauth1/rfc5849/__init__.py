@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 """
 oauthlib.oauth1.rfc5849
@@ -10,25 +10,32 @@ for signing and checking OAuth 1.0 RFC 5849 requests.
 """
 
 import logging
+import sys
 import time
-import urlparse
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
+
+if sys.version_info[0] == 3:
+    bytes_type = bytes
+else:
+    bytes_type = str
 
 from oauthlib.common import Request, urlencode, generate_nonce
-from oauthlib.common import generate_timestamp
+from oauthlib.common import generate_timestamp, to_unicode
 from . import parameters, signature, utils
 
-logger = logging.getLogger(__name__)
-
-SIGNATURE_HMAC = u"HMAC-SHA1"
-SIGNATURE_RSA = u"RSA-SHA1"
-SIGNATURE_PLAINTEXT = u"PLAINTEXT"
+SIGNATURE_HMAC = "HMAC-SHA1"
+SIGNATURE_RSA = "RSA-SHA1"
+SIGNATURE_PLAINTEXT = "PLAINTEXT"
 SIGNATURE_METHODS = (SIGNATURE_HMAC, SIGNATURE_RSA, SIGNATURE_PLAINTEXT)
 
-SIGNATURE_TYPE_AUTH_HEADER = u'AUTH_HEADER'
-SIGNATURE_TYPE_QUERY = u'QUERY'
-SIGNATURE_TYPE_BODY = u'BODY'
+SIGNATURE_TYPE_AUTH_HEADER = 'AUTH_HEADER'
+SIGNATURE_TYPE_QUERY = 'QUERY'
+SIGNATURE_TYPE_BODY = 'BODY'
 
-CONTENT_TYPE_FORM_URLENCODED = u'application/x-www-form-urlencoded'
+CONTENT_TYPE_FORM_URLENCODED = 'application/x-www-form-urlencoded'
 
 
 class Client(object):
@@ -40,16 +47,48 @@ class Client(object):
             callback_uri=None,
             signature_method=SIGNATURE_HMAC,
             signature_type=SIGNATURE_TYPE_AUTH_HEADER,
-            rsa_key=None, verifier=None):
-        self.client_key = client_key
-        self.client_secret = client_secret
-        self.resource_owner_key = resource_owner_key
-        self.resource_owner_secret = resource_owner_secret
-        self.signature_method = signature_method
-        self.signature_type = signature_type
-        self.callback_uri = callback_uri
-        self.rsa_key = rsa_key
-        self.verifier = verifier
+            rsa_key=None, verifier=None, realm=None,
+            encoding='utf-8', decoding=None,
+            nonce=None, timestamp=None):
+        """Create an OAuth 1 client.
+
+        :param client_key: Client key (consumer key), mandatory.
+        :param resource_owner_key: Resource owner key (oauth token).
+        :param resource_owner_secret: Resource owner secret (oauth token secret).
+        :param callback_uri: Callback used when obtaining request token.
+        :param signature_method: SIGNATURE_HMAC, SIGNATURE_RSA or SIGNATURE_PLAINTEXT.
+        :param signature_type: SIGNATURE_TYPE_AUTH_HEADER (default),
+                               SIGNATURE_TYPE_QUERY or SIGNATURE_TYPE_BODY
+                               depending on where you want to embed the oauth
+                               credentials.
+        :param rsa_key: RSA key used with SIGNATURE_RSA.
+        :param verifier: Verifier used when obtaining an access token.
+        :param realm: Realm (scope) to which access is being requested.
+        :param encoding: If you provide non-unicode input you may use this
+                         to have oauthlib automatically convert.
+        :param decoding: If you wish that the returned uri, headers and body
+                         from sign be encoded back from unicode, then set
+                         decoding to your preferred encoding, i.e. utf-8.
+        :param nonce: Use this nonce instead of generating one. (Mainly for testing)
+        :param timestamp: Use this timestamp instead of using current. (Mainly for testing)
+        """
+        # Convert to unicode using encoding if given, else assume unicode
+        encode = lambda x: to_unicode(x, encoding) if encoding else x
+
+        self.client_key = encode(client_key)
+        self.client_secret = encode(client_secret)
+        self.resource_owner_key = encode(resource_owner_key)
+        self.resource_owner_secret = encode(resource_owner_secret)
+        self.signature_method = encode(signature_method)
+        self.signature_type = encode(signature_type)
+        self.callback_uri = encode(callback_uri)
+        self.rsa_key = encode(rsa_key)
+        self.verifier = encode(verifier)
+        self.realm = encode(realm)
+        self.encoding = encode(encoding)
+        self.decoding = encode(decoding)
+        self.nonce = encode(nonce)
+        self.timestamp = encode(timestamp)
 
         if self.signature_method == SIGNATURE_RSA and self.rsa_key is None:
             raise ValueError('rsa_key is required when using RSA signature method.')
@@ -68,17 +107,17 @@ class Client(object):
             uri_query=urlparse.urlparse(uri).query,
             body=body,
             headers=headers)
-        logger.debug("Collected params: {0}".format(collected_params))
+        logging.debug("Collected params: {0}".format(collected_params))
 
         normalized_params = signature.normalize_parameters(collected_params)
         normalized_uri = signature.normalize_base_string_uri(request.uri)
-        logger.debug("Normalized params: {0}".format(normalized_params))
-        logger.debug("Normalized URI: {0}".format(normalized_uri))
+        logging.debug("Normalized params: {0}".format(normalized_params))
+        logging.debug("Normalized URI: {0}".format(normalized_uri))
 
         base_string = signature.construct_base_string(request.http_method,
             normalized_uri, normalized_params)
 
-        logger.debug("Base signing string: {0}".format(base_string))
+        logging.debug("Base signing string: {0}".format(base_string))
 
         if self.signature_method == SIGNATURE_HMAC:
             sig = signature.sign_hmac_sha1(base_string, self.client_secret,
@@ -89,29 +128,33 @@ class Client(object):
             sig = signature.sign_plaintext(self.client_secret,
                 self.resource_owner_secret)
 
-        logger.debug("Signature: {0}".format(sig))
+        logging.debug("Signature: {0}".format(sig))
         return sig
 
     def get_oauth_params(self):
         """Get the basic OAuth parameters to be used in generating a signature.
         """
+        nonce = (generate_nonce()
+                 if self.nonce is None else self.nonce)
+        timestamp = (generate_timestamp()
+                     if self.timestamp is None else self.timestamp)
         params = [
-            (u'oauth_nonce', generate_nonce()),
-            (u'oauth_timestamp', generate_timestamp()),
-            (u'oauth_version', u'1.0'),
-            (u'oauth_signature_method', self.signature_method),
-            (u'oauth_consumer_key', self.client_key),
+            ('oauth_nonce', nonce),
+            ('oauth_timestamp', timestamp),
+            ('oauth_version', '1.0'),
+            ('oauth_signature_method', self.signature_method),
+            ('oauth_consumer_key', self.client_key),
         ]
         if self.resource_owner_key:
-            params.append((u'oauth_token', self.resource_owner_key))
+            params.append(('oauth_token', self.resource_owner_key))
         if self.callback_uri:
-            params.append((u'oauth_callback', self.callback_uri))
+            params.append(('oauth_callback', self.callback_uri))
         if self.verifier:
-            params.append((u'oauth_verifier', self.verifier))
+            params.append(('oauth_verifier', self.verifier))
 
         return params
 
-    def _render(self, request, formencode=False):
+    def _render(self, request, formencode=False, realm=None):
         """Render a signed request according to signature type
 
         Returns a 3-tuple containing the request URI, headers, and body.
@@ -132,12 +175,12 @@ class Client(object):
         # like the spec requires. This would be a fundamental change though, and
         # I'm not sure how I feel about it.
         if self.signature_type == SIGNATURE_TYPE_AUTH_HEADER:
-            headers = parameters.prepare_headers(request.oauth_params, request.headers)
+            headers = parameters.prepare_headers(request.oauth_params, request.headers, realm=realm)
         elif self.signature_type == SIGNATURE_TYPE_BODY and request.decoded_body is not None:
             body = parameters.prepare_form_encoded_body(request.oauth_params, request.decoded_body)
             if formencode:
                 body = urlencode(body)
-            headers['Content-Type'] = u'application/x-www-form-urlencoded'
+            headers['Content-Type'] = 'application/x-www-form-urlencoded'
         elif self.signature_type == SIGNATURE_TYPE_QUERY:
             uri = parameters.prepare_request_uri_query(request.oauth_params, request.uri)
         else:
@@ -145,14 +188,16 @@ class Client(object):
 
         return uri, headers, body
 
-    def sign(self, uri, http_method=u'GET', body=None, headers=None):
+    def sign(self, uri, http_method='GET', body=None, headers=None, realm=None):
         """Sign a request
 
         Signs an HTTP request with the specified parts.
 
         Returns a 3-tuple of the signed request's URI, headers, and body.
         Note that http_method is not returned as it is unaffected by the OAuth
-        signing process.
+        signing process. Also worth noting is that duplicate parameters
+        will be included in the signature, regardless of where they are
+        specified (query, body).
 
         The body argument may be a dict, a list of 2-tuples, or a formencoded
         string. The Content-Type header must be 'application/x-www-form-urlencoded'
@@ -166,11 +211,16 @@ class Client(object):
         If the body does contain parameters, it will be returned as a properly-
         formatted formencoded string.
 
-        All string data MUST be unicode. This includes strings inside body
-        dicts, for example.
+        Body may not be included if the http_method is either GET or HEAD as
+        this changes the semantic meaning of the request.
+
+        All string data MUST be unicode or be encoded with the same encoding
+        scheme supplied to the Client constructor, default utf-8. This includes
+        strings inside body dicts, for example.
         """
         # normalize request data
-        request = Request(uri, http_method, body, headers)
+        request = Request(uri, http_method, body, headers,
+                          encoding=self.encoding)
 
         # sanity check
         content_type = request.headers.get('Content-Type', None)
@@ -206,14 +256,34 @@ class Client(object):
                 should_have_params and has_params and not multipart):
             raise ValueError('Body signatures may only be used with form-urlencoded content')
 
+        # We amend http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
+        # with the clause that parameters from body should only be included
+        # in non GET or HEAD requests. Extracting the request body parameters
+        # and including them in the signature base string would give semantic
+        # meaning to the body, which it should not have according to the
+        # HTTP 1.1 spec.
+        elif http_method.upper() in ('GET', 'HEAD') and has_params:
+            raise ValueError('GET/HEAD requests should not include body.')
+
         # generate the basic OAuth parameters
         request.oauth_params = self.get_oauth_params()
 
         # generate the signature
-        request.oauth_params.append((u'oauth_signature', self.get_oauth_signature(request)))
+        request.oauth_params.append(('oauth_signature', self.get_oauth_signature(request)))
 
         # render the signed request and return it
-        return self._render(request, formencode=True)
+        uri, headers, body = self._render(request, formencode=True,
+                realm=(realm or self.realm))
+
+        if self.decoding:
+            logging.debug('Encoding URI, headers and body to %s.', self.decoding)
+            uri = uri.encode(self.decoding)
+            body = body.encode(self.decoding) if body else body
+            new_headers = {}
+            for k, v in headers.items():
+                new_headers[k.encode(self.decoding)] = v.encode(self.decoding)
+            headers = new_headers
+        return uri, headers, body
 
 
 class Server(object):
@@ -254,10 +324,10 @@ class Server(object):
     each methods documentation for detailed usage.
     The following methods must be implemented:
 
-    - validate_client
+    - validate_client_key
     - validate_request_token
     - validate_access_token
-    - validate_nonce_and_timestamp
+    - validate_timestamp_and_nonce
     - validate_redirect_uri
     - validate_requested_realm
     - validate_realm
@@ -456,8 +526,9 @@ class Server(object):
         """Extracts parameters from query, headers and body. Signature type
         is set to the source in which parameters were found.
         """
+        # Per RFC5849, only the Authorization header may contain the 'realm' optional parameter.
         header_params = signature.collect_parameters(headers=request.headers,
-                exclude_oauth_signature=False)
+                exclude_oauth_signature=False, with_realm=True)
         body_params = signature.collect_parameters(body=request.body,
                 exclude_oauth_signature=False)
         query_params = signature.collect_parameters(uri_query=request.uri_query,
@@ -467,14 +538,14 @@ class Server(object):
         params.extend(header_params)
         params.extend(body_params)
         params.extend(query_params)
-        signature_types_with_oauth_params = filter(lambda s: s[2], (
+        signature_types_with_oauth_params = list(filter(lambda s: s[2], (
             (SIGNATURE_TYPE_AUTH_HEADER, params,
                 utils.filter_oauth_params(header_params)),
             (SIGNATURE_TYPE_BODY, params,
                 utils.filter_oauth_params(body_params)),
             (SIGNATURE_TYPE_QUERY, params,
                 utils.filter_oauth_params(query_params))
-        ))
+        )))
 
         if len(signature_types_with_oauth_params) > 1:
             raise ValueError('oauth_ params must come from only 1 signature type but were found in %s' % ', '.join(
@@ -574,10 +645,16 @@ class Server(object):
         straightforward for the provider to verify whether the supplied
         redirect_uri is valid or not.
 
+        Alternatively per `Section 2.1`_ of the spec:
+
+        "If the client is unable to receive callbacks or a callback URI has
+        been established via other means, the parameter value MUST be set to
+        "oob" (case sensitive), to indicate an out-of-band configuration."
+
         .. _`CWE-601`: http://cwe.mitre.org/top25/index.html#CWE-601
+        .. _`Section 2.1`: https://tools.ietf.org/html/rfc5849#section-2.1
         """
         raise NotImplementedError("Subclasses must implement this function.")
-
 
     def validate_requested_realm(self, client_key, realm):
         """Validates that the client may request access to the realm.
@@ -612,9 +689,30 @@ class Server(object):
         """
         raise NotImplementedError("Subclasses must implement this function.")
 
-    def verify_request(self, uri, http_method=u'GET', body=None,
+    def verify_request_token_request(self, uri, http_method='GET', body=None,
+            headers=None):
+        """Verify the initial request in the OAuth workflow.
+
+        During this step the client obtains a request token for use during
+        resource owner authorization (which is outside the scope of oauthlib).
+        """
+        return self.verify_request(uri, http_method=http_method, body=body,
+                headers=headers, require_resource_owner=False,
+                require_realm=True, require_callback=True)
+
+    def verify_access_token_request(self, uri, http_method='GET', body=None,
+            headers=None):
+        """Verify the second request in the OAuth workflow.
+
+        During this step the client obtains the access token for use when
+        accessing protected resources.
+        """
+        return self.verify_request(uri, http_method=http_method, body=body,
+                headers=headers, require_verifier=True)
+
+    def verify_request(self, uri, http_method='GET', body=None,
             headers=None, require_resource_owner=True, require_verifier=False,
-            require_realm=False, required_realm=None):
+            require_realm=False, required_realm=None, require_callback=False):
         """Verifies a request ensuring that the following is true:
 
         Per `section 3.2`_ of the spec.
@@ -646,11 +744,11 @@ class Server(object):
         """
         # Only include body data from x-www-form-urlencoded requests
         headers = headers or {}
-        if (u"Content-Type" in headers and
-                headers[u"Content-Type"] == CONTENT_TYPE_FORM_URLENCODED):
+        if ("Content-Type" in headers and
+                headers["Content-Type"] == CONTENT_TYPE_FORM_URLENCODED):
             request = Request(uri, http_method, body, headers)
         else:
-            request = Request(uri, http_method, u'', headers)
+            request = Request(uri, http_method, '', headers)
 
         if self.enforce_ssl and not request.uri.lower().startswith("https://"):
             raise ValueError("Insecure transport, only HTTPS is allowed.")
@@ -663,20 +761,21 @@ class Server(object):
             raise ValueError("Duplicate OAuth entries.")
 
         oauth_params = dict(oauth_params)
-        request_signature = oauth_params.get(u'oauth_signature')
-        client_key = oauth_params.get(u'oauth_consumer_key')
-        resource_owner_key = oauth_params.get(u'oauth_token')
-        nonce = oauth_params.get(u'oauth_nonce')
-        timestamp = oauth_params.get(u'oauth_timestamp')
-        callback_uri = oauth_params.get(u'oauth_callback')
-        verifier = oauth_params.get(u'oauth_verifier')
-        signature_method = oauth_params.get(u'oauth_signature_method')
-        realm = dict(params).get(u'realm')
+        request.signature = oauth_params.get('oauth_signature')
+        request.client_key = oauth_params.get('oauth_consumer_key')
+        request.resource_owner_key = oauth_params.get('oauth_token')
+        request.nonce = oauth_params.get('oauth_nonce')
+        request.timestamp = oauth_params.get('oauth_timestamp')
+        request.callback_uri = oauth_params.get('oauth_callback')
+        request.verifier = oauth_params.get('oauth_verifier')
+        request.signature_method = oauth_params.get('oauth_signature_method')
+        request.realm = dict(params).get('realm')
 
         # The server SHOULD return a 400 (Bad Request) status code when
         # receiving a request with missing parameters.
-        if not all((request_signature, client_key, nonce,
-                    timestamp, signature_method)):
+        if not all((request.signature, request.client_key,
+                    request.nonce, request.timestamp,
+                    request.signature_method)):
             raise ValueError("Missing OAuth parameters.")
 
         # OAuth does not mandate a particular signature method, as each
@@ -687,22 +786,23 @@ class Server(object):
         # Considerations section (`Section 4`_) before deciding on which
         # method to support.
         # .. _`Section 4`: http://tools.ietf.org/html/rfc5849#section-4
-        if not signature_method in self.allowed_signature_methods:
+        if not request.signature_method in self.allowed_signature_methods:
             raise ValueError("Invalid signature method.")
 
         # Servers receiving an authenticated request MUST validate it by:
         #   If the "oauth_version" parameter is present, ensuring its value is
         #   "1.0".
-        if u'oauth_version' in oauth_params and oauth_params[u'oauth_version'] != u'1.0':
+        if ('oauth_version' in request.oauth_params and
+            request.oauth_params['oauth_version'] != '1.0'):
             raise ValueError("Invalid OAuth version.")
 
         # The timestamp value MUST be a positive integer. Unless otherwise
         # specified by the server's documentation, the timestamp is expressed
         # in the number of seconds since January 1, 1970 00:00:00 GMT.
-        if len(timestamp) != 10:
+        if len(request.timestamp) != 10:
             raise ValueError("Invalid timestamp size")
         try:
-            ts = int(timestamp)
+            ts = int(request.timestamp)
 
         except ValueError:
             raise ValueError("Timestamp must be an integer")
@@ -716,31 +816,34 @@ class Server(object):
 
         # Provider specific validation of parameters, used to enforce
         # restrictions such as character set and length.
-        if not self.check_client_key(client_key):
+        if not self.check_client_key(request.client_key):
             raise ValueError("Invalid client key.")
 
-        if not resource_owner_key and require_resource_owner:
+        if not request.resource_owner_key and require_resource_owner:
             raise ValueError("Missing resource owner.")
 
         if (require_resource_owner and not require_verifier and
-            not self.check_access_token(resource_owner_key)):
+            not self.check_access_token(request.resource_owner_key)):
             raise ValueError("Invalid resource owner key.")
 
         if (require_resource_owner and require_verifier and
-            not self.check_request_token(resource_owner_key)):
+            not self.check_request_token(request.resource_owner_key)):
             raise ValueError("Invalid resource owner key.")
 
-        if not self.check_nonce(nonce):
+        if not self.check_nonce(request.nonce):
             raise ValueError("Invalid nonce.")
 
-        if realm and not self.check_realm(realm):
+        if request.realm and not self.check_realm(request.realm):
             raise ValueError("Invalid realm. Allowed are %s" % self.realms)
 
-        if not verifier and require_verifier:
+        if not request.verifier and require_verifier:
             raise ValueError("Missing verifier.")
 
-        if require_verifier and not self.check_verifier(verifier):
+        if require_verifier and not self.check_verifier(request.verifier):
             raise ValueError("Invalid verifier.")
+
+        if require_callback and not request.callback_uri:
+            raise ValueError("Missing callback URI.")
 
         # Servers receiving an authenticated request MUST validate it by:
         #   If using the "HMAC-SHA1" or "RSA-SHA1" signature methods, ensuring
@@ -753,12 +856,12 @@ class Server(object):
         # We check this before validating client and resource owner for
         # increased security and performance, both gained by doing less work.
         if require_verifier:
-            token = {"request_token": resource_owner_key}
+            token = {"request_token": request.resource_owner_key}
         else:
-            token = {"access_token": resource_owner_key}
-        if not self.validate_timestamp_and_nonce(client_key, timestamp,
-                nonce, **token):
-                return False
+            token = {"access_token": request.resource_owner_key}
+        if not self.validate_timestamp_and_nonce(request.client_key,
+                request.timestamp, request.nonce, **token):
+                return False, request
 
         # The server SHOULD return a 401 (Unauthorized) status code when
         # receiving a request with invalid client credentials.
@@ -767,12 +870,18 @@ class Server(object):
         # time request verification.
         #
         # Note that early exit would enable client enumeration
-        valid_client = self.validate_client_key(client_key)
+        valid_client = self.validate_client_key(request.client_key)
         if not valid_client:
-            client_key = self.dummy_client
+            request.client_key = self.dummy_client
 
-        # Ensure a valid redirection uri is used
-        valid_redirect = self.validate_redirect_uri(client_key, callback_uri)
+        # Callback is normally never required, except for requests for
+        # a Temporary Credential as described in `Section 2.1`_
+        # .._`Section 2.1`: http://tools.ietf.org/html/rfc5849#section-2.1
+        if require_callback:
+            valid_redirect = self.validate_redirect_uri(request.client_key,
+                    request.callback_uri)
+        else:
+            valid_redirect = True
 
         # The server SHOULD return a 401 (Unauthorized) status code when
         # receiving a request with invalid or expired token.
@@ -781,15 +890,17 @@ class Server(object):
         # time request verification.
         #
         # Note that early exit would enable resource owner enumeration
-        if resource_owner_key:
+        if request.resource_owner_key:
             if require_verifier:
                 valid_resource_owner = self.validate_request_token(
-                    client_key, resource_owner_key)
+                    request.client_key, request.resource_owner_key)
+                if not valid_resource_owner:
+                    request.resource_owner_key = self.dummy_request_token
             else:
                 valid_resource_owner = self.validate_access_token(
-                    client_key, resource_owner_key)
-            if not valid_resource_owner:
-                resource_owner_key = self.dummy_resource_owner
+                    request.client_key, request.resource_owner_key)
+                if not valid_resource_owner:
+                    request.resource_owner_key = self.dummy_access_token
         else:
             valid_resource_owner = True
 
@@ -815,14 +926,16 @@ class Server(object):
         # Access to protected resources will always validate the realm but note
         # that the realm is now tied to the access token and not provided by
         # the client.
-        if ((require_realm and not resource_owner_key) or
-            (not require_resource_owner and not realm)):
-            valid_realm = self.validate_requested_realm(client_key, realm)
+        if ((require_realm and not request.resource_owner_key) or
+            (not require_resource_owner and not request.realm)):
+            valid_realm = self.validate_requested_realm(request.client_key,
+                    request.realm)
         elif require_verifier:
             valid_realm = True
         else:
-            valid_realm = self.validate_realm(client_key, resource_owner_key,
-                    uri=request.uri, required_realm=required_realm)
+            valid_realm = self.validate_realm(request.client_key,
+                    request.resource_owner_key, uri=request.uri,
+                    required_realm=required_realm)
 
         # The server MUST verify (Section 3.2) the validity of the request,
         # ensure that the resource owner has authorized the provisioning of
@@ -833,23 +946,22 @@ class Server(object):
         #
         # Note that early exit would enable resource owner authorization
         # verifier enumertion.
-        if verifier:
-            valid_verifier = self.validate_verifier(client_key,
-                resource_owner_key, verifier)
+        if request.verifier:
+            valid_verifier = self.validate_verifier(request.client_key,
+                request.resource_owner_key, request.verifier)
         else:
             valid_verifier = True
 
         # Parameters to Client depend on signature method which may vary
         # for each request. Note that HMAC-SHA1 and PLAINTEXT share parameters
 
-        request.params = filter(lambda x: x[0] != "oauth_signature", params)
-        request.signature = request_signature
+        request.params = filter(lambda x: x[0] not in ("oauth_signature", "realm"), params)
 
         # ---- RSA Signature verification ----
-        if signature_method == SIGNATURE_RSA:
+        if request.signature_method == SIGNATURE_RSA:
             # The server verifies the signature per `[RFC3447] section 8.2.2`_
             # .. _`[RFC3447] section 8.2.2`: http://tools.ietf.org/html/rfc3447#section-8.2.1
-            rsa_key = self.get_rsa_key(client_key)
+            rsa_key = self.get_rsa_key(request.client_key)
             valid_signature = signature.verify_rsa_sha1(request, rsa_key)
 
         # ---- HMAC or Plaintext Signature verification ----
@@ -859,15 +971,17 @@ class Server(object):
             #   `Section 3.4`_ and comparing it to the value received from the
             #   client via the "oauth_signature" parameter.
             # .. _`Section 3.4`: http://tools.ietf.org/html/rfc5849#section-3.4
-            client_secret = self.get_client_secret(client_key)
-            if require_verifier:
-                resource_owner_secret = self.get_request_token_secret(
-                    client_key, resource_owner_key)
-            else:
-                resource_owner_secret = self.get_access_token_secret(
-                    client_key, resource_owner_key)
+            client_secret = self.get_client_secret(request.client_key)
+            resource_owner_secret = None
+            if require_resource_owner:
+                if require_verifier:
+                    resource_owner_secret = self.get_request_token_secret(
+                        request.client_key, request.resource_owner_key)
+                else:
+                    resource_owner_secret = self.get_access_token_secret(
+                        request.client_key, request.resource_owner_key)
 
-            if signature_method == SIGNATURE_HMAC:
+            if request.signature_method == SIGNATURE_HMAC:
                 valid_signature = signature.verify_hmac_sha1(request,
                     client_secret, resource_owner_secret)
             else:
@@ -881,6 +995,7 @@ class Server(object):
         # prevents malicious users from guessing sensitive information
         v = all((valid_client, valid_resource_owner, valid_realm,
                     valid_redirect, valid_verifier, valid_signature))
+        logger = logging.getLogger("oauthlib")
         if not v:
             logger.info("[Failure] OAuthLib request verification failed.")
             logger.info("Valid client:\t%s" % valid_client)
@@ -889,4 +1004,4 @@ class Server(object):
             logger.info("Valid callback:\t%s" % valid_redirect)
             logger.info("Valid verifier:\t%s\t(Required: %s)" % (valid_verifier, require_verifier))
             logger.info("Valid signature:\t%s" % valid_signature)
-        return v
+        return v, request
