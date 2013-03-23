@@ -24,8 +24,8 @@
                     What's Happening?
                 {% endif %}
             </legend>
-            <textarea name="status" id="status">RT
-                @{{ retweet_status.user.screen_name }}: {{ retweet_status.text }}</textarea>
+            <textarea name="status" id="status">{% if retweet_status is defined %}RT @
+                {{ retweet_status.user.screen_name }}: {{ retweet_status.text }}{% endif %}</textarea>
 
             <div class="box">
                 {% if in_reply_to_status is defined %}
