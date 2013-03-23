@@ -11,7 +11,6 @@ from application import app
 
 @app.route("/post", methods=["GET", "POST"])
 @decorators.login_required
-@decorators.login_required
 def status_post():
     data = dict()
     if flask.request.method == "POST":
