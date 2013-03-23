@@ -38,7 +38,7 @@ def status_post():
             data["last_status"] = status_text
         else:
             data["title"] = "New Tweet"
-            return flask.redirect("%s#t%s" % (flask.url_for("status", id=result["id"]), result["id_str"]))
+            return flask.redirect("%s#t%s" % (flask.url_for("status", status_id=result["id"]), result["id_str"]))
     data["title"] = "What's happening?"
     return flask.render_template("status_post.html", **data)
 

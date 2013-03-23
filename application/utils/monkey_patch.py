@@ -1,6 +1,8 @@
 import inspect
 import logging
 
+import requests_oauthlib
+
 from . import render
 from . import do_item
 from . import do_rfc822
@@ -18,8 +20,8 @@ def patch_logging():
     logging.debug = logger_debug
 
     # Mute noisy logging.
-    logging.getLogger("requests").setLevel(logging.CRITICAL)
-    logging.getLogger("oauthlib").setLevel(logging.CRITICAL)
+    logging.getLogger("requests").setLevel(logging.ERROR)
+    logging.getLogger("oauthlib").setLevel(logging.ERROR)
 
 
 def patch_jinja2(app):
