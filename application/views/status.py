@@ -14,31 +14,32 @@ from application import app
 def status_post():
     data = dict()
     if flask.request.method == "POST":
-        status_text = flask.request.form.get("status", "")
-        pic_file = flask.request.files.get("pic-file")
-        try:
-            retweet_id = flask.request.form.get("retweet_id")
-            if "retweet" in flask.request.form and retweet_id:
-                result = flask.g.api.retweet(id=retweet_id)
-            else:
-                in_reply_to_id = flask.request.form.get("in_reply_to_id")
-                kwargs = {
-                    "status": status_text,
-                }
-                if in_reply_to_id:
-                    kwargs["in_reply_to_status_id"] = in_reply_to_id
-                if pic_file:
-                    url = "https://upload.twitter.com/1.1/statuses/update_with_media.json"
-                    kwargs["media_data[]"] = base64.b64encode(pic_file.read())
-                    result = flask.g.api.post(url, params=kwargs)
+        status_text = flask.request.form.get("status")
+        if status_text:
+            pic_file = flask.request.files.get("pic-file")
+            try:
+                retweet_id = flask.request.form.get("retweet_id")
+                if "retweet" in flask.request.form and retweet_id:
+                    result = flask.g.api.retweet(id=retweet_id)
                 else:
-                    result = flask.g.api.updateStatus(**kwargs)
-        except twython.TwythonError, e:
-            flask.flash("Post error: %s" % str(e))
-            data["last_status"] = status_text
-        else:
-            data["title"] = "New Tweet"
-            return flask.redirect("%s#t%s" % (flask.url_for("status", status_id=result["id"]), result["id_str"]))
+                    in_reply_to_id = flask.request.form.get("in_reply_to_id")
+                    kwargs = {
+                        "status": status_text,
+                    }
+                    if in_reply_to_id:
+                        kwargs["in_reply_to_status_id"] = in_reply_to_id
+                    if pic_file:
+                        url = "https://upload.twitter.com/1.1/statuses/update_with_media.json"
+                        kwargs["media_data[]"] = base64.b64encode(pic_file.read())
+                        result = flask.g.api.post(url, params=kwargs)
+                    else:
+                        result = flask.g.api.updateStatus(**kwargs)
+            except twython.TwythonError, e:
+                flask.flash("Post error: %s" % str(e))
+                data["last_status"] = status_text
+            else:
+                data["title"] = "New Tweet"
+                return flask.redirect("%s#t%s" % (flask.url_for("status", status_id=result["id"]), result["id_str"]))
     data["title"] = "What's happening?"
     return flask.render_template("status_post.html", **data)
 
