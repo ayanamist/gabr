@@ -48,7 +48,6 @@ def home_rss(sid):
             "results": json.loads(zlib.decompress(cached))
         }
     else:
-        params["include_entities"] = 1
         params["count"] = 100
         data = timeline.timeline("Home", functools.partial(flask.g.api.getHomeTimeline, **params))
         data["results"].sort(

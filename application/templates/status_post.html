@@ -25,7 +25,8 @@
                 {% endif %}
             </legend>
             <textarea name="status" id="status">{% if retweet_status is defined %}RT @
-                {{ retweet_status.user.screen_name }}: {{ retweet_status.text }}{% endif %}</textarea>
+                {{ retweet_status.user.screen_name }}: {{ retweet_status.text }}{% elif last_status is defined %}
+                {{ last_status }}{% endif %}</textarea>
 
             <div class="box">
                 {% if in_reply_to_status is defined %}
