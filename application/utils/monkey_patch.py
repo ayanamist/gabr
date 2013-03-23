@@ -1,7 +1,8 @@
 import inspect
 import logging
+import urlparse
 
-import requests_oauthlib
+import oauthlib.common
 
 from . import render
 from . import do_item
@@ -36,8 +37,18 @@ def patch_jinja2(app):
     app.jinja_env.filters['rfc822'] = do_rfc822
 
 
+def patch_oauthlib():
+    def urldecode(params):
+        if isinstance(params, unicode):
+            params = params.encode("utf8")
+        return oauthlib.common.decode_params_utf8(urlparse.parse_qsl(params, keep_blank_values=True))
+
+    oauthlib.common.urldecode = urldecode
+
+
 def patch_all(app=None):
     patch_logging()
+    patch_oauthlib()
     if app:
         patch_jinja2(app)
 
