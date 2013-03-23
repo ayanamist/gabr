@@ -8,14 +8,13 @@ from ..utils import decorators
 from ..utils import render
 from application import app
 
-
 @app.route("/user/<screen_name>")
 @decorators.login_required
 @decorators.templated("user_show.html")
 def user(screen_name):
     data = {
         "results": list(),
-    }
+        }
     if not flask.request.args:
         data["title"] = "User %s" % screen_name
         try:
@@ -28,7 +27,7 @@ def user(screen_name):
             data["user"]["tweets_per_day"] = "%.4g" % (result["statuses_count"] / days_delta) if days_delta > 0 else 0
         try:
             result = flask.g.api.showFriendship(source_screen_name=flask.g.screen_name,
-                                                target_screen_name=data["user"]["screen_name"])
+                target_screen_name=data["user"]["screen_name"])
         except twython.TwythonError:
             pass
         else:
@@ -40,6 +39,7 @@ def user(screen_name):
     else:
         data["title"] = "User %s Timeline" % screen_name
     params = utils.parse_params()
+    params["include_entities"] = 1
     try:
         tweets_result = flask.g.api.getUserTimeline(screen_name=screen_name, **params)
     except twython.TwythonError, e:
