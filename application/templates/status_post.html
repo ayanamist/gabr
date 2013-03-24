@@ -7,7 +7,7 @@
         </p>
     {% endif %}
     <form action="{{ url_for("status_post") }}" method="post" enctype="multipart/form-data">
-        {% if retweet_status is defined and retweet_status.user.protected %}
+        {% if retweet_status is defined and not retweet_status.user.protected %}
             <input type="hidden" value="{{ retweet_status.id_str }}" name="retweet_id" id="retweet_id"/>
             <fieldset>
                 <legend>Twitter's new style retweet:</legend>
