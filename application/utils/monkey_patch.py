@@ -1,8 +1,6 @@
 import inspect
 import logging
-import urlparse
 
-import oauthlib.common
 import twython
 
 from . import render
@@ -42,15 +40,6 @@ def patch_jinja2(app):
     app.jinja_env.filters['rfc822'] = do_rfc822
 
 
-def patch_oauthlib():
-    def urldecode(params):
-        if isinstance(params, unicode):
-            params = params.encode("utf8")
-        return oauthlib.common.decode_params_utf8(urlparse.parse_qsl(params, keep_blank_values=True))
-
-    oauthlib.common.urldecode = urldecode
-
-
 def patch_twython():
     def str_exception(self):
         return "%s %s" % (
@@ -61,7 +50,6 @@ def patch_twython():
 
 def patch_all(app=None):
     patch_logging()
-    patch_oauthlib()
     patch_twython()
     if app:
         patch_jinja2(app)

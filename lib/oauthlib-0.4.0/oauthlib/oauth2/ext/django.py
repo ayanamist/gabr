@@ -43,15 +43,13 @@ class OAuth2ProviderDecorator(object):
                 log.debug('Saving credentials to session, %r.', credentials)
                 request.session['oauth2_credentials'] = credentials
                 kwargs['scopes'] = scopes
+                kwargs.update(credentials)
                 log.debug('Invoking view method, %r.', f)
                 return f(request, *args, **kwargs)
 
             except errors.FatalClientError as e:
                 log.debug('Fatal client error, redirecting to error page.')
                 return HttpResponseRedirect(e.in_uri(self._error_uri))
-            except errors.OAuth2Error as e:
-                log.debug('Client error, redirecting back to client.')
-                return HttpResponseRedirect(e.in_uri(redirect_uri))
         return wrapper
 
     def post_authorization_view(self, f):
@@ -90,9 +88,6 @@ class OAuth2ProviderDecorator(object):
             response = HttpResponse(content=body, status=status)
             for k, v in headers:
                 response[k] = v
-            response['Content-Type'] = 'application/json;charset=UTF-8'
-            response['Cache-Control'] = 'no-store'
-            response['Pragma'] = 'no-cache'
             return response
         return wrapper
 
@@ -106,7 +101,7 @@ class OAuth2ProviderDecorator(object):
                         uri, http_method, body, headers, scopes)
                 kwargs.update({
                     'client': r.client,
-                    'resource_owner': r.resource_owner,
+                    'user': r.user,
                     'scopes': r.scopes
                 })
                 if valid:

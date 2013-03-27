@@ -9,6 +9,7 @@ This module provides data structures and utilities common
 to all implementations of OAuth.
 """
 
+import collections
 import random
 import re
 import sys
@@ -47,7 +48,8 @@ else:
 
 # 'safe' must be bytes (Python 2.6 requires bytes, other versions allow either)
 def quote(s, safe=b'/'):
-    s = _quote(s.encode('utf-8'), safe)
+    s = s.encode('utf-8') if isinstance(s, unicode_type) else s
+    s = _quote(s, safe)
     # PY3 always returns unicode.  PY2 may return either, depending on whether
     # it had to modify the string.
     if isinstance(s, bytes_type):
@@ -122,7 +124,21 @@ def urldecode(query):
     if len(re.findall(invalid_hex, query)):
         raise ValueError('Invalid hex encoding in query string.')
 
-    query = query.decode('utf-8') if isinstance(query, bytes_type) else query
+    # We encode to utf-8 prior to parsing because parse_qsl behaves
+    # differently on unicode input in python 2 and 3.
+    # Python 2.7
+    # >>> urlparse.parse_qsl(u'%E5%95%A6%E5%95%A6')
+    # u'\xe5\x95\xa6\xe5\x95\xa6'
+    # Python 2.7, non unicode input gives the same
+    # >>> urlparse.parse_qsl('%E5%95%A6%E5%95%A6')
+    # '\xe5\x95\xa6\xe5\x95\xa6'
+    # but now we can decode it to unicode
+    # >>> urlparse.parse_qsl('%E5%95%A6%E5%95%A6').decode('utf-8')
+    # u'\u5566\u5566'
+    # Python 3.3 however
+    # >>> urllib.parse.parse_qsl(u'%E5%95%A6%E5%95%A6')
+    # u'\u5566\u5566'
+    query = query.encode('utf-8') if not PY3 and isinstance(query, unicode_type) else query
     # We want to allow queries such as "c2" whereas urlparse.parse_qsl
     # with the strict_parsing flag will not.
     params = urlparse.parse_qsl(query, keep_blank_values=True)
@@ -332,5 +348,15 @@ class Request(object):
 
     @property
     def uri_query_params(self):
+        if not self.uri_query:
+            return []
         return urlparse.parse_qsl(self.uri_query, keep_blank_values=True,
                                   strict_parsing=True)
+
+    @property
+    def duplicate_params(self):
+        seen_keys = collections.defaultdict(int)
+        all_keys = (p[0] for p in self.decoded_body or [] + self.uri_query_params)
+        for k in all_keys:
+            seen_keys[k] += 1
+        return [k for k, c in seen_keys.items() if c > 1]
