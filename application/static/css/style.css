@@ -64,12 +64,14 @@ body {
 }
 
 .menu a {
+    border-color: #fff;
     color: #fff;
     padding: 0 2px;
     text-decoration: none
 }
 
 .tweet, .features, .profile {
+    position: relative;
     padding: 0.313em
 }
 
@@ -86,22 +88,15 @@ body {
 }
 
 .avatar {
-    display: block;
     height: 3em;
     width: 3em;
-    left: 0.3em;
-    margin: 0;
-    overflow: hidden;
-    float: left;
-}
-
-.avatar img {
-    height: 3em;
-    width: 3em;
+    top: 0.5em;
+    left: 0.4em;
+    position: absolute;
+    border: 0;
 }
 
 .status {
-    display: block;
     word-wrap: break-word;
 }
 
@@ -127,7 +122,6 @@ body {
 }
 
 .more {
-    border: 1px solid #138;
     margin: 0.5em;
     text-align: center;
     font-size: 1.2em
@@ -135,7 +129,6 @@ body {
 
 .more a {
     width: 100%;
-    display: block
 }
 
 .dialog {
@@ -185,5 +178,22 @@ body {
     min-height: 2em;
     min-width: 2em;
     background-color: #138;
-    border-radius: 0.5em;
+}
+
+.actions {
+    margin-left: 0.5em;
+}
+
+.actions a {
+    display: inline-block;
+    min-width: 2em;
+    text-align: center;
+}
+
+.border-radius-5 {
+    border: 1px dotted #138;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -o-border-radius: 5px;
 }
