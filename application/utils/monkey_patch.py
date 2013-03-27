@@ -30,9 +30,7 @@ def patch_logging():
 
 def patch_jinja2(app):
     app.jinja_env.globals.update(
-        abs_url_for=abs_url_for
-    )
-    app.jinja_env.globals.update(
+        abs_url_for=abs_url_for,
         prerender_tweet=render.prerender_tweet,
         render_created_at=render.render_created_at,
     )
