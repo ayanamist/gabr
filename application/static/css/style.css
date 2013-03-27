@@ -122,12 +122,14 @@ body {
 }
 
 .more {
+    border: 1px dotted #138;
     margin: 0.5em;
     text-align: center;
     font-size: 1.2em
 }
 
 .more a {
+    display: block;
     width: 100%;
 }
 
@@ -186,14 +188,5 @@ body {
 
 .actions a {
     display: inline-block;
-    min-width: 2em;
     text-align: center;
-}
-
-.border-radius-5 {
-    border: 1px dotted #138;
-    border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    -o-border-radius: 5px;
 }

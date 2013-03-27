@@ -2,6 +2,6 @@
 {% block main %}
     {{ super() }}
     {% if next_page_url %}
-        <div class="more border-radius-5"><a href="{{ next_page_url }}">More</a></div>
+        <div class="more"><a href="{{ next_page_url }}">More</a></div>
     {% endif %}
 {% endblock main %}
