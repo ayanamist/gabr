@@ -87,6 +87,12 @@ body {
     color: #555
 }
 
+ul.about {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
 .avatar {
     height: 3em;
     width: 3em;

@@ -2,14 +2,12 @@
 {% block main %}
     {% if user is defined %}
         <div class="profile">
-        <span class="avatar">
-            <a href="{{ user.profile_image_url|replace("_normal", "") }}">
-                <img src="{{ user.profile_image_url }}"/>
-            </a>
-        </span>
-        <span class="status shift">
-            <span class="bold">
-                {{ user.screen_name }} ({{ user.name }})
+            <div class="shift">
+                <div class="bold">
+                    <a href="{{ user.profile_image_url|replace("_normal", "") }}">
+                        <img class="avatar" src="{{ user.profile_image_url }}"/>
+                    </a>
+                    <span>{{ user.screen_name }} ({{ user.name }})</span>
                 <span class="small">
                     {% if user.protected %}Protected{% endif %}
                     {% if user.verified %}Verified{% endif %}
@@ -17,18 +15,14 @@
                     {% if user.contributors_enabled %}Contributed{% endif %}
                     {% if user.followed_by %}Following you{% endif %}
                 </span>
-            </span>
-            <br/>
-            <span class="about">Bio: {{ user.description }}
-                <br/>
-                Link: {% if user.url %}<a href="{{ user.url }}">{{ user.url }}</a>{% endif %}
-                <br/>
-                Location: {{ user.location }}
-                <br/>
-                Joined: {{ render_created_at(user.created_at) }} (~{{ user.tweets_per_day }} tweets per day)
-            </span>
-        </span>
-
+                </div>
+                <ul class="about">
+                    <li>Bio: {{ user.description }}</li>
+                    <li>Link: {% if user.url %}<a href="{{ user.url }}">{{ user.url }}</a>{% endif %}</li>
+                    <li>Location: {{ user.location }}</li>
+                    <li>Joined: {{ render_created_at(user.created_at) }} (~{{ user.tweets_per_day }} tweets per day)</li>
+                </ul>
+            </div>
             <div class="features">{{ user.statuses_count }} tweets |
                 <a href="">{{ user.followers_count }} followers</a> |
                 <a href="">{{ user.friends_count }} friends</a> |
