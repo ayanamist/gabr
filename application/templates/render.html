@@ -35,9 +35,9 @@
             {% if tweet.entities %}
                 {% for media in tweet.entities.media %}
                     <div class="item-pic">
-                    <a href="{{ media.original_url }}">
-                        <img class="preview" src="{{ media.preview_url }}"/>
-                    </a>
+                        <a href="{{ media.original_url }}">
+                            <img class="preview" src="{{ media.preview_url }}"/>
+                        </a>
                     </div>
                 {% endfor %}
             {% endif %}
@@ -70,96 +70,106 @@
     </div>
 {%- endmacro %}
 {% macro render_follow(result) -%}
-    <span class="avatar">
-    {% if result.sources_size == 1 %}
-        <img src="{{ result.sources|first|item("profile_image_url") }}"/>
-    {% endif %}
-    </span>
-    <span class="status shift">
-        <span class="bold">
-            {% for source in result.sources %}
-                <a href="{{ url_for("user", screen_name=source.screen_name) }}">
-                    {{ source.screen_name }}
-                </a>
-                {% if not loop.last %}
-                    ,
-                {% endif %}
-            {% endfor %}
-        </span>
-        followed
-        {% if result.targets|first|item("screen_name") == g.screen_name %}
-            you.
-        {% else %}
-            :
-            {% for target in result.targets %}
-                <br/>
-                <a href="{{ url_for("user", screen_name=target.screen_name) }}">
-                    {{ target.screen_name }}
-                </a>
-                ({{ target.name }})
-            {% endfor %}
+    <div class="status shift">
+        <div class="item-header">
+            {% if result.sources_size == 1 %}
+                <img class="avatar" src="{{ result.sources|first|item("profile_image_url") }}"/>
+            {% endif %}
+            <span class="bold">
+                {% for source in result.sources %}
+                    <a href="{{ url_for("user", screen_name=source.screen_name) }}">
+                        {{ source.screen_name }}
+                    </a>
+                    {% if not loop.last %}
+                        ,
+                    {% endif %}
+                {% endfor %}
+            </span>
+            followed
+            {% if result.targets|first|item("screen_name") == g.screen_name %}
+                you.
+            {% else %}
+                :
+            {% endif %}
+        </div>
+        {% if result.targets|first|item("screen_name") != g.screen_name %}
+            <div class="item-content">
+                <ul>
+                    {% for target in result.targets %}
+                        <li>
+                            <a href="{{ url_for("user", screen_name=target.screen_name) }}">
+                                {{ target.screen_name }}
+                            </a>
+                            ({{ target.name }})
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
         {% endif %}
-        <br/>
-        <span class="time">{{ render_created_at(result.created_at) }}</span>
-    </span>
+        <div class="item-footer">
+            <span class="time">{{ render_created_at(result.created_at) }}</span>
+        </div>
+    </div>
 {%- endmacro %}
 {% macro render_favorite(result) -%}
-    <span class="avatar">
-    {% if result.sources_size == 1 %}
-        <img src="{{ result.sources|first|item("profile_image_url") }}"/>
-    {% endif %}
-    </span>
-    <span class="status shift">
-        <span class="bold">
-            {% for source in result.sources %}
-                <a href="{{ url_for("user", screen_name=source.screen_name) }}">
-                    {{ source.screen_name }}
-                </a>
-                {% if not loop.last %}
-                    ,
-                {% endif %}
-            {% endfor %}
-        </span>
-        {% set tweet = prerender_tweet(result.targets|first) %}
-        favorited
-        {% if tweet.user.screen_name == g.screen_name %}
-            your Tweet
-        {% else %}
-            <a href="{{ url_for("user", screen_name=tweet.user.screen_name) }}">
-                {{ tweet.user.screen_name }}
-            </a>
-            ({{ tweet.user.name }})
-        {% endif %}
-        :<br/>
-        {{ tweet.text|safe }}
-        <br/>
-        {% if tweet.entities %}
-            {% for media in tweet.entities.media %}
-                <a href="{{ media.original_url }}">
-                    <img class="preview" src="{{ media.preview_url }}"/>
-                </a>
-                <br/>
-            {% endfor %}
-        {% endif %}
-        <a href="{{ url_for("status", status_id=tweet.id) }}" class="time">
-            {{ render_created_at(tweet.created_at) }}
-        </a>
-        <span class="small">
-            from {{ tweet.source|safe }}
-            {% if tweet.in_reply_to_status_id %}
-                <a href="{{ url_for("status", status_id=tweet.id) }}">&gt;&gt;</a>
+    <div class="status shift">
+        <div class="item-header">
+            {% if result.sources_size == 1 %}
+                <img class="avatar" src="{{ result.sources|first|item("profile_image_url") }}"/>
             {% endif %}
-        </span>
-    </span>
+            <span class="bold">
+                {% for source in result.sources %}
+                    <a href="{{ url_for("user", screen_name=source.screen_name) }}">
+                        {{ source.screen_name }}
+                    </a>
+                    {% if not loop.last %}
+                        ,
+                    {% endif %}
+                {% endfor %}
+            </span>
+            {% set tweet = prerender_tweet(result.targets|first) %}
+            favorited
+            {% if tweet.user.screen_name == g.screen_name %}
+                your Tweet
+            {% else %}
+                <a href="{{ url_for("user", screen_name=tweet.user.screen_name) }}">
+                    {{ tweet.user.screen_name }}
+                </a>
+                ({{ tweet.user.name }})
+            {% endif %}
+            :
+        </div>
+        <div class="item-content">
+            {{ tweet.text|safe }}
+            {% if tweet.entities %}
+                {% for media in tweet.entities.media %}
+                    <a href="{{ media.original_url }}">
+                        <img class="preview" src="{{ media.preview_url }}"/>
+                    </a>
+                    <br/>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="item-footer">
+            <a href="{{ url_for("status", status_id=tweet.id) }}" class="time">
+                {{ render_created_at(tweet.created_at) }}
+            </a>
+            <span class="small">
+                from {{ tweet.source|safe }}
+                {% if tweet.in_reply_to_status_id %}
+                    <a href="{{ url_for("status", status_id=tweet.id) }}">&gt;&gt;</a>
+                {% endif %}
+            </span>
+        </div>
+    </div>
 {%- endmacro %}
 {% macro render_retweet(result) -%}
-    <span class="avatar">
-        {% if result.sources_size == 1 %}
-            <img src="{{ result.sources|first|item("profile_image_url") }}"/>
-        {% endif %}
-    </span>
-    <span class="status shift">
-        <span class="bold">
+    <div class="status shift">
+        <div class="item-header">
+            {% if result.sources_size == 1 %}
+                <img class="avatar" src="{{ result.sources|first|item("profile_image_url") }}"/>
+            {% endif %}
+            <span class="bold">
             {% for source in result.sources %}
                 <a href="{{ url_for("user", screen_name=source.screen_name) }}">
                     {{ source.screen_name }}
@@ -168,71 +178,77 @@
                     ,
                 {% endif %}
             {% endfor %}
-        </span>
-        {% set tweet = prerender_tweet(result.target_objects|first) %}
-        retweeted
-        {% if tweet.user.screen_name == g.screen_name %}
-            your Tweet
-        {% else %}
-            {{ tweet.user.screen_name }} ({{ tweet.user.name }})
-        {% endif %}
-        :<br/>
-        {{ tweet.text|safe }}
-        <br/>
-        {% if tweet.entities %}
-            {% for media in tweet.entities.media %}
-                <a href="{{ media.original_url }}">
-                    <img class="preview" src="{{ media.preview_url }}"/>
-                </a>
-                <br/>
-            {% endfor %}
-        {% endif %}
-        <a href="{{ url_for("status", status_id=tweet.id) }}" class="time">
-            {{ render_created_at(tweet.created_at) }}
-        </a>
-        <span class="small">
-            from {{ tweet.source|safe }}
-            {% if tweet.in_reply_to_status_id %}
-                <a href="{{ url_for("status", status_id=tweet.id) }}">&gt;&gt;</a>
+            </span>
+            {% set tweet = prerender_tweet(result.target_objects|first) %}
+            retweeted
+            {% if tweet.user.screen_name == g.screen_name %}
+                your Tweet
+            {% else %}
+                {{ tweet.user.screen_name }} ({{ tweet.user.name }})
             {% endif %}
-        </span>
-    </span>
+            :
+        </div>
+        <div class="item-content">
+            {{ tweet.text|safe }}
+            {% if tweet.entities %}
+                {% for media in tweet.entities.media %}
+                    <a href="{{ media.original_url }}">
+                        <img class="preview" src="{{ media.preview_url }}"/>
+                    </a>
+                    <br/>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="item-footer">
+            <a href="{{ url_for("status", status_id=tweet.id) }}" class="time">
+                {{ render_created_at(tweet.created_at) }}
+            </a>
+            <span class="small">
+                from {{ tweet.source|safe }}
+                {% if tweet.in_reply_to_status_id %}
+                    <a href="{{ url_for("status", status_id=tweet.id) }}">&gt;&gt;</a>
+                {% endif %}
+            </span>
+        </div>
+    </div>
 {%- endmacro %}
 {% macro render_list_member_added(result) -%}
     <span class="avatar">
-    {% if result.sources_size == 1 %}
-        <img src="{{ result.sources|first|item("profile_image_url") }}"/>
-    {% endif %}
     </span>
-    <span class="status shift">
-        <span class="bold">
-            {% for source in result.sources %}
-                <a href="{{ url_for("user", screen_name=source.screen_name) }}">
-                    {{ source.screen_name }}
-                </a>
-                {% if not loop.last %}
-                    ,
-                {% endif %}
-            {% endfor %}
-        </span>
-        added
-        {% if result.targets|first|item("screen_name") == g.screen_name %}
-            you.
-        {% else %}
-            {% for target in result.targets %}
-                <br/>
-                <a href="{{ url_for("user", screen_name=target.screen_name) }}">
-                    {{ target.screen_name }}
-                </a>
-                ({{ target.name }})
-            {% endfor %}
-        {% endif %}
-        <br/>
-        to list
-        <a href="{{ result.target_objects|first|item("uri") }}">
-            {{ result.target_objects|first|item("full_name") }}
-        </a>
-        <br/>
-        <span class="time">{{ render_created_at(result.created_at) }}</span>
-    </span>
+    <div class="status shift">
+        <div class="item-header">
+            {% if result.sources_size == 1 %}
+                <img src="{{ result.sources|first|item("profile_image_url") }}"/>
+            {% endif %}
+            <span class="bold">
+                {% for source in result.sources %}
+                    <a href="{{ url_for("user", screen_name=source.screen_name) }}">
+                        {{ source.screen_name }}
+                    </a>
+                    {% if not loop.last %}
+                        ,
+                    {% endif %}
+                {% endfor %}
+            </span>
+            added
+            {% if result.targets|first|item("screen_name") == g.screen_name %}
+                you.
+            {% else %}
+                {% for target in result.targets %}
+                    <br/>
+                    <a href="{{ url_for("user", screen_name=target.screen_name) }}">
+                        {{ target.screen_name }}
+                    </a>
+                    ({{ target.name }})
+                {% endfor %}
+            {% endif %}
+            to list
+            <a href="{{ result.target_objects|first|item("uri") }}">
+                {{ result.target_objects|first|item("full_name") }}
+            </a>
+        </div>
+        <div class="item-footer">
+            <span class="time">{{ render_created_at(result.created_at) }}</span>
+        </div>
+    </div>
 {%- endmacro %}

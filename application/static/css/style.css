@@ -196,3 +196,7 @@ ul.about {
     display: inline-block;
     text-align: center;
 }
+
+.item-content ul {
+    list-style: none;
+}
