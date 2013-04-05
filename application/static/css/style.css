@@ -65,7 +65,7 @@ body {
 
 .menu a {
     display: inline-block;
-    min-width: 3.5em;
+    min-width: 3.25em;
     width: 10%;
     border-color: #fff;
     color: #fff;
