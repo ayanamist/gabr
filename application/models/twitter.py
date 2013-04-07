@@ -32,9 +32,10 @@ class API(object):
         self.client = requests.Session()
         self.client.headers = {"User-Agent": USER_AGENT}
 
-    def bind_auth(self, oauth_token=None, oauth_token_secret=None):
-        self.client.auth = requests_oauthlib.OAuth1(self.consumer_key, self.consumer_secret, oauth_token,
-                                                    oauth_token_secret, signature_type=SIGNATURE_TYPE)
+    def bind_auth(self, oauth_token=None, oauth_token_secret=None, oauth_verifier=None):
+        self.client.auth = requests_oauthlib.OAuth1(self.consumer_key, self.consumer_secret,
+                                                    oauth_token, oauth_token_secret, verifier=oauth_verifier,
+                                                    signature_type=SIGNATURE_TYPE)
 
     def request(self, method, endpoint, params=None, files=None, **kwargs):
         if endpoint.startswith('http://') or endpoint.startswith('https://'):
@@ -86,9 +87,12 @@ class API(object):
         else:
             request_args = None
 
-        response = self.request("GET", OAUTH_REQUEST_TOKEN_URL, params=request_args)
-        return dict(urlparse.parse_qsl(response.content))
+        response = self.request("POST", OAUTH_REQUEST_TOKEN_URL, params=request_args)
+        request_tokens = dict(urlparse.parse_qsl(response.content))
+        request_tokens["auth_url"] = "%s?%s" % (OAUTH_AUTHORIZE_URL,
+                                                urllib.urlencode({"oauth_token": request_tokens["oauth_token"]}))
+        return request_tokens
 
     def get_authorized_tokens(self):
-        response = self.request("GET", OAUTH_ACCESS_TOKEN_URL)
+        response = self.request("POST", OAUTH_ACCESS_TOKEN_URL)
         return dict(urlparse.parse_qsl(response.content))

@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import urllib
-
 import flask
 
 from application import app
@@ -20,17 +18,16 @@ def login():
 
 @app.route("/oauth")
 def oauth_login():
+    flask.g.api.bind_auth()
     try:
         request_tokens = flask.g.api.get_authentication_tokens(callback_url=abs_url_for("oauth_callback"))
-        if request_tokens["oauth_callback_confirmed"] == "true":
+        if request_tokens["oauth_callback_confirmed"] != "true":
             raise twitter.Error("OAuth callback not confirmed")
     except twitter.Error as e:
         flask.flash("OAuth error: %s, please try again." % str(e))
         return flask.redirect(flask.url_for("login"))
     else:
-        redirect_url = "%s?%s" % (twitter.OAUTH_AUTHORIZE_URL,
-                                  urllib.urlencode({"oauth_token": request_tokens["oauth_token"]}))
-        return flask.redirect(redirect_url)
+        return flask.redirect(request_tokens["auth_url"])
 
 
 @app.route("/oauth_callback")
@@ -39,7 +36,7 @@ def oauth_callback():
     oauth_verifier = flask.request.args.get("oauth_verifier")
     try:
         if oauth_token and oauth_verifier:
-            flask.g.api.bind_auth(oauth_token, oauth_token)
+            flask.g.api.bind_auth(oauth_token, oauth_verifier=oauth_verifier)
             flask.session.update(flask.g.api.get_authorized_tokens())
         else:
             raise twitter.Error("OAuth callback does not have necessary parameters")
