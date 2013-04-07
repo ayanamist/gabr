@@ -55,21 +55,28 @@ class API(object):
             url = urlparse.urlunsplit(parts)
 
         response = self.client.request(method=method, url=url, params=params, files=files)
+        json_content = None
         if url.endswith(".json"):
             try:
-                response.json()
+                json_content = response.json()
             except ValueError:  # not a json, sometimes maybe a XML file.
                 logging.debug("%d: Not a JSON response for %s %s:\n%s" % (response.status_code,
                                                                           method, url, response.content))
                 raise Error("Not a JSON response.", response=response)
         if response.status_code > 304:
-            message = "%d %s" % (response.status_code, response)
-            try:
-                errors = response.content["errors"]
-            except (TypeError, KeyError):
-                pass
-            else:
-                message += ": %s (%d)" % (errors["message"], errors["code"])
+            message = "%d %s" % (response.status_code, response.reason)
+            if json_content:
+                errors = json_content.get("errors")
+                if errors:
+                    for error in errors:
+                        message += ", \"%s (%d)\"" % (error["message"], error["code"])
+                else:
+                    error = json_content.get("error")
+                    if error:
+                        message += ", \"%s\"" % error
+                    else:
+                        # Twitter maybe have other error format, we should save it for further digging.
+                        logging.debug("JSON Errors: %s" % response.content)
             raise Error(message, response=response)
         return response
 
