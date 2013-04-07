@@ -130,7 +130,7 @@ def status(status_id):
 @decorators.templated("status_post.html")
 def status_reply(status_id):
     data = {
-        "title": "Reply",
+        "title": "Reply to %s" % status_id,
     }
     try:
         result = flask.g.api.request("GET", "statuses/show/%s" % status_id).json()
@@ -148,7 +148,7 @@ def status_reply(status_id):
 @decorators.templated("status_post.html")
 def status_replyall(status_id):
     data = {
-        "title": "Reply to All",
+        "title": "Reply to All %s" % status_id,
     }
     try:
         result = flask.g.api.request("GET", "statuses/show/%s" % status_id).json()
@@ -173,7 +173,7 @@ def status_replyall(status_id):
 @decorators.templated("status_post.html")
 def status_retweet(status_id):
     data = {
-        "title": "Retweet",
+        "title": "Retweet %s" % status_id,
     }
     try:
         result = flask.g.api.request("GET", "statuses/show/%s" % status_id).json()
@@ -190,7 +190,7 @@ def status_retweet(status_id):
 @decorators.templated("results.html")
 def status_favorite(status_id):
     data = {
-        "title": "Favorite",
+        "title": "Favorite %s" % status_id,
     }
     try:
         result = flask.g.api.request("POST", "favorites/create", {"id": status_id}).json()
@@ -208,7 +208,7 @@ def status_favorite(status_id):
 @decorators.templated("results.html")
 def status_unfavorite(status_id):
     data = {
-        "title": "Unfavorite",
+        "title": "Unfavorite %s" % status_id,
     }
     try:
         result = flask.g.api.request("POST", "favorites/destroy", {"id": status_id}).json()
@@ -225,7 +225,7 @@ def status_unfavorite(status_id):
 @decorators.login_required
 def status_delete(status_id):
     data = {
-        "title": "Delete",
+        "title": "Delete %s" % status_id,
     }
     if flask.request.method == "GET":
         data["status_id"] = status_id
