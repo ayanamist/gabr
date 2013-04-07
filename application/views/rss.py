@@ -10,11 +10,11 @@ import zlib
 from google.appengine.api import memcache
 
 import flask
-import twython
-from application.libs import crypto, indicesreplace
 
 from application import app
 from application import utils
+from application.libs import crypto
+from application.libs import indicesreplace
 from application.utils import decorators
 from application.views import timeline
 
@@ -39,8 +39,7 @@ def home_rss(sid):
         oauth_token, oauth_token_secret = sid.split(":", 1)
     except (ValueError, TypeError):
         return "Invalid sid."
-    flask.g.api = twython.Twython(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"],
-                                  oauth_token, oauth_token_secret)
+    flask.g.api.bind_auth(oauth_token, oauth_token_secret)
     params = utils.parse_params()
     cached = memcache.get(sid + str(params))
     if cached:

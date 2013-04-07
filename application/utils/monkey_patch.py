@@ -3,8 +3,6 @@ from __future__ import absolute_import
 import inspect
 import logging
 
-import twython
-
 from application.libs import render
 from application.utils import abs_url_for
 from application.utils import do_item
@@ -40,17 +38,8 @@ def patch_jinja2(app):
     app.jinja_env.filters['rfc822'] = do_rfc822
 
 
-def patch_twython():
-    def str_exception(self):
-        return "%s %s" % (
-            self.error_code, twython.twitter_endpoints.twitter_http_status_codes.get(self.error_code, ["Unknown"])[0])
-
-    twython.TwythonError.__str__ = str_exception
-
-
 def patch_all(app=None):
     patch_logging()
-    patch_twython()
     if app:
         patch_jinja2(app)
 

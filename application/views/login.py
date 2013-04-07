@@ -1,9 +1,11 @@
 from __future__ import absolute_import
 
+import urllib
+
 import flask
-import twython
 
 from application import app
+from application.models import twitter
 from application.utils import abs_url_for
 from application.utils import decorators
 
@@ -18,24 +20,31 @@ def login():
 
 @app.route("/oauth")
 def oauth_login():
-    flask.g.api.callback_url = abs_url_for("oauth_callback")
-    flask.g.api.authenticate_url = flask.g.api.authorize_url
     try:
-        redirect_url = flask.g.api.get_authentication_tokens()['auth_url']
-        return flask.redirect(redirect_url)
-    except twython.TwythonError, e:
-        flask.flash("OAuth error:%s, please try again." % str(e))
+        request_tokens = flask.g.api.get_authentication_tokens(callback_url=abs_url_for("oauth_callback"))
+        if request_tokens["oauth_callback_confirmed"] == "true":
+            raise twitter.Error("OAuth callback not confirmed")
+    except twitter.Error as e:
+        flask.flash("OAuth error: %s, please try again." % str(e))
         return flask.redirect(flask.url_for("login"))
+    else:
+        redirect_url = "%s?%s" % (twitter.OAUTH_AUTHORIZE_URL,
+                                  urllib.urlencode({"oauth_token": request_tokens["oauth_token"]}))
+        return flask.redirect(redirect_url)
 
 
 @app.route("/oauth_callback")
 def oauth_callback():
-    flask.g.api = twython.Twython(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"],
-        flask.request.args.get("oauth_token"), flask.request.args.get("oauth_verifier"))
+    oauth_token = flask.request.args.get("oauth_token")
+    oauth_verifier = flask.request.args.get("oauth_verifier")
     try:
-        flask.session.update(flask.g.api.get_authorized_tokens())
-    except twython.Twython, e:
-        flask.flash("OAuth error:%s, please try again." % str(e))
+        if oauth_token and oauth_verifier:
+            flask.g.api.bind_auth(oauth_token, oauth_token)
+            flask.session.update(flask.g.api.get_authorized_tokens())
+        else:
+            raise twitter.Error("OAuth callback does not have necessary parameters")
+    except twitter.Error as e:
+        flask.flash("OAuth error: %s, please try again." % str(e))
         return flask.redirect(flask.url_for("login"))
     else:
         last_url = flask.session.get("last_url")

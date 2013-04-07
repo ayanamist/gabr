@@ -4,10 +4,11 @@ import base64
 import operator
 
 import flask
-import twython
-from application.libs import render
+
 
 from application import app
+from application.libs import render
+from application.models import twitter
 from application.utils import decorators
 
 
@@ -22,22 +23,21 @@ def status_post():
             try:
                 retweet_id = flask.request.form.get("retweet_id")
                 if "retweet" in flask.request.form and retweet_id:
-                    result = flask.g.api.retweet(id=retweet_id)
+                    result = flask.g.api.request("POST", "statuses/retweet/%s" % retweet_id).content
                 else:
                     in_reply_to_id = flask.request.form.get("in_reply_to_id")
                     kwargs = {
                         "status": status_text,
-                        "include_entities": 1,
                     }
                     if in_reply_to_id:
                         kwargs["in_reply_to_status_id"] = in_reply_to_id
                     if pic_file:
                         url = "https://upload.twitter.com/1.1/statuses/update_with_media.json"
                         kwargs["media_data[]"] = base64.b64encode(pic_file.read())
-                        result = flask.g.api.post(url, params=kwargs)
+                        result = flask.g.api.request("POST", url, **kwargs).content
                     else:
-                        result = flask.g.api.updateStatus(**kwargs)
-            except twython.TwythonError, e:
+                        result = flask.g.api.request("POST", "statuses/update", **kwargs).content
+            except twitter.Error as e:
                 flask.flash("Post error: %s" % str(e))
                 data["preset_status"] = status_text
             else:
@@ -56,21 +56,22 @@ def status(status_id):
         "results": list(),
     }
     try:
-        origin_status = flask.g.api.showStatus(id=status_id)
-    except twython.TwythonError, e:
+        origin_status = flask.g.api.request("GET", "statuses/show/%s" % status_id).content
+    except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
     else:
         origin_status["orig"] = True
         tweets = list()
         if origin_status and not origin_status["user"]["protected"]:
             try:
-                related_result = flask.g.api.get("related_results/show/%s" % status_id,
-                                                 params={"include_entities": 1}, version="1")
-            except twython.TwythonError, e:
+                related_result = flask.g.api.request("GET",
+                                                     "%s/1/related_results/show/%s.json" % (twitter.BASE_URL, status_id),
+                                                     include_entities=1).content
+            except twitter.Error as e:
                 flask.flash("Get related status error: %s" % str(e))
             else:
                 if related_result:
-                    last_conversation_role = 'Ancestor' # possible value: Ancestor, Descendant, Fork
+                    last_conversation_role = 'Ancestor'  # possible value: Ancestor, Descendant, Fork
                     related_result = related_result[0]['results']
                     for result in related_result:
                         if result['kind'] == 'Tweet':
@@ -90,8 +91,8 @@ def status(status_id):
                 current_id = status["retweeted_status"]["in_reply_to_status_id"]
             if current_id and current_id not in previous_ids:
                 try:
-                    status = flask.g.api.showStatus(id=current_id)
-                except twython.TwythonError:
+                    status = flask.g.api.request("GET", "statuses/show/%s" % current_id).content
+                except twitter.Error:
                     pass
                 else:
                     tweets.insert(i + 1, status)
@@ -101,8 +102,8 @@ def status(status_id):
             if status['in_reply_to_status_id_str']:
                 current_id = status['in_reply_to_status_id_str']
                 try:
-                    status = flask.g.api.showStatus(id=current_id)
-                except twython.TwythonError:
+                    status = flask.g.api.request("GET", "statuses/show/%s" % current_id).content
+                except twitter.Error:
                     break
             else:
                 break
@@ -125,8 +126,8 @@ def status_reply(status_id):
         "title": "Reply",
     }
     try:
-        result = flask.g.api.showStatus(id=status_id)
-    except twython.TwythonError, e:
+        result = flask.g.api.request("GET", "statuses/show/%s" % status_id).content
+    except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
     else:
         data["preset_status"] = "@%s " % result["user"]["screen_name"]
@@ -143,8 +144,8 @@ def status_replyall(status_id):
         "title": "Reply to All",
     }
     try:
-        result = flask.g.api.showStatus(id=status_id)
-    except twython.TwythonError, e:
+        result = flask.g.api.request("GET", "statuses/show/%s" % status_id).content
+    except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
     else:
         data["in_reply_to_status"] = render.prerender_tweet(result)
@@ -168,8 +169,8 @@ def status_retweet(status_id):
         "title": "Retweet",
     }
     try:
-        result = flask.g.api.showStatus(id=status_id)
-    except twython.TwythonError, e:
+        result = flask.g.api.request("GET", "statuses/show/%s" % status_id).content
+    except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
     else:
         data["retweet_status"] = result
@@ -186,12 +187,12 @@ def status_favorite(status_id):
         "tweets": list(),
     }
     try:
-        result = flask.g.api.createFavorite(id=status_id)
-    except twython.TwythonError, e:
+        result = flask.g.api.request("POST", "favorites/create", {"id": status_id}).content
+    except twitter.Error as e:
         flask.flash("Create favorite error: %s" % str(e))
     else:
         flask.flash("Created favorite successfully!")
-        result["favorited"] = True # fucking twitter won't mark it as favorited.
+        result["favorited"] = True  # fucking twitter won't mark it as favorited.
         data["results"] = [result]
     return data
 
@@ -205,12 +206,12 @@ def status_unfavorite(status_id):
         "tweets": list(),
     }
     try:
-        result = flask.g.api.destroyFavorite(id=status_id)
-    except twython.TwythonError, e:
+        result = flask.g.api.request("POST", "favorites/destroy", {"id": status_id}).content
+    except twitter.Error as e:
         flask.flash("Destroy favorite error: %s" % str(e))
     else:
         flask.flash("Destroyed favorite successfully!")
-        result["favorited"] = False # fucking twitter won't mark it as not favorited.
+        result["favorited"] = False  # fucking twitter won't mark it as not favorited.
         data["results"] = [result]
     return data
 
@@ -226,12 +227,11 @@ def status_delete(status_id):
         data["status_id"] = status_id
         return flask.render_template("status_delete.html", **data)
     try:
-        result = flask.g.api.destroyStatus(id=status_id)
-    except twython.TwythonError, e:
+        result = flask.g.api.request("POST", "statuses/destroy/%s" % status_id).content
+    except twitter.Error as e:
         flask.flash("Destroy status error: %s" % str(e))
     else:
         flask.flash("Destroyed status successfully!")
         result["deleted"] = True
         data["results"] = [result]
     return flask.render_template("results.html", **data)
-
