@@ -40,8 +40,9 @@ def status_post():
                 flask.flash("Post error: %s" % str(e))
                 data["preset_status"] = status_text
             else:
-                data["title"] = "New Tweet"
-                return flask.redirect("%s#t%s" % (flask.url_for("status", status_id=result["id"]), result["id_str"]))
+                data["title"] = "Tweet %s" % result["id_str"]
+                data["results"] = [result]
+                return flask.render_template("results.html", **data)
     data["title"] = "What's happening?"
     return flask.render_template("status_post.html", **data)
 
@@ -190,7 +191,6 @@ def status_retweet(status_id):
 def status_favorite(status_id):
     data = {
         "title": "Favorite",
-        "tweets": list(),
     }
     try:
         result = flask.g.api.request("POST", "favorites/create", {"id": status_id}).json()
@@ -209,7 +209,6 @@ def status_favorite(status_id):
 def status_unfavorite(status_id):
     data = {
         "title": "Unfavorite",
-        "tweets": list(),
     }
     try:
         result = flask.g.api.request("POST", "favorites/destroy", {"id": status_id}).json()
@@ -227,7 +226,6 @@ def status_unfavorite(status_id):
 def status_delete(status_id):
     data = {
         "title": "Delete",
-        "tweets": list(),
     }
     if flask.request.method == "GET":
         data["status_id"] = status_id
