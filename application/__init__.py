@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import os
 import sys
 
@@ -9,7 +11,7 @@ for zip_file in os.listdir(lib_path):
 
 import flask
 
-from utils import monkey_patch
+from application.utils import monkey_patch
 
 app = flask.Flask("application")
 monkey_patch.patch_all(app)

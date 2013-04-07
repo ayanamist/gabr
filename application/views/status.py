@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import base64
 import operator
 
@@ -5,8 +7,8 @@ import flask
 import twython
 from application.libs import render
 
-from ..utils import decorators
 from application import app
+from application.utils import decorators
 
 
 @app.route("/post", methods=["GET", "POST"])

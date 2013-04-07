@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import copy
 import functools
 import urllib
@@ -5,9 +7,9 @@ import urllib
 import flask
 import twython
 
-from ..import utils
-from ..utils import decorators
 from application import app
+from application import utils
+from application.utils import decorators
 
 def timeline(title, api_func):
     data = {

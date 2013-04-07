@@ -1,12 +1,14 @@
+from __future__ import absolute_import
+
 import time
 
 import flask
 import twython
 
-from .. import utils
-from application.libs import render
-from ..utils import decorators
 from application import app
+from application import utils
+from application.libs import render
+from application.utils import decorators
 
 @app.route("/user/<screen_name>")
 @decorators.login_required

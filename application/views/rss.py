@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import base64
 import email.utils
 import functools
@@ -11,10 +13,10 @@ import flask
 import twython
 from application.libs import crypto, indicesreplace
 
-from . import timeline
-from .. import utils
-from ..utils import decorators
 from application import app
+from application import utils
+from application.utils import decorators
+from application.views import timeline
 
 
 @app.route("/rss")

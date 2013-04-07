@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import re
 # All functions should return a tuple containing a thumbnail and a full image url.
 

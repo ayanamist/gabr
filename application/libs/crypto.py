@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from Crypto.Cipher import AES
 
 BLOCK_SIZE = 16

@@ -1,10 +1,12 @@
+from __future__ import absolute_import
+
 import email
 import time
 
 import flask
 
-from . import preview
 from application.libs import indicesreplace
+from application.libs import preview
 
 preview_builders = [getattr(preview, f) for f in dir(preview) if f.startswith("media_")]
 

@@ -1,9 +1,11 @@
+from __future__ import absolute_import
+
 import flask
 import twython
 
-from ..utils import decorators
-from ..utils import abs_url_for
 from application import app
+from application.utils import abs_url_for
+from application.utils import decorators
 
 
 @app.route("/login")
