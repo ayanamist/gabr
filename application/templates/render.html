@@ -140,14 +140,18 @@
             :
         </div>
         <div class="item-content">
-            {{ tweet.text|safe }}
+            <div class="item-text">
+                {{ tweet.text|safe }}
+            </div>
             {% if tweet.entities %}
-                {% for media in tweet.entities.media %}
-                    <a href="{{ media.original_url }}">
-                        <img class="preview" src="{{ media.preview_url }}"/>
-                    </a>
-                    <br/>
-                {% endfor %}
+                <div class="item-pic">
+                    {% for media in tweet.entities.media %}
+                        <a href="{{ media.original_url }}">
+                            <img class="preview" src="{{ media.preview_url }}"/>
+                        </a>
+                        <br/>
+                    {% endfor %}
+                </div>
             {% endif %}
         </div>
         <div class="item-footer">
@@ -189,14 +193,18 @@
             :
         </div>
         <div class="item-content">
-            {{ tweet.text|safe }}
+            <div class="item-text">
+                {{ tweet.text|safe }}
+            </div>
             {% if tweet.entities %}
-                {% for media in tweet.entities.media %}
-                    <a href="{{ media.original_url }}">
-                        <img class="preview" src="{{ media.preview_url }}"/>
-                    </a>
-                    <br/>
-                {% endfor %}
+                <div class="item-pic">
+                    {% for media in tweet.entities.media %}
+                        <a href="{{ media.original_url }}">
+                            <img class="preview" src="{{ media.preview_url }}"/>
+                        </a>
+                        <br/>
+                    {% endfor %}
+                </div>
             {% endif %}
         </div>
         <div class="item-footer">
