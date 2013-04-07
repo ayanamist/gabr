@@ -17,7 +17,7 @@ def timeline(title, api_func):
         "results": list(),
     }
     try:
-        results = api_func().content
+        results = api_func().json()
     except twitter.Error as e:
         flask.flash("Error: %s" % str(e))
     else:

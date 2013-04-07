@@ -23,7 +23,7 @@ def status_post():
             try:
                 retweet_id = flask.request.form.get("retweet_id")
                 if "retweet" in flask.request.form and retweet_id:
-                    result = flask.g.api.request("POST", "statuses/retweet/%s" % retweet_id).content
+                    result = flask.g.api.request("POST", "statuses/retweet/%s" % retweet_id).json()
                 else:
                     in_reply_to_id = flask.request.form.get("in_reply_to_id")
                     kwargs = {
@@ -34,9 +34,9 @@ def status_post():
                     if pic_file:
                         url = "https://upload.twitter.com/1.1/statuses/update_with_media.json"
                         kwargs["media_data[]"] = base64.b64encode(pic_file.read())
-                        result = flask.g.api.request("POST", url, **kwargs).content
+                        result = flask.g.api.request("POST", url, **kwargs).json()
                     else:
-                        result = flask.g.api.request("POST", "statuses/update", **kwargs).content
+                        result = flask.g.api.request("POST", "statuses/update", **kwargs).json()
             except twitter.Error as e:
                 flask.flash("Post error: %s" % str(e))
                 data["preset_status"] = status_text
@@ -56,7 +56,7 @@ def status(status_id):
         "results": list(),
     }
     try:
-        origin_status = flask.g.api.request("GET", "statuses/show/%s" % status_id).content
+        origin_status = flask.g.api.request("GET", "statuses/show/%s" % status_id).json()
     except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
     else:
@@ -66,7 +66,7 @@ def status(status_id):
             try:
                 related_result = flask.g.api.request("GET",
                                                      "%s/1/related_results/show/%s.json" % (twitter.BASE_URL, status_id),
-                                                     include_entities=1).content
+                                                     include_entities=1).json()
             except twitter.Error as e:
                 flask.flash("Get related status error: %s" % str(e))
             else:
@@ -91,7 +91,7 @@ def status(status_id):
                 current_id = status["retweeted_status"]["in_reply_to_status_id"]
             if current_id and current_id not in previous_ids:
                 try:
-                    status = flask.g.api.request("GET", "statuses/show/%s" % current_id).content
+                    status = flask.g.api.request("GET", "statuses/show/%s" % current_id).json()
                 except twitter.Error:
                     pass
                 else:
@@ -102,7 +102,7 @@ def status(status_id):
             if status['in_reply_to_status_id_str']:
                 current_id = status['in_reply_to_status_id_str']
                 try:
-                    status = flask.g.api.request("GET", "statuses/show/%s" % current_id).content
+                    status = flask.g.api.request("GET", "statuses/show/%s" % current_id).json()
                 except twitter.Error:
                     break
             else:
@@ -126,7 +126,7 @@ def status_reply(status_id):
         "title": "Reply",
     }
     try:
-        result = flask.g.api.request("GET", "statuses/show/%s" % status_id).content
+        result = flask.g.api.request("GET", "statuses/show/%s" % status_id).json()
     except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
     else:
@@ -144,7 +144,7 @@ def status_replyall(status_id):
         "title": "Reply to All",
     }
     try:
-        result = flask.g.api.request("GET", "statuses/show/%s" % status_id).content
+        result = flask.g.api.request("GET", "statuses/show/%s" % status_id).json()
     except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
     else:
@@ -169,7 +169,7 @@ def status_retweet(status_id):
         "title": "Retweet",
     }
     try:
-        result = flask.g.api.request("GET", "statuses/show/%s" % status_id).content
+        result = flask.g.api.request("GET", "statuses/show/%s" % status_id).json()
     except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
     else:
@@ -187,7 +187,7 @@ def status_favorite(status_id):
         "tweets": list(),
     }
     try:
-        result = flask.g.api.request("POST", "favorites/create", {"id": status_id}).content
+        result = flask.g.api.request("POST", "favorites/create", {"id": status_id}).json()
     except twitter.Error as e:
         flask.flash("Create favorite error: %s" % str(e))
     else:
@@ -206,7 +206,7 @@ def status_unfavorite(status_id):
         "tweets": list(),
     }
     try:
-        result = flask.g.api.request("POST", "favorites/destroy", {"id": status_id}).content
+        result = flask.g.api.request("POST", "favorites/destroy", {"id": status_id}).json()
     except twitter.Error as e:
         flask.flash("Destroy favorite error: %s" % str(e))
     else:
@@ -227,7 +227,7 @@ def status_delete(status_id):
         data["status_id"] = status_id
         return flask.render_template("status_delete.html", **data)
     try:
-        result = flask.g.api.request("POST", "statuses/destroy/%s" % status_id).content
+        result = flask.g.api.request("POST", "statuses/destroy/%s" % status_id).json()
     except twitter.Error as e:
         flask.flash("Destroy status error: %s" % str(e))
     else:

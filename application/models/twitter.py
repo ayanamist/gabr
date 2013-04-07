@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import json
 import logging
 import urllib
 import urlparse
@@ -43,10 +42,11 @@ class API(object):
         else:
             url = "%s/%s/%s.json" % (BASE_URL, API_VERSION, endpoint.lower())
 
-        if params is None and kwargs:
-            params = kwargs
-        else:
-            params.update(kwargs)
+        if kwargs:
+            if params is None:
+                params = kwargs
+            else:
+                params.update(kwargs)
 
         if method.upper() == "GET" and params:
             parts = urlparse.urlsplit(url)
@@ -57,13 +57,11 @@ class API(object):
         response = self.client.request(method=method, url=url, params=params, files=files)
         if url.endswith(".json"):
             try:
-                json_result = json.loads(response.content.decode('utf-8'))
+                response.json()
             except ValueError:  # not a json, sometimes maybe a XML file.
                 logging.debug("%d: Not a JSON response for %s %s:\n%s" % (response.status_code,
                                                                           method, url, response.content))
                 raise Error("Not a JSON response.", response=response)
-            else:
-                response.content = json_result
         if response.status_code > 304:
             message = "%d %s" % (response.status_code, response)
             try:
