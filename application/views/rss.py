@@ -41,6 +41,8 @@ def home_rss(sid):
         return "Invalid sid."
     flask.g.api.bind_auth(oauth_token, oauth_token_secret)
     params = utils.parse_params()
+    if params.get("count"):
+        params["count"] = 100
     cached = memcache.get(sid + str(params))
     if cached:
         data = {
@@ -48,9 +50,11 @@ def home_rss(sid):
             "results": json.loads(zlib.decompress(cached))
         }
     else:
-        params["include_entities"] = 1
-        params["count"] = 100
-        data = timeline.timeline("Home", functools.partial(flask.g.api.getHomeTimeline, **params))
+        data = timeline.timeline("Home",
+                                 functools.partial(flask.g.api.request,
+                                                   "GET",
+                                                   "statuses/home_timeline",
+                                                   **params))
         data["results"].sort(
             cmp=lambda a, b: int(time.mktime(email.utils.parsedate(a["created_at"])) - time.mktime(
                 email.utils.parsedate(b["created_at"]))),
