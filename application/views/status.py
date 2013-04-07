@@ -3,9 +3,9 @@ import operator
 
 import flask
 import twython
+from application.libs import render
 
 from ..utils import decorators
-from ..utils import render
 from application import app
 
 

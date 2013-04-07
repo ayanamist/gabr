@@ -3,8 +3,8 @@ import time
 
 import flask
 
-from . import indicesreplace
 from . import preview
+from application.libs import indicesreplace
 
 preview_builders = [getattr(preview, f) for f in dir(preview) if f.startswith("media_")]
 

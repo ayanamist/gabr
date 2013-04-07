@@ -3,10 +3,10 @@ import logging
 
 import twython
 
-from . import render
 from . import do_item
 from . import do_rfc822
 from . import abs_url_for
+from application.libs import render
 
 
 def patch_logging():

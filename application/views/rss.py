@@ -9,12 +9,11 @@ from google.appengine.api import memcache
 
 import flask
 import twython
-from application.utils import crypto
+from application.libs import crypto, indicesreplace
 
 from . import timeline
 from .. import utils
 from ..utils import decorators
-from ..utils import indicesreplace
 from application import app
 
 

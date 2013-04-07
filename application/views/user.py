@@ -4,8 +4,8 @@ import flask
 import twython
 
 from .. import utils
+from application.libs import render
 from ..utils import decorators
-from ..utils import render
 from application import app
 
 @app.route("/user/<screen_name>")
