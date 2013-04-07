@@ -5,7 +5,6 @@ import operator
 
 import flask
 
-
 from application import app
 from application.libs import render
 from application.models import twitter
@@ -63,24 +62,31 @@ def status(status_id):
         origin_status["orig"] = True
         tweets = list()
         if origin_status and not origin_status["user"]["protected"]:
-            try:
-                related_result = flask.g.api.request("GET",
-                                                     "%s/1/related_results/show/%s.json" % (twitter.BASE_URL, status_id),
-                                                     include_entities=1).json()
-            except twitter.Error as e:
-                flask.flash("Get related status error: %s" % str(e))
-            else:
-                if related_result:
-                    last_conversation_role = 'Ancestor'  # possible value: Ancestor, Descendant, Fork
-                    related_result = related_result[0]['results']
-                    for result in related_result:
-                        if result['kind'] == 'Tweet':
-                            conversation_role = result['annotations']['ConversationRole']
-                            if conversation_role != last_conversation_role:
-                                tweets.insert(0, origin_status)
-                                origin_status = None
-                                last_conversation_role = conversation_role
-                            tweets.insert(0, result["value"])
+            related_result = None
+            retries = 3
+            for i in xrange(retries):
+                try:
+                    related_result = flask.g.api.request("GET",
+                                                         "%s/1/related_results/show/%s.json" % (
+                                                         twitter.BASE_URL, status_id),
+                                                         include_entities=1).json()
+                except twitter.Error as e:
+                    if e.response.status_code != 400 or i + 1 == retries:
+                        flask.flash("Get related status error: %s" % str(e))
+                        break
+                else:
+                    break
+            if related_result:
+                last_conversation_role = 'Ancestor'  # possible value: Ancestor, Descendant, Fork
+                related_result = related_result[0]['results']
+                for result in related_result:
+                    if result['kind'] == 'Tweet':
+                        conversation_role = result['annotations']['ConversationRole']
+                        if conversation_role != last_conversation_role:
+                            tweets.insert(0, origin_status)
+                            origin_status = None
+                            last_conversation_role = conversation_role
+                        tweets.insert(0, result["value"])
         if origin_status:
             tweets.insert(0, origin_status)
         previous_ids = set(x["id"] for x in tweets)
