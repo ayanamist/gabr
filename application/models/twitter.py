@@ -76,7 +76,7 @@ class API(object):
                         message += ", \"%s\"" % error
                     else:
                         # Twitter maybe have other error format, we should save it for further digging.
-                        logging.debug("JSON Errors: %s" % response.content)
+                        logging.error("JSON Errors: %s" % response.content)
             raise Error(message, response=response)
         return response
 
