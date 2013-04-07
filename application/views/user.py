@@ -25,7 +25,7 @@ def user(screen_name):
         except twitter.Error as e:
             flask.flash("Can not show user %s: %s" % (screen_name, str(e)))
         else:
-            data["user"] = result.content
+            data["user"] = result
             days_delta = (time.time() - render.prerender_timestamp(result["created_at"])) // 86400
             data["user"]["tweets_per_day"] = "%.4g" % (result["statuses_count"] / days_delta) if days_delta > 0 else 0
         try:
