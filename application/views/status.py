@@ -67,8 +67,7 @@ def status(status_id):
             retries = 3
             for i in xrange(retries):
                 try:
-                    related_result = flask.g.api.get("related_results/show/%s" % status_id,
-                                                     version="1",
+                    related_result = flask.g.api.get("related_results/show/%s" % status_id, version="1",
                                                      include_entities=1).json()
                 except twitter.Error as e:
                     if e.response.status_code != 400 or i + 1 == retries:

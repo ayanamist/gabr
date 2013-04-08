@@ -32,8 +32,8 @@ class API(object):
         self.client = requests.Session()
         self.client.headers = {"User-Agent": USER_AGENT}
 
-        self.get = functools.partial(self.request, method="GET")
-        self.post = functools.partial(self.request, method="POST")
+        self.get = functools.partial(self.request, "GET")
+        self.post = functools.partial(self.request, "POST")
 
     def bind_auth(self, oauth_token=None, oauth_token_secret=None, oauth_verifier=None):
         self.client.auth = requests_oauthlib.OAuth1(self.consumer_key, self.consumer_secret,
