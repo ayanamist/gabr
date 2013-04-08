@@ -31,8 +31,7 @@ def timeline(title, api_func):
 def home_timeline():
     params = utils.parse_params()
     data = timeline("Home",
-                    functools.partial(flask.g.api.request,
-                                      method="GET",
+                    functools.partial(flask.g.api.get,
                                       endpoint="statuses/home_timeline",
                                       params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
@@ -47,9 +46,9 @@ def connect_timeline():
     params = utils.parse_params()
     params["include_entities"] = 1
     data = timeline("Connect",
-                    functools.partial(flask.g.api.request,
-                                      method="GET",
-                                      endpoint="%s/i/activity/about_me.json" % twitter.BASE_URL,
+                    functools.partial(flask.g.api.get,
+                                      endpoint="activity/about_me",
+                                      version="i",
                                       params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict(),
@@ -64,9 +63,9 @@ def activity_timeline():
     params = utils.parse_params()
     params["include_entities"] = 1
     data = timeline("Activity",
-                    functools.partial(flask.g.api.request,
-                                      method="GET",
-                                      endpoint="%s/i/activity/by_friends.json" % twitter.BASE_URL,
+                    functools.partial(flask.g.api.get,
+                                      endpoint="activity/by_friends",
+                                      version="i",
                                       params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict(),
@@ -81,8 +80,7 @@ def search_tweets():
     params = utils.parse_params()
     params["q"] = urllib.unquote(params["q"]).encode("utf8")
     data = timeline("Search",
-                    functools.partial(flask.g.api.request,
-                                      method="GET",
+                    functools.partial(flask.g.api.get,
                                       endpoint="search/tweets",
                                       params=params))
     if data["results"]:
@@ -104,8 +102,7 @@ def search_tweets():
 def user_favorites(screen_name):
     params = utils.parse_params()
     data = timeline("%s Favorites" % screen_name,
-                    functools.partial(flask.g.api.request,
-                                      method="GET",
+                    functools.partial(flask.g.api.get,
                                       endpoint="favorites/list",
                                       screen_name=screen_name,
                                       params=params))

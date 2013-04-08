@@ -51,8 +51,7 @@ def home_rss(sid):
         }
     else:
         data = timeline.timeline("Home",
-                                 functools.partial(flask.g.api.request,
-                                                   "GET",
+                                 functools.partial(flask.g.api.get,
                                                    "statuses/home_timeline",
                                                    **params))
         data["results"].sort(

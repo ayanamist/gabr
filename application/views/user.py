@@ -21,7 +21,7 @@ def user(screen_name):
     if not flask.request.args:
         data["title"] = "User %s" % screen_name
         try:
-            result = flask.g.api.request("GET", "users/show", screen_name=screen_name).json()
+            result = flask.g.api.get("users/show", screen_name=screen_name).json()
         except twitter.Error as e:
             flask.flash("Can not show user %s: %s" % (screen_name, str(e)))
         else:
@@ -29,7 +29,7 @@ def user(screen_name):
             days_delta = (time.time() - render.prerender_timestamp(result["created_at"])) // 86400
             data["user"]["tweets_per_day"] = "%.4g" % (result["statuses_count"] / days_delta) if days_delta > 0 else 0
         try:
-            result = flask.g.api.request("GET", "friendships/show", source_screen_name=flask.g.screen_name,
+            result = flask.g.api.get("friendships/show", source_screen_name=flask.g.screen_name,
                                          target_screen_name=data["user"]["screen_name"]).json()
         except twitter.Error:
             pass
@@ -43,7 +43,7 @@ def user(screen_name):
         data["title"] = "User %s Timeline" % screen_name
     params = utils.parse_params()
     try:
-        tweets_result = flask.g.api.request("GET", "statuses/user_timeline", screen_name=screen_name, **params).json()
+        tweets_result = flask.g.api.get("statuses/user_timeline", screen_name=screen_name, **params).json()
     except twitter.Error as e:
         flask.flash("Can not get timeline: %s" % str(e))
     else:
@@ -56,7 +56,7 @@ def user(screen_name):
 @decorators.login_required
 def user_follow(screen_name):
     try:
-        result = flask.g.api.request("POST", "friendships/create", screen_name=screen_name).json()
+        result = flask.g.api.post("friendships/create", screen_name=screen_name).json()
     except twitter.Error as e:
         flask.flash("Error: %s" % str(e))
     else:
@@ -68,7 +68,7 @@ def user_follow(screen_name):
 @decorators.login_required
 def user_unfollow(screen_name):
     try:
-        result = flask.g.api.request("POST", "friendships/destroy", screen_name=screen_name).json()
+        result = flask.g.api.post("friendships/destroy", screen_name=screen_name).json()
     except twitter.Error as e:
         flask.flash("Error: %s" % str(e))
     else:
@@ -80,7 +80,7 @@ def user_unfollow(screen_name):
 @decorators.login_required
 def user_block(screen_name):
     try:
-        result = flask.g.api.request("POST", "blocks/create", screen_name=screen_name).json()
+        result = flask.g.api.post("blocks/create", screen_name=screen_name).json()
     except twitter.Error as e:
         flask.flash("Error: %s" % str(e))
     else:
@@ -92,7 +92,7 @@ def user_block(screen_name):
 @decorators.login_required
 def user_unblock(screen_name):
     try:
-        result = flask.g.api.request("POST", "blocks/destroy", screen_name=screen_name).json()
+        result = flask.g.api.post("blocks/destroy", screen_name=screen_name).json()
     except twitter.Error as e:
         flask.flash("Error: %s" % str(e))
     else:
@@ -104,7 +104,7 @@ def user_unblock(screen_name):
 @decorators.login_required
 def user_reportspam(screen_name):
     try:
-        result = flask.g.api.request("POST", "users/report_spam", screen_name=screen_name).json()
+        result = flask.g.api.post("users/report_spam", screen_name=screen_name).json()
     except twitter.Error as e:
         flask.flash("Error: %s" % str(e))
     else:

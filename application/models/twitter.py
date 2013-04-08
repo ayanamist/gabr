@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import functools
 import logging
 import urllib
 import urlparse
@@ -13,7 +14,6 @@ OAUTH_REQUEST_TOKEN_URL = "%s/oauth/request_token" % BASE_URL
 OAUTH_ACCESS_TOKEN_URL = "%s/oauth/access_token" % BASE_URL
 OAUTH_AUTHORIZE_URL = "%s/oauth/authorize" % BASE_URL
 
-API_VERSION = "1.1"
 USER_AGENT = "gabr/1.0"
 SIGNATURE_TYPE = "auth_header"
 
@@ -32,16 +32,19 @@ class API(object):
         self.client = requests.Session()
         self.client.headers = {"User-Agent": USER_AGENT}
 
+        self.get = functools.partial(self.request, method="GET")
+        self.post = functools.partial(self.request, method="POST")
+
     def bind_auth(self, oauth_token=None, oauth_token_secret=None, oauth_verifier=None):
         self.client.auth = requests_oauthlib.OAuth1(self.consumer_key, self.consumer_secret,
                                                     oauth_token, oauth_token_secret, verifier=oauth_verifier,
                                                     signature_type=SIGNATURE_TYPE)
 
-    def request(self, method, endpoint, params=None, files=None, **kwargs):
+    def request(self, method, endpoint, params=None, files=None, version="1.1", **kwargs):
         if endpoint.startswith('http://') or endpoint.startswith('https://'):
             url = endpoint
         else:
-            url = "%s/%s/%s.json" % (BASE_URL, API_VERSION, endpoint.lower())
+            url = "%s/%s/%s.json" % (BASE_URL, version, endpoint.lower())
 
         if kwargs:
             if params is None:
