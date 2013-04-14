@@ -70,17 +70,25 @@ class API(object):
         if response.status_code > 304:
             message = "%d %s" % (response.status_code, response.reason)
             if json_content:
+                err_msg = ""
                 errors = json_content.get("errors")
                 if errors:
-                    for error in errors:
-                        message += ", \"%s (%d)\"" % (error["message"], error["code"])
+                    # Twitter will return anything in errors.
+                    if isinstance(errors, basestring):
+                        err_msg = errors
+                    elif hasattr(errors, "__iter__"):
+                        err_msg = ", ".join("\"%s (%d)\"" % (error["message"], error["code"]) for error in errors)
+                    else:
+                        err_msg = str(errors)
                 else:
                     error = json_content.get("error")
                     if error:
-                        message += ", \"%s\"" % error
+                        err_msg = error
                     else:
                         # Twitter maybe have other error format, we should save it for further digging.
                         logging.error("JSON Errors: %s" % response.content)
+                if err_msg:
+                    message += ", %s" % err_msg
             raise Error(message, response=response)
         return response
 
