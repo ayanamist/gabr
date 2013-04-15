@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import base64
 import operator
 
 import flask
@@ -32,7 +31,9 @@ def status_post():
                         kwargs["in_reply_to_status_id"] = in_reply_to_id
                     if pic_file:
                         endpoint = "statuses/update_with_media"
-                        kwargs["media_data[]"] = base64.b64encode(pic_file.read())
+                        kwargs["files"] = {
+                            "media[]": pic_file.read(),
+                        }
                     else:
                         endpoint = "statuses/update"
                     result = flask.g.api.post(endpoint, **kwargs).json()

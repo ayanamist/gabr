@@ -58,7 +58,10 @@ class API(object):
                 parts.query = "%s&%s" % (parts.query, urllib.urlencode(params))
             url = urlparse.urlunsplit(parts)
 
-        response = self.client.request(method=method, url=url, params=params, files=files)
+        try:
+            response = self.client.request(method=method, url=url, params=params, files=files)
+        except requests.ConnectionError as e:
+            raise Error(str(e))
         json_content = None
         if url.endswith(".json"):
             try:
