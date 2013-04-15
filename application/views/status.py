@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import operator
-
 import flask
 
 from application import app
@@ -83,43 +81,44 @@ def status(status_id):
                     if result['kind'] == 'Tweet':
                         conversation_role = result['annotations']['ConversationRole']
                         if conversation_role != last_conversation_role:
-                            tweets.insert(0, origin_status)
+                            tweets.append(origin_status)
                             origin_status = None
                             last_conversation_role = conversation_role
-                        tweets.insert(0, result["value"])
+                        tweets.append(result["value"])
         if origin_status:
-            tweets.insert(0, origin_status)
-        previous_ids = set(x["id"] for x in tweets)
+            tweets.append(origin_status)
+        fetched_ids = set(x["id"] for x in tweets)
         for i, status in enumerate(tweets):
             if "retweeted_status" not in status:
                 current_id = status["in_reply_to_status_id"]
             else:
                 current_id = status["retweeted_status"]["in_reply_to_status_id"]
-            if current_id and current_id not in previous_ids:
+            if current_id and current_id not in fetched_ids:
+                fetched_ids.add(current_id)
                 try:
                     status = flask.g.api.get("statuses/show/%s" % current_id).json()
                 except twitter.Error:
                     pass
                 else:
-                    tweets.insert(i + 1, status)
-                    previous_ids.add(status["id"])
+                    tweets.insert(i, status)
         while len(tweets) <= 4:
-            status = tweets[-1]
+            status = tweets[0]
             if status['in_reply_to_status_id_str']:
-                current_id = status['in_reply_to_status_id_str']
+                current_id = status['in_reply_to_status_id']
+                if current_id in fetched_ids:
+                    break
                 try:
-                    status = flask.g.api.get("statuses/show/%s" % current_id).json()
+                    status = flask.g.api.get("statuses/show/%d" % current_id).json()
                 except twitter.Error:
                     break
             else:
                 break
-            if 'retweeted_status' in status and status["retweeted_status"]["id"] not in previous_ids:
-                tweets.append(status['retweeted_status'])
-                previous_ids.add(status['retweeted_status']["id"])
-            elif status["id"] not in previous_ids:
-                tweets.append(status)
-                previous_ids.add(status["id"])
-        tweets.sort(key=operator.itemgetter("id"))
+            if 'retweeted_status' in status and status["retweeted_status"]["id"] not in fetched_ids:
+                tweets.insert(0, status['retweeted_status'])
+                fetched_ids.add(status['retweeted_status']["id"])
+            elif status["id"] not in fetched_ids:
+                tweets.insert(0, status)
+                fetched_ids.add(status["id"])
         data["results"] = tweets
     return data
 
