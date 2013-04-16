@@ -15,7 +15,7 @@ def status_post():
     if flask.request.method == "POST":
         status_text = flask.request.form.get("status")
         if status_text:
-            pic_file = flask.request.files.get("pic-file")
+            media_file = flask.request.files.get("media[]")
             try:
                 retweet_id = flask.request.form.get("retweet_id")
                 if "retweet" in flask.request.form and retweet_id:
@@ -27,10 +27,10 @@ def status_post():
                     }
                     if in_reply_to_id:
                         kwargs["in_reply_to_status_id"] = in_reply_to_id
-                    if pic_file:
+                    if media_file:
                         endpoint = "statuses/update_with_media"
                         kwargs["files"] = {
-                            "media[]": pic_file.read(),
+                            "media[]": media_file,
                         }
                     else:
                         endpoint = "statuses/update"
