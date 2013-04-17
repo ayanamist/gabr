@@ -4,52 +4,39 @@ import flask
 
 from application import app
 from application.models import twitter
-from application.utils import abs_url_for
 from application.utils import decorators
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 @decorators.templated()
 def login():
-    return {
+    tpl_data = {
         "title": "Login",
     }
-
-
-@app.route("/oauth")
-def oauth_login():
-    flask.g.api.bind_auth()
-    try:
-        request_tokens = flask.g.api.get_authentication_tokens(callback_url=abs_url_for("oauth_callback"))
-        if request_tokens["oauth_callback_confirmed"] != "true":
-            raise twitter.Error("OAuth callback not confirmed")
-    except twitter.Error as e:
-        flask.flash("OAuth error: %s, please try again." % str(e))
-        return flask.redirect(flask.url_for("login"))
-    else:
-        return flask.redirect(request_tokens["auth_url"])
-
-
-@app.route("/oauth_callback")
-def oauth_callback():
-    oauth_token = flask.request.args.get("oauth_token")
-    oauth_verifier = flask.request.args.get("oauth_verifier")
-    try:
-        if oauth_token and oauth_verifier:
-            flask.g.api.bind_auth(oauth_token, oauth_verifier=oauth_verifier)
-            flask.session.update(flask.g.api.get_authorized_tokens())
+    if flask.request.method == "POST":
+        username = flask.request.form.get("username")
+        password = flask.request.form.get("password")
+        if username and password:
+            flask.g.api.bind_auth()
+            params = {
+                "x_auth_mode": "client_auth",
+                "x_auth_username": username,
+                "x_auth_password": password,
+            }
+            try:
+                flask.session.update(flask.g.api.get_authorized_tokens(**params))
+            except twitter.Error as e:
+                flask.flash("XAuth error: %s, please try again." % str(e))
+            else:
+                last_url = flask.session.get("last_url")
+                if last_url:
+                    flask.session["last_url"] = ""
+                    return flask.redirect(last_url)
+                else:
+                    return flask.redirect(flask.url_for("home_timeline"))
         else:
-            raise twitter.Error("OAuth callback does not have necessary parameters")
-    except twitter.Error as e:
-        flask.flash("OAuth error: %s, please try again." % str(e))
-        return flask.redirect(flask.url_for("login"))
-    else:
-        last_url = flask.session.get("last_url")
-        if last_url:
-            flask.session["last_url"] = ""
-            return flask.redirect(last_url)
-        else:
-            return flask.redirect(flask.url_for("home_timeline"))
+            flask.flash("Username & Password are both required!")
+    return tpl_data
 
 
 @app.route("/logout")

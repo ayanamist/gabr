@@ -107,6 +107,6 @@ class API(object):
                                                 urllib.urlencode({"oauth_token": request_tokens["oauth_token"]}))
         return request_tokens
 
-    def get_authorized_tokens(self):
-        response = self.request("POST", OAUTH_ACCESS_TOKEN_URL)
+    def get_authorized_tokens(self, **kwargs):
+        response = self.request("POST", OAUTH_ACCESS_TOKEN_URL, kwargs)
         return dict(urlparse.parse_qsl(response.content))

@@ -1,8 +1,21 @@
 {% extends "base.html" %}
 {% block main %}
     <div class="login">
-        <p>
-            <a href="{{ url_for("oauth_login") }}">Sign in via Twitter.com</a>
-        </p>
+        <form method="post" action="{{ url_for("login") }}" accept-charset="UTF-8">
+            <fieldset>
+                <legend>Sign in with your Twitter account</legend>
+                <div class="fieldset-wrapper">
+                    <div class="form-item" id="edit-name">
+                        <label for="username">Username: </label>
+                        <input name="username" id="username" type="text"/>
+                    </div>
+                    <div class="form-item" id="edit-pass">
+                        <label for="password">Password: </label>
+                        <input name="password" id="password" type="password"/>
+                    </div>
+                </div>
+            </fieldset>
+            <input name="submit" id="submit" type="submit" value="Log in"/>
+        </form>
     </div>
 {% endblock main %}

@@ -7,10 +7,9 @@ threadsafe: true
 env_variables:
   SITE_NAME: "gabr"
   SESSION_COOKIE_PATH: "/"
-  CONSUMER_KEY: ""
-  CONSUMER_SECRET: ""
+  CONSUMER_KEY: "3nVuSoBZnx6U4vzUxf5w"
+  CONSUMER_SECRET: "Bcs59EFbbsdF6Sl9Ng71smgStWEGwXXKSjYvPVt7qys"
   SECRET_KEY: ""
-  INVITE_CODE: ""
 
 builtins:
 - appstats: on
