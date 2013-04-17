@@ -26,8 +26,9 @@ def rss_url():
     return {
         "title": "RSS",
         "rss_url": utils.abs_url_for("home_rss", sid=base64.urlsafe_b64encode(
-            crypto.encrypt(
-                "%s:%s" % (flask.g.api.oauth_token, flask.g.api.oauth_token_secret), app.config["SECRET_KEY"]))),
+            crypto.encrypt("%s:%s" % (flask.session["oauth_token"], flask.session["oauth_token_secret"]),
+                           app.config["SECRET_KEY"]),
+        )),
     }
 
 
