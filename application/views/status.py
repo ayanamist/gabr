@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import operator
+
 import flask
 
 from application import app
@@ -46,42 +48,10 @@ def status_post():
     return flask.render_template("status_post.html", **data)
 
 
-def get_related_results(status):
-    tweets = []
-    if status and not status["user"]["protected"]:
-        related_result = None
-        retries = 3
-        for i in xrange(retries):
-            try:
-                related_result = flask.g.api.get("related_results/show/%d" % status["id"], version="1",
-                                                 include_entities=1).json()
-            except twitter.Error as e:
-                if e.response.status_code != 400 or i + 1 == retries:
-                    flask.flash("Get related status error: %s" % str(e))
-                    break
-            else:
-                break
-        if related_result:
-            last_conversation_role = 'Ancestor'  # possible value: Ancestor, Descendant, Fork
-            related_result = related_result[0]['results']
-            for result in related_result:
-                if result['kind'] == 'Tweet':
-                    conversation_role = result['annotations']['ConversationRole']
-                    if conversation_role != last_conversation_role:
-                        tweets.append(status)
-                        status = None
-                        last_conversation_role = conversation_role
-                    tweets.append(result["value"])
-    if status:
-        tweets.append(status)
-    return tweets
-
-
 @app.route("/status/<status_id>")
 @decorators.login_required
 @decorators.templated("results.html")
 def status(status_id):
-
     data = {
         "title": "Status %s" % status_id,
         "results": list(),
@@ -90,47 +60,55 @@ def status(status_id):
         origin_status = flask.g.api.get("statuses/show/%s" % status_id).json()
     except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
-    else:
-        origin_status["orig"] = True
-        tweets = get_related_results(origin_status)
+        return data
+    origin_status["orig"] = True
 
-        fetched_ids = set(x["id"] for x in tweets)
+    tweets = [origin_status]
+    try:
+        tweets = flask.g.api.get("conversation/show", {"id": status_id, "count": 20}).json()
+    except twitter.Error as e:
+        flask.flash("Get conversation error: %s" % str(e))
 
-        # If a tweet has its parent not added, add it.
-        for i, status in enumerate(tweets):
-            if "retweeted_status" not in status:
-                current_id = status["in_reply_to_status_id"]
+    fetched_ids = set(x["id"] for x in tweets)
+
+    # If a tweet has its parent not added, add it.
+    for i, status in enumerate(tweets):
+        if "retweeted_status" not in status:
+            current_id = status["in_reply_to_status_id"]
+        else:
+            current_id = status["retweeted_status"]["in_reply_to_status_id"]
+        if current_id and current_id not in fetched_ids:
+            fetched_ids.add(current_id)
+            try:
+                status = flask.g.api.get("statuses/show/%s" % current_id).json()
+            except twitter.Error:
+                pass
             else:
-                current_id = status["retweeted_status"]["in_reply_to_status_id"]
-            if current_id and current_id not in fetched_ids:
-                fetched_ids.add(current_id)
-                try:
-                    status = flask.g.api.get("statuses/show/%s" % current_id).json()
-                except twitter.Error:
-                    pass
-                else:
-                    tweets.insert(i, status)
+                tweets.append(status)
 
-        # If too few tweets and the first tweet still has its parent, add them until enough.
-        while len(tweets) <= 4:
-            status = tweets[0]
-            if status['in_reply_to_status_id_str']:
-                current_id = status['in_reply_to_status_id']
-                if current_id in fetched_ids:
-                    break
-                try:
-                    status = flask.g.api.get("statuses/show/%d" % current_id).json()
-                except twitter.Error:
-                    break
-            else:
+    tweets.sort(key=operator.itemgetter("id"))
+
+    # If too few tweets and the first tweet still has its parent, add them until enough.
+    while len(tweets) <= 4:
+        status = tweets[0]
+        if status['in_reply_to_status_id_str']:
+            current_id = status['in_reply_to_status_id']
+            if current_id in fetched_ids:
                 break
-            if 'retweeted_status' in status and status["retweeted_status"]["id"] not in fetched_ids:
-                tweets.insert(0, status['retweeted_status'])
-                fetched_ids.add(status['retweeted_status']["id"])
-            elif status["id"] not in fetched_ids:
-                tweets.insert(0, status)
-                fetched_ids.add(status["id"])
-        data["results"] = tweets
+            try:
+                status = flask.g.api.get("statuses/show/%d" % current_id).json()
+            except twitter.Error:
+                break
+        else:
+            break
+        if 'retweeted_status' in status and status["retweeted_status"]["id"] not in fetched_ids:
+            tweets.insert(0, status['retweeted_status'])
+            fetched_ids.add(status['retweeted_status']["id"])
+        elif status["id"] not in fetched_ids:
+            tweets.insert(0, status)
+            fetched_ids.add(status["id"])
+
+    data["results"] = tweets
     return data
 
 
