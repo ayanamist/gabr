@@ -41,6 +41,7 @@ def status_post():
                 flask.flash("Post error: %s" % str(e))
                 data["preset_status"] = status_text
             else:
+                result["current"] = True
                 data["title"] = "Tweet %s" % result["id_str"]
                 data["results"] = [result]
                 return flask.render_template("results.html", **data)
@@ -56,20 +57,19 @@ def status(status_id):
         "title": "Status %s" % status_id,
         "results": list(),
     }
-    try:
-        origin_status = flask.g.api.get("statuses/show/%s" % status_id).json()
-    except twitter.Error as e:
-        flask.flash("Get status error: %s" % str(e))
-        return data
-    origin_status["orig"] = True
 
-    tweets = [origin_status]
+    tweets = []
     try:
         tweets = flask.g.api.get("conversation/show", {"id": status_id, "count": 20}).json()
     except twitter.Error as e:
         flask.flash("Get conversation error: %s" % str(e))
 
-    fetched_ids = set(x["id"] for x in tweets)
+    fetched_ids = set()
+    for tweet in tweets:
+        tweet_id = tweet["id"]
+        fetched_ids.add(tweet_id)
+        if str(tweet_id) == status_id:
+            tweet["current"] = True
 
     # If a tweet has its parent not added, add it.
     for i, status in enumerate(tweets):
@@ -186,6 +186,7 @@ def status_favorite(status_id):
     else:
         flask.flash("Created favorite successfully!")
         result["favorited"] = True  # fucking twitter won't mark it as favorited.
+        result["current"] = True
         data["results"] = [result]
     return data
 
@@ -204,6 +205,7 @@ def status_unfavorite(status_id):
     else:
         flask.flash("Destroyed favorite successfully!")
         result["favorited"] = False  # fucking twitter won't mark it as not favorited.
+        result["current"] = True
         data["results"] = [result]
     return data
 
@@ -224,5 +226,6 @@ def status_delete(status_id):
     else:
         flask.flash("Destroyed status successfully!")
         result["deleted"] = True
+        result["current"] = True
         data["results"] = [result]
     return flask.render_template("results.html", **data)
