@@ -55,14 +55,13 @@ def status_post():
 def status(status_id):
     data = {
         "title": "Status %s" % status_id,
-        "results": list(),
     }
 
-    tweets = []
     try:
         tweets = flask.g.api.get("conversation/show", {"id": status_id, "count": 20}).json()
     except twitter.Error as e:
         flask.flash("Get conversation error: %s" % str(e))
+        return data
 
     fetched_ids = set()
     for tweet in tweets:
