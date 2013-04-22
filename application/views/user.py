@@ -40,7 +40,7 @@ def user(screen_name):
             data["user"].update(source)
     else:
         data["title"] = "User %s Timeline" % screen_name
-    params = utils.parse_params()
+    params = flask.request.args.to_dict()
     try:
         tweets_result = flask.g.api.get("statuses/user_timeline", screen_name=screen_name, **params).json()
     except twitter.Error as e:

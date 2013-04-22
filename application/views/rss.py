@@ -41,7 +41,7 @@ def home_rss(sid):
     except (ValueError, TypeError):
         return "Invalid sid."
     flask.g.api.bind_auth(oauth_token, oauth_token_secret)
-    params = utils.parse_params()
+    params = flask.request.args.to_dict()
     if params.get("count"):
         params["count"] = 100
     cached = memcache.get(sid + str(params))

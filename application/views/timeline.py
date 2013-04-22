@@ -29,7 +29,7 @@ def timeline(title, api_func):
 @decorators.login_required
 @decorators.templated("timeline.html")
 def home_timeline():
-    params = utils.parse_params()
+    params = flask.request.args.to_dict()
     data = timeline("Home", functools.partial(flask.g.api.get, "statuses/home_timeline", params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict())
@@ -40,7 +40,7 @@ def home_timeline():
 @decorators.login_required
 @decorators.templated("timeline.html")
 def connect_timeline():
-    params = utils.parse_params()
+    params = flask.request.args.to_dict()
     params["include_entities"] = 1
     data = timeline("Connect", functools.partial(flask.g.api.get, "activity/about_me", version="i", params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
@@ -53,7 +53,7 @@ def connect_timeline():
 @decorators.login_required
 @decorators.templated("timeline.html")
 def activity_timeline():
-    params = utils.parse_params()
+    params = flask.request.args.to_dict()
     params["include_entities"] = 1
     data = timeline("Activity", functools.partial(flask.g.api.get, "activity/by_friends", version="i", params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
@@ -66,7 +66,7 @@ def activity_timeline():
 @decorators.login_required
 @decorators.templated("timeline.html")
 def search_tweets():
-    params = utils.parse_params()
+    params = flask.request.args.to_dict()
     params["q"] = urllib.unquote(params["q"]).encode("utf8")
     data = timeline("Search", functools.partial(flask.g.api.get, "search/tweets", params=params))
     if data["results"]:
@@ -86,7 +86,7 @@ def search_tweets():
 @decorators.login_required
 @decorators.templated("timeline.html")
 def user_favorites(screen_name):
-    params = utils.parse_params()
+    params = flask.request.args.to_dict()
     data = timeline("%s Favorites" % screen_name, functools.partial(flask.g.api.get, "favorites/list",
                                                                     screen_name=screen_name, params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
