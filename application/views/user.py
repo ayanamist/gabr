@@ -16,21 +16,20 @@ from application.utils import decorators
 @decorators.templated("user_show.html")
 def user(screen_name):
     data = {
-        "results": list(),
+        "title": "User %s" % screen_name,
     }
     if not flask.request.args:
-        data["title"] = "User %s" % screen_name
         try:
             result = flask.g.api.get("users/show", screen_name=screen_name).json()
         except twitter.Error as e:
             flask.flash("Can not show user %s: %s" % (screen_name, str(e)))
-        else:
-            data["user"] = result
-            days_delta = (time.time() - render.prerender_timestamp(result["created_at"])) // 86400
-            data["user"]["tweets_per_day"] = "%.4g" % (result["statuses_count"] / days_delta) if days_delta > 0 else 0
+            return data
+        data["user"] = result
+        days_delta = (time.time() - render.prerender_timestamp(result["created_at"])) // 86400
+        data["user"]["tweets_per_day"] = "%.4g" % (result["statuses_count"] / days_delta) if days_delta > 0 else 0
         try:
             result = flask.g.api.get("friendships/show", source_screen_name=flask.g.screen_name,
-                                         target_screen_name=data["user"]["screen_name"]).json()
+                                     target_screen_name=data["user"]["screen_name"]).json()
         except twitter.Error:
             pass
         else:

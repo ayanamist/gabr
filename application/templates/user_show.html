@@ -20,7 +20,8 @@
                     <li>Bio: {{ user.description }}</li>
                     <li>Link: {% if user.url %}<a href="{{ user.url }}">{{ user.url }}</a>{% endif %}</li>
                     <li>Location: {{ user.location }}</li>
-                    <li>Joined: {{ render_created_at(user.created_at) }} (~{{ user.tweets_per_day }} tweets per day)</li>
+                    <li>Joined: {{ render_created_at(user.created_at) }} (~{{ user.tweets_per_day }} tweets per day)
+                    </li>
                 </ul>
             </div>
             <div class="features">{{ user.statuses_count }} tweets |
@@ -47,7 +48,9 @@
             </div>
         </div>
     {% endif %}
-    <div class="timeline">
-        {{ super() }}
-    </div>
+    {% if results is defined %}
+        <div class="timeline">
+            {{ super() }}
+        </div>
+    {% endif %}
 {% endblock main %}
