@@ -205,3 +205,8 @@ ul.about {
     margin: 0;
     padding: 0;
 }
+
+.item-text p {
+    white-space: pre-wrap;
+    margin: 0;
+}

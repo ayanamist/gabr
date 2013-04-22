@@ -30,7 +30,7 @@
         </div>
         <div class="item-content">
             <div class="item-text">
-                {{ tweet.text|safe }}
+                <p>{{ tweet.text|safe }}</p>
             </div>
             {% if tweet.entities %}
                 {% for media in tweet.entities.media %}
