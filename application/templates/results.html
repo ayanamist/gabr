@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block main %}
     {% if results is defined %}
-        {% import "render.html" as render with context %}
+        {% import "elements.html" as render with context %}
         {% for result in results %}
             <div
                     {% if result.id %}id="t{{ result.id }}" {% endif %}
