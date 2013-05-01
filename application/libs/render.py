@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import email
 import time
+import urllib
 
 import flask
 
@@ -70,7 +71,7 @@ def prerender_entities(text, entities):
     for hashtag in hashtags:
         start, stop = hashtag["indices"]
         data = {
-            "url": "%s?q=%s" % (flask.url_for("search_tweets"), hashtag["text"]),
+            "url": "%s?q=%%23%s" % (flask.url_for("search_tweets"), urllib.quote(hashtag["text"].encode("UTF8"))),
             "text": hashtag["text"],
         }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\">#%(text)s</a>" % data)
