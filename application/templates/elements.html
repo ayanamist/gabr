@@ -2,7 +2,7 @@
     {% set tweet=prerender_tweet(result) %}
     <div class="status shift">
         <div class="item-header">
-            <img class="avatar" src="{{ tweet.user.profile_image_url }}"/>
+            <img class="avatar" src="{{ tweet.user.profile_image_url_https }}"/>
             <span class="bold">
                 <a href="{{ url_for("user", screen_name=tweet.user.screen_name) }}">
                     {{ tweet.user.screen_name }} ({{ tweet.user.name }})
@@ -73,7 +73,7 @@
     <div class="status shift">
         <div class="item-header">
             {% if result.sources_size == 1 %}
-                <img class="avatar" src="{{ result.sources|first|item("profile_image_url") }}"/>
+                <img class="avatar" src="{{ result.sources|first|item("profile_image_url_https") }}"/>
             {% endif %}
             <span class="bold">
                 {% for source in result.sources %}
@@ -115,7 +115,7 @@
     <div class="status shift">
         <div class="item-header">
             {% if result.sources_size == 1 %}
-                <img class="avatar" src="{{ result.sources|first|item("profile_image_url") }}"/>
+                <img class="avatar" src="{{ result.sources|first|item("profile_image_url_https") }}"/>
             {% endif %}
             <span class="bold">
                 {% for source in result.sources %}
@@ -171,7 +171,7 @@
     <div class="status shift">
         <div class="item-header">
             {% if result.sources_size == 1 %}
-                <img class="avatar" src="{{ result.sources|first|item("profile_image_url") }}"/>
+                <img class="avatar" src="{{ result.sources|first|item("profile_image_url_https") }}"/>
             {% endif %}
             <span class="bold">
             {% for source in result.sources %}
@@ -226,7 +226,7 @@
     <div class="status shift">
         <div class="item-header">
             {% if result.sources_size == 1 %}
-                <img src="{{ result.sources|first|item("profile_image_url") }}"/>
+                <img src="{{ result.sources|first|item("profile_image_url_https") }}"/>
             {% endif %}
             <span class="bold">
                 {% for source in result.sources %}

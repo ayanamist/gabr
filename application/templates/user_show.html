@@ -4,8 +4,8 @@
         <div class="profile">
             <div class="shift">
                 <div class="bold">
-                    <a href="{{ user.profile_image_url|replace("_normal", "") }}">
-                        <img class="avatar" src="{{ user.profile_image_url }}"/>
+                    <a href="{{ user.profile_image_url_https|replace("_normal", "") }}">
+                        <img class="avatar" src="{{ user.profile_image_url_https }}"/>
                     </a>
                     <span>{{ user.screen_name }} ({{ user.name }})</span>
                 <span class="small">

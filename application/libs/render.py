@@ -96,8 +96,8 @@ def prerender_entities(text, entities):
             "text": media["display_url"],
         }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\">%(text)s</a>" % data)
-        media["preview_url"] = "%s:small" % media["media_url"]
-        media["original_url"] = "%s:large" % media["media_url"]
+        media["preview_url"] = "%s:small" % media["media_url_https"]
+        media["original_url"] = "%s:large" % media["media_url_https"]
 
     urls = entities.get("urls", list())
     for url in urls:

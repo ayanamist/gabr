@@ -36,8 +36,13 @@ handlers:
 - url: /static
   static_dir: application/static
 
+- url: /rss/.*
+  script: application.app
+  secure: optional
+
 - url: /.*
   script: application.app
+  secure: always
 
 skip_files:
 - ^(.*/)?.*\.py[co]
