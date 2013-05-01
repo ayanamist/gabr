@@ -69,15 +69,7 @@ def search_tweets():
     params = flask.request.args.to_dict()
     params["q"] = urllib.unquote(params["q"]).encode("utf8")
     data = timeline("Search", functools.partial(flask.g.api.get, "search/tweets", params=params))
-    if data["results"]:
-        results = data["results"] = utils.remove_status_by_id(data["results"]["results"], params.get("max_id"))
-        for result in results:
-            result["user"] = {
-                "screen_name": result["from_user"],
-                "id": result["from_user_id"],
-                "id_str": result["from_user_id_str"],
-                "profile_image_url": result["profile_image_url"],
-            }
+    data["results"] = utils.remove_status_by_id(data["results"]["statuses"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], params)
     return data
 
