@@ -17,6 +17,7 @@ from application.utils import decorators
 def user(screen_name):
     data = {
         "title": "User %s" % screen_name,
+        "results": [],
     }
     if not flask.request.args:
         try:
