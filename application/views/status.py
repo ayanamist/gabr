@@ -57,15 +57,14 @@ def status(status_id):
         "title": "Status %s" % status_id,
     }
 
-    tweets = []
     try:
         tweets = flask.g.api.get("conversation/show", {"id": status_id, "count": 20}).json()
-        if len(tweets) == 0:
+        if not tweets:
             raise twitter.Error("Empty conversation.")
     except twitter.Error as e:
         flask.flash("Get conversation error: %s" % str(e))
         try:
-            tweets.append(flask.g.api.get("statuses/show/%s" % status_id).json())
+            tweets = [flask.g.api.get("statuses/show/%s" % status_id).json()]
         except twitter.Error as e:
             flask.flash("Get status error: %s" % str(e))
             return data
@@ -74,7 +73,7 @@ def status(status_id):
     for tweet in tweets:
         tweet_id = tweet["id"]
         fetched_ids.add(tweet_id)
-        if str(tweet_id) == status_id:
+        if tweet["id_str"] == status_id:
             tweet["current"] = True
 
     # If a tweet has its parent not added, add it.
@@ -95,7 +94,7 @@ def status(status_id):
     tweets.sort(key=operator.itemgetter("id"))
 
     # If too few tweets and the first tweet still has its parent, add them until enough.
-    while len(tweets) <= 4:
+    while 0 < len(tweets) <= 4:
         status = tweets[0]
         if status['in_reply_to_status_id_str']:
             current_id = status['in_reply_to_status_id']
