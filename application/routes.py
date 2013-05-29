@@ -1,5 +1,8 @@
-import flask
+from __future__ import absolute_import
+
 from werkzeug import import_string, cached_property
+
+from application import app
 
 
 class LazyView(object):
@@ -16,8 +19,8 @@ class LazyView(object):
 
 
 def url(url_rule, import_name, **options):
-    view = LazyView('application.' + import_name)
-    flask.current_app.add_url_rule(url_rule, view_func=view, **options)
+    view = LazyView("application.views." + import_name)
+    app.add_url_rule(url_rule, view_func=view, **options)
 
 
 url("/login", "login.login", methods=["GET", "POST"])

@@ -21,7 +21,7 @@ for name in (x for x in os.environ.keys() if x.isupper()):
 
 from application.utils import monkey_patch
 
-monkey_patch.patch_all()
+monkey_patch.patch_all(app)
 
 from application import views
 from application import routes

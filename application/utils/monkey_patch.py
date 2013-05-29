@@ -3,8 +3,6 @@ from __future__ import absolute_import
 import inspect
 import logging
 
-import flask
-
 from application.libs import render
 from application.utils import abs_url_for
 from application.utils import do_item
@@ -30,8 +28,7 @@ def patch_logging():
     logging.getLogger("oauthlib").setLevel(logging.ERROR)
 
 
-def patch_jinja2():
-    app = flask.current_app
+def patch_jinja2(app):
     app.jinja_env.globals.update(
         abs_url_for=abs_url_for,
         prerender_tweet=render.prerender_tweet,
@@ -41,7 +38,7 @@ def patch_jinja2():
     app.jinja_env.filters['rfc822'] = do_rfc822
 
 
-def patch_all():
+def patch_all(app):
     patch_logging()
-    patch_jinja2()
+    patch_jinja2(app)
 
