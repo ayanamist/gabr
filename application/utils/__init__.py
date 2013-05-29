@@ -8,7 +8,7 @@ from email import utils
 
 import flask
 
-abs_url_for = lambda endpoint, **values: urlparse.urljoin(flask.request.host_url, flask.url_for(endpoint, **values))
+abs_url_for = lambda endpoint, **values: urlparse.urljoin("https://" + flask.request.host, flask.url_for(endpoint, **values))
 
 
 def remove_status_by_id(iterable, max_id):
