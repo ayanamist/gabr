@@ -11,7 +11,6 @@ from google.appengine.api import memcache
 
 import flask
 
-from application import app
 from application import utils
 from application.libs import crypto
 from application.libs import indicesreplace
@@ -19,7 +18,6 @@ from application.utils import decorators
 from application.views import timeline
 
 
-@app.route("/rss")
 @decorators.login_required
 @decorators.templated("rss.html")
 def rss_url():
@@ -27,16 +25,15 @@ def rss_url():
         "title": "RSS",
         "rss_url": utils.abs_url_for("home_rss", sid=base64.urlsafe_b64encode(
             crypto.encrypt("%s:%s" % (flask.session["oauth_token"], flask.session["oauth_token_secret"]),
-                           app.config["SECRET_KEY"]),
+                           flask.current_app.config["SECRET_KEY"]),
         )),
     }
 
 
-@app.route("/rss/<sid>")
 def home_rss(sid):
     sid = str(sid)
     try:
-        sid = crypto.decrypt(base64.urlsafe_b64decode(sid), app.config["SECRET_KEY"])
+        sid = crypto.decrypt(base64.urlsafe_b64decode(sid), flask.current_app.config["SECRET_KEY"])
         oauth_token, oauth_token_secret = sid.split(":", 1)
     except (ValueError, TypeError):
         return "Invalid sid."

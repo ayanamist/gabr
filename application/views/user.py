@@ -4,14 +4,12 @@ import time
 
 import flask
 
-from application import app
 from application import utils
 from application.libs import render
 from application.models import twitter
 from application.utils import decorators
 
 
-@app.route("/user/<screen_name>")
 @decorators.login_required
 @decorators.templated("user_show.html")
 def user(screen_name):
@@ -52,7 +50,6 @@ def user(screen_name):
     return data
 
 
-@app.route("/user/<screen_name>/follow")
 @decorators.login_required
 def user_follow(screen_name):
     try:
@@ -64,7 +61,6 @@ def user_follow(screen_name):
     return flask.redirect(flask.url_for("user", screen_name=screen_name))
 
 
-@app.route("/user/<screen_name>/unfollow")
 @decorators.login_required
 def user_unfollow(screen_name):
     try:
@@ -76,7 +72,6 @@ def user_unfollow(screen_name):
     return flask.redirect(flask.url_for("user", screen_name=screen_name))
 
 
-@app.route("/user/<screen_name>/block")
 @decorators.login_required
 def user_block(screen_name):
     try:
@@ -88,7 +83,6 @@ def user_block(screen_name):
     return flask.redirect(flask.url_for("user", screen_name=screen_name))
 
 
-@app.route("/user/<screen_name>/unblock")
 @decorators.login_required
 def user_unblock(screen_name):
     try:
@@ -100,7 +94,6 @@ def user_unblock(screen_name):
     return flask.redirect(flask.url_for("user", screen_name=screen_name))
 
 
-@app.route("/user/<screen_name>/reportspam")
 @decorators.login_required
 def user_reportspam(screen_name):
     try:

@@ -11,10 +11,7 @@ for zip_file in os.listdir(lib_path):
 
 import flask
 
-from application.utils import monkey_patch
-
 app = flask.Flask("application")
-monkey_patch.patch_all(app)
 
 # Config from os.environ are all strings, but here only accepts integer.
 app.config["PERMANENT_SESSION_LIFETIME"] = 31536000  # one year
@@ -22,4 +19,9 @@ app.config["PERMANENT_SESSION_LIFETIME"] = 31536000  # one year
 for name in (x for x in os.environ.keys() if x.isupper()):
     app.config[name] = os.environ[name]
 
-__import__("views", globals(), locals(), [], -1)
+from application.utils import monkey_patch
+
+monkey_patch.patch_all()
+
+from application import views
+from application import routes

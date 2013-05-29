@@ -4,13 +4,11 @@ import operator
 
 import flask
 
-from application import app
 from application.libs import render
 from application.models import twitter
 from application.utils import decorators
 
 
-@app.route("/post", methods=["GET", "POST"])
 @decorators.login_required
 def status_post():
     data = dict()
@@ -49,7 +47,6 @@ def status_post():
     return flask.render_template("status_post.html", **data)
 
 
-@app.route("/status/<status_id>")
 @decorators.login_required
 @decorators.templated("results.html")
 def status(status_id):
@@ -117,7 +114,6 @@ def status(status_id):
     return data
 
 
-@app.route("/status/<status_id>/reply", methods=["GET", "POST"])
 @decorators.login_required
 @decorators.templated("status_post.html")
 def status_reply(status_id):
@@ -135,7 +131,6 @@ def status_reply(status_id):
     return data
 
 
-@app.route("/status/<status_id>/replyall")
 @decorators.login_required
 @decorators.templated("status_post.html")
 def status_replyall(status_id):
@@ -160,7 +155,6 @@ def status_replyall(status_id):
     return data
 
 
-@app.route("/status/<status_id>/retweet", methods=["GET", "POST"])
 @decorators.login_required
 @decorators.templated("status_post.html")
 def status_retweet(status_id):
@@ -177,7 +171,6 @@ def status_retweet(status_id):
     return data
 
 
-@app.route("/status/<status_id>/favorite")
 @decorators.login_required
 @decorators.templated("results.html")
 def status_favorite(status_id):
@@ -196,7 +189,6 @@ def status_favorite(status_id):
     return data
 
 
-@app.route("/status/<status_id>/unfavorite")
 @decorators.login_required
 @decorators.templated("results.html")
 def status_unfavorite(status_id):
@@ -215,7 +207,6 @@ def status_unfavorite(status_id):
     return data
 
 
-@app.route("/status/<status_id>/delete", methods=['GET', 'POST'])
 @decorators.login_required
 def status_delete(status_id):
     data = {

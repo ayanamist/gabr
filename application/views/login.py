@@ -2,12 +2,10 @@ from __future__ import absolute_import
 
 import flask
 
-from application import app
 from application.models import twitter
 from application.utils import decorators
 
 
-@app.route("/login", methods=["GET", "POST"])
 @decorators.templated()
 def login():
     tpl_data = {
@@ -39,7 +37,6 @@ def login():
     return tpl_data
 
 
-@app.route("/logout")
 def logout():
     del flask.session["screen_name"]
     del flask.session["oauth_token"]

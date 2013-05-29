@@ -5,7 +5,6 @@ import urllib
 
 import flask
 
-from application import app
 from application import utils
 from application.models import twitter
 from application.utils import decorators
@@ -25,7 +24,6 @@ def timeline(title, api_func):
     return data
 
 
-@app.route("/")
 @decorators.login_required
 @decorators.templated("timeline.html")
 def home_timeline():
@@ -36,7 +34,6 @@ def home_timeline():
     return data
 
 
-@app.route("/connect")
 @decorators.login_required
 @decorators.templated("timeline.html")
 def connect_timeline():
@@ -49,7 +46,6 @@ def connect_timeline():
     return data
 
 
-@app.route("/activity")
 @decorators.login_required
 @decorators.templated("timeline.html")
 def activity_timeline():
@@ -62,7 +58,6 @@ def activity_timeline():
     return data
 
 
-@app.route("/search")
 @decorators.login_required
 @decorators.templated("timeline.html")
 def search_tweets():
@@ -74,7 +69,6 @@ def search_tweets():
     return data
 
 
-@app.route("/user/<screen_name>/favorites")
 @decorators.login_required
 @decorators.templated("timeline.html")
 def user_favorites(screen_name):
