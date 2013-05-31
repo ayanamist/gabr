@@ -16,7 +16,14 @@ app = flask.Flask("application")
 # Config from os.environ are all strings, but here only accepts integer.
 app.config["PERMANENT_SESSION_LIFETIME"] = 31536000  # one year
 # import all configs from app.yaml
-for name in (x for x in os.environ.keys() if x.isupper()):
+os_names = (
+    "SITE_NAME",
+    "SESSION_COOKIE_PATH",
+    "CONSUMER_KEY",
+    "CONSUMER_SECRET",
+    "SECRET_KEY",
+)
+for name in os_names:
     app.config[name] = os.environ[name]
 
 from application.utils import monkey_patch
