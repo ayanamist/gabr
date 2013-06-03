@@ -11,9 +11,6 @@ env_variables:
   CONSUMER_SECRET: "Bcs59EFbbsdF6Sl9Ng71smgStWEGwXXKSjYvPVt7qys"
   SECRET_KEY: ""
 
-builtins:
-- appstats: on
-
 libraries:
 - name: jinja2
   version: "2.6"
@@ -21,6 +18,8 @@ libraries:
   version: "0.15"
 - name: pycrypto
   version: "2.6"
+- name: ssl
+  version: "2.7"
 
 handlers:
 - url: /favicon.ico
