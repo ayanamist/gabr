@@ -36,6 +36,7 @@ def patch_jinja2(app):
     )
     app.jinja_env.filters['item'] = do_item
     app.jinja_env.filters['rfc822'] = do_rfc822
+    app.jinja_env.auto_reload = False
 
 
 def patch_all(app):
