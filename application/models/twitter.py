@@ -60,7 +60,7 @@ class API(object):
 
         try:
             response = self.client.request(method=method, url=url, params=params, files=files)
-        except requests.ConnectionError as e:
+        except requests.RequestException as e:
             raise Error(str(e))
         json_content = None
         if url.endswith(".json"):
