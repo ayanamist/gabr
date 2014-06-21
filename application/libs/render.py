@@ -26,7 +26,7 @@ def prerender_tweet(tweet_json):
     tweet_json["text_raw"] = tweet_json["text"]
     entities = tweet_json.get("entities")
     if entities:
-        tweet_json["text"] = prerender_entities(tweet_json["text_raw"], entities)
+        tweet_json["text"] = prerender_entities(tweet_json["text_raw"], tweet_json)
         tweet_json["highlight"] = screen_name_exists(flask.g.screen_name, entities)
     return tweet_json
 
@@ -63,7 +63,9 @@ def get_preview_url(url):
             return result
 
 
-def prerender_entities(text, entities):
+def prerender_entities(text, tweet_json):
+    entities = tweet_json["entities"]
+    extended_entities = tweet_json.get("extended_entities")
     new_text = indicesreplace.IndicesReplace(text)
     new_text.highlight = False
 
@@ -88,23 +90,27 @@ def prerender_entities(text, entities):
 
     if "media" not in entities:
         entities["media"] = list()
-    medias = entities["media"]
-    for media in medias:
+    for media in entities["media"]:
         start, stop = media["indices"]
         data = {
             "url": media["expanded_url"],
             "text": media["display_url"],
         }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\">%(text)s</a>" % data)
-        media["preview_url"] = "%s:small" % media["media_url_https"]
-        media["original_url"] = "%s:large" % media["media_url_https"]
+
+    # support twitter new multiple picture in same tweet
+    if extended_entities:
+        entities["media"] = extended_entities["media"]
+        for media in entities["media"]:
+            media["preview_url"] = "%s:small" % media["media_url_https"]
+            media["original_url"] = "%s:large" % media["media_url_https"]
 
     urls = entities.get("urls", list())
     for url in urls:
         preview_urls = get_preview_url(url["expanded_url"])
         if preview_urls:
             url["preview_url"], url["original_url"] = preview_urls
-            medias.append(url)
+            entities["media"].append(url)
         start, stop = url["indices"]
         data = {
             "url": url["expanded_url"],
