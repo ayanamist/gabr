@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
 import copy
+import os
+import re
 import time
 import urllib
 import urlparse
@@ -8,7 +10,15 @@ from email import utils
 
 import flask
 
-abs_url_for = lambda endpoint, **values: urlparse.urljoin("https://" + flask.request.host, flask.url_for(endpoint, **values))
+
+is_support_versions = not not os.environ.get("VERSIONS", None)
+
+
+def abs_url_for(endpoint, **values):
+    host = flask.request.host
+    if not is_support_versions:
+        host = re.sub(r'^[0-9]+\-dot\-', '', flask.request.host)
+    return urlparse.urljoin("https://" + host, flask.url_for(endpoint, **values))
 
 
 def remove_status_by_id(iterable, max_id):

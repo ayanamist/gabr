@@ -13,7 +13,7 @@ def before_request():
     flask.g.screen_name = flask.session.get("screen_name")
     oauth_token = flask.session.get("oauth_token")
     oauth_token_secret = flask.session.get("oauth_token_secret")
-    flask.g.api = twitter.API(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"])
+    flask.g.api = twitter.API(app.config["CONSUMER_KEY"], app.config["CONSUMER_SECRET"], app.config["TWIP_T_MODE"])
     if oauth_token and oauth_token_secret:
         flask.g.api.bind_auth(oauth_token, oauth_token_secret)
 

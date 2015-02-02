@@ -24,8 +24,12 @@ def patch_logging():
         setattr(logging, func_name, logger_wrap(getattr(logging, func_name)))
 
     # Mute noisy logging.
-    logging.getLogger("requests").setLevel(logging.ERROR)
-    logging.getLogger("oauthlib").setLevel(logging.ERROR)
+    import requests
+    logging.getLogger(requests.__name__).setLevel(logging.ERROR)
+    import requests_oauthlib
+    logging.getLogger(requests_oauthlib.__name__).setLevel(logging.ERROR)
+    import oauthlib
+    logging.getLogger(oauthlib.__name__).setLevel(logging.ERROR)
 
 
 def patch_jinja2(app):

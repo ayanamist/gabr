@@ -25,9 +25,10 @@ class Error(IOError):
 
 
 class API(object):
-    def __init__(self, consumer_key, consumer_secret):
+    def __init__(self, consumer_key, consumer_secret, twip_t_mode_base_url=None):
         self.consumer_key = consumer_key
         self.consumer_secret = consumer_secret
+        self.twip_t_mode_base_url = twip_t_mode_base_url
 
         self.client = requests.Session()
         self.client.headers = {"User-Agent": USER_AGENT}
@@ -40,7 +41,7 @@ class API(object):
                                                     oauth_token, oauth_token_secret, verifier=oauth_verifier,
                                                     signature_type=SIGNATURE_TYPE)
 
-    def request(self, method, endpoint, params=None, files=None, version="1.1", **kwargs):
+    def request(self, method, endpoint, params=None, files=None, version="1.1", use_t_mode=False, **kwargs):
         if endpoint.startswith('http://') or endpoint.startswith('https://'):
             url = endpoint
         else:
@@ -58,8 +59,11 @@ class API(object):
                 parts.query = "%s&%s" % (parts.query, urllib.urlencode(params))
             url = urlparse.urlunsplit(parts)
 
+        prepped = self.client.prepare_request(requests.Request(method=method, url=url, params=params, files=files))
+        if use_t_mode and self.twip_t_mode_base_url:
+            prepped.url = self.twip_t_mode_base_url + prepped.url[len(BASE_URL):]
         try:
-            response = self.client.request(method=method, url=url, params=params, files=files)
+            response = self.client.send(prepped)
         except requests.RequestException as e:
             raise Error(str(e))
         json_content = None
@@ -70,28 +74,36 @@ class API(object):
                 logging.debug("%d: Not a JSON response for %s %s:\n%s" % (response.status_code,
                                                                           method, url, response.content))
                 raise Error("Not a JSON response.", response=response)
+        message = ""
         if response.status_code > 304:
             message = "%d %s" % (response.status_code, response.reason)
-            if json_content:
-                err_msg = ""
-                errors = json_content.get("errors")
-                if errors:
-                    # Twitter will return anything in errors.
-                    if isinstance(errors, basestring):
-                        err_msg = errors
-                    elif hasattr(errors, "__iter__"):
-                        err_msg = ", ".join("\"%s (%d)\"" % (error["message"], error["code"]) for error in errors)
-                    else:
-                        err_msg = str(errors)
+        if json_content and isinstance(json_content, dict):
+            errors = json_content.get("errors")
+            if not errors:
+                results = json_content.get("results")
+                if results:
+                    errors = results.get("errors")
+            if errors:
+                # Twitter will return anything in errors.
+                if isinstance(errors, basestring):
+                    err_msg = errors
+                elif hasattr(errors, "__iter__"):
+                    err_msg = ", ".join("\"%s (%d)\"" % (error["message"], error["code"]) for error in errors)
                 else:
-                    error = json_content.get("error")
-                    if error:
-                        err_msg = error
-                    else:
-                        # Twitter maybe have other error format, we should save it for further digging.
-                        logging.error("JSON Errors: %s" % response.content)
-                if err_msg:
-                    message += ", %s" % err_msg
+                    err_msg = str(errors)
+            else:
+                error = json_content.get("error")
+                if error:
+                    err_msg = error
+                elif response.status_code > 304:
+                    err_msg = "unknown error for unexpected response"
+                    # Twitter maybe have other error format, we should save it for further digging.
+                    logging.error("JSON Errors: %s" % response.content)
+                else:
+                    err_msg = None
+            if err_msg:
+                message = ", ".join(filter(lambda x: not not x, (message, err_msg)))
+        if message:
             raise Error(message, response=response)
         return response
 

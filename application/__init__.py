@@ -25,6 +25,7 @@ os_names = (
 )
 for name in os_names:
     app.config[name] = os.environ[name]
+app.config["TWIP_T_MODE"] = os.environ.get("TWIP_T_MODE", None)
 
 from application.utils import monkey_patch
 
