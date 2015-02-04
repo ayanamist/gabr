@@ -17,8 +17,8 @@
                 </span>
                 </div>
                 <ul class="about">
-                    <li>Bio: {{ user.description }}</li>
-                    <li>Link: {% if user.url %}<a href="{{ user.url }}">{{ user.url }}</a>{% endif %}</li>
+                    <li>Bio: {{ user.description|safe }}</li>
+                    <li>Link: {% if user.url %}{{ user.url|safe }}{% endif %}</li>
                     <li>Location: {{ user.location }}</li>
                     <li>Joined: {{ render_created_at(user.created_at) }} (~{{ user.tweets_per_day }} tweets per day)
                     </li>

@@ -26,7 +26,7 @@ def prerender_tweet(tweet_json):
     tweet_json["text_raw"] = tweet_json["text"]
     entities = tweet_json.get("entities")
     if entities:
-        tweet_json["text"] = prerender_entities(tweet_json["text_raw"], tweet_json)
+        tweet_json["text"] = prerender_tweet_entities(tweet_json["text_raw"], tweet_json)
         tweet_json["highlight"] = screen_name_exists(flask.g.screen_name, entities)
     return tweet_json
 
@@ -63,8 +63,26 @@ def get_preview_url(url):
             return result
 
 
-def prerender_entities(text, tweet_json):
+def prerender_user_entities(user_json):
+    entities = user_json.get("entities")
+    if entities and isinstance(entities, dict):
+        for key, value in entities.iteritems():
+            old_content = user_json.get(key)
+            urls = value.get("urls")
+            if old_content and urls:
+                new_content = indicesreplace.IndicesReplace(old_content)
+                for url in urls:
+                    start, stop = url["indices"]
+                    new_content.replace_indices(start, stop, "<a href=\"%(expanded_url)s\">%(display_url)s</a>" % url)
+                user_json[key] = unicode(new_content)
+
+    return user_json
+
+
+def prerender_tweet_entities(text, tweet_json):
     entities = tweet_json["entities"]
+    if not isinstance(entities, dict):
+        return text
     extended_entities = tweet_json.get("extended_entities")
     new_text = indicesreplace.IndicesReplace(text)
     new_text.highlight = False
@@ -99,7 +117,7 @@ def prerender_entities(text, tweet_json):
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\">%(text)s</a>" % data)
 
     # support twitter new multiple picture in same tweet
-    if extended_entities:
+    if extended_entities and isinstance(extended_entities, dict):
         entities["media"] = extended_entities["media"]
         for media in entities["media"]:
             media["preview_url"] = "%s:small" % media["media_url_https"]

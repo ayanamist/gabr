@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import bisect
 
+
 class IndicesReplace(object):
     def __init__(self, s):
         self.original_s = s
