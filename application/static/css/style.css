@@ -26,6 +26,7 @@ img {
 }
 
 body {
+    font-family: "Helvetica Neue", Helvetica, "Liberation Sans", Arial, sans-serif, "Segoe UI Symbol";
     background: #ddd;
     color: #111;
     margin: 0;
