@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import flask
 
+from application import utils
 from application.models import twitter
 from application.utils import decorators
 
@@ -31,7 +32,7 @@ def login():
                     flask.session["last_url"] = ""
                     return flask.redirect(last_url)
                 else:
-                    return flask.redirect(flask.url_for("home_timeline"))
+                    return flask.redirect(utils.abs_url_for("home_timeline"))
         else:
             flask.flash("Username & Password are both required!")
     return tpl_data
@@ -42,4 +43,4 @@ def logout():
     del flask.session["oauth_token"]
     del flask.session["oauth_token_secret"]
     flask.flash("Logout successfully!")
-    return flask.redirect(flask.url_for("login"))
+    return flask.redirect(utils.abs_url_for("login"))

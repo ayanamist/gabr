@@ -58,7 +58,7 @@ def user_follow(screen_name):
         flask.flash("Error: %s" % str(e))
     else:
         flask.flash("Following user %s." % result["screen_name"])
-    return flask.redirect(flask.url_for("user", screen_name=screen_name))
+    return flask.redirect(utils.abs_url_for("user", screen_name=screen_name))
 
 
 @decorators.login_required
@@ -69,7 +69,7 @@ def user_unfollow(screen_name):
         flask.flash("Error: %s" % str(e))
     else:
         flask.flash("Unfollowed user %s." % result["screen_name"])
-    return flask.redirect(flask.url_for("user", screen_name=screen_name))
+    return flask.redirect(utils.abs_url_for("user", screen_name=screen_name))
 
 
 @decorators.login_required
@@ -80,7 +80,7 @@ def user_block(screen_name):
         flask.flash("Error: %s" % str(e))
     else:
         flask.flash("Blocking user %s." % result["screen_name"])
-    return flask.redirect(flask.url_for("user", screen_name=screen_name))
+    return flask.redirect(utils.abs_url_for("user", screen_name=screen_name))
 
 
 @decorators.login_required
@@ -91,7 +91,7 @@ def user_unblock(screen_name):
         flask.flash("Error: %s" % str(e))
     else:
         flask.flash("Unblocked user %s." % result["screen_name"])
-    return flask.redirect(flask.url_for("user", screen_name=screen_name))
+    return flask.redirect(utils.abs_url_for("user", screen_name=screen_name))
 
 
 @decorators.login_required
@@ -102,4 +102,4 @@ def user_reportspam(screen_name):
         flask.flash("Error: %s" % str(e))
     else:
         flask.flash("Reported user %s as spam." % result["screen_name"])
-    return flask.redirect(flask.url_for("user", screen_name=screen_name))
+    return flask.redirect(utils.abs_url_for("user", screen_name=screen_name))

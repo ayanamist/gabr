@@ -6,6 +6,7 @@ import urllib
 
 import flask
 
+from application import utils
 from application.libs import indicesreplace
 from application.libs import preview
 
@@ -91,7 +92,7 @@ def prerender_tweet_entities(text, tweet_json):
     for hashtag in hashtags:
         start, stop = hashtag["indices"]
         data = {
-            "url": "%s?q=%%23%s" % (flask.url_for("search_tweets"), urllib.quote(hashtag["text"].encode("UTF8"))),
+            "url": "%s?q=%%23%s" % (utils.abs_url_for("search_tweets"), urllib.quote(hashtag["text"].encode("UTF8"))),
             "text": hashtag["text"],
         }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\">#%(text)s</a>" % data)
@@ -100,7 +101,7 @@ def prerender_tweet_entities(text, tweet_json):
     for user_mention in user_mentions:
         start, stop = user_mention["indices"]
         data = {
-            "url": flask.url_for("user", screen_name=user_mention["screen_name"]),
+            "url": utils.abs_url_for("user", screen_name=user_mention["screen_name"]),
             "title": user_mention["name"],
             "text": user_mention["screen_name"],
         }
