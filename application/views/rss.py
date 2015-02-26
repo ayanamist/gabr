@@ -57,9 +57,12 @@ def home_rss(sid):
                 email.utils.parsedate(b["created_at"]))),
             reverse=True)
         for tweet in data["results"]:
-            urls = tweet.get("entities", {}).get("urls", [])
             new_text = indicesreplace.IndicesReplace(tweet["text"])
-            for url in urls:
+            entities = tweet.get("entities", {})
+            for url in entities.get("urls", []):
+                start, stop = url["indices"]
+                new_text.replace_indices(start, stop, url["display_url"])
+            for url in entities.get("media", []):
                 start, stop = url["indices"]
                 new_text.replace_indices(start, stop, url["display_url"])
             tweet["rss_title"] = unicode(new_text).replace("\r\n", " ").replace("\r", " ").replace("\n", " ")
