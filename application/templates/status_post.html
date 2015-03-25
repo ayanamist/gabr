@@ -29,6 +29,8 @@
             <div class="box">
                 {% if in_reply_to_status is defined %}
                     <input type="hidden" value="{{ in_reply_to_status.id }}" name="in_reply_to_id" id="in_reply_to_id"/>
+                {% elif retweet_status is defined %}
+                    <input type="hidden" value="{{ retweet_status.id_str }}" name="in_reply_to_id" id="in_reply_to_id"/>
                 {% endif %}
                 <span>
                     <input type="file" name="media[]" id="media[]" size="1"/>
