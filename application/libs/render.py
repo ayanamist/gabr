@@ -126,10 +126,12 @@ def prerender_tweet_entities(text, tweet_json):
 
     # support twitter new multiple picture in same tweet
     if extended_entities and isinstance(extended_entities, dict):
-        entities["media"] = extended_entities["media"]
-        for media in entities["media"]:
-            media["preview_url"] = "%s:small" % media["media_url_https"]
-            media["original_url"] = "%s:large" % media["media_url_https"]
+        media_entities = extended_entities["media"]
+    else:
+        media_entities = entities["media"]
+    for media in media_entities:
+        media["preview_url"] = "%s:small" % media["media_url_https"]
+        media["original_url"] = "%s:large" % media["media_url_https"]
 
     urls = entities.get("urls", list())
     for url in urls:
