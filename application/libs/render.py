@@ -73,9 +73,9 @@ def prerender_user_entities(user_json):
             if old_content and urls:
                 new_content = indicesreplace.IndicesReplace(old_content)
                 for url in urls:
-                    if "display_url" not in url or url["display_url"]:
+                    if "display_url" not in url or not url["display_url"]:
                         url["display_url"] = url.get("url")
-                    if "expanded_url" not in url or url["expanded_url"]:
+                    if "expanded_url" not in url or not url["expanded_url"]:
                         url["expanded_url"] = url.get("url")
                     if url.get("expanded_url"):
                         start, stop = url["indices"]
