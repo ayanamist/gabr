@@ -73,8 +73,15 @@ def prerender_user_entities(user_json):
             if old_content and urls:
                 new_content = indicesreplace.IndicesReplace(old_content)
                 for url in urls:
-                    start, stop = url["indices"]
-                    new_content.replace_indices(start, stop, "<a href=\"%(expanded_url)s\">%(display_url)s</a>" % url)
+                    if "display_url" not in url or url["display_url"]:
+                        url["display_url"] = url.get("url")
+                    if "expanded_url" not in url or url["expanded_url"]:
+                        url["expanded_url"] = url.get("url")
+                    if url.get("expanded_url"):
+                        start, stop = url["indices"]
+                        if not url["display_url"]:
+                            url["display_url"] = url["expanded_url"]
+                        new_content.replace_indices(start, stop, "<a href=\"%(expanded_url)s\">%(display_url)s</a>" % url)
                 user_json[key] = unicode(new_content)
 
     return user_json
