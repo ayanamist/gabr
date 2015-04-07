@@ -28,6 +28,7 @@ def timeline(title, api_func):
 @decorators.templated("timeline.html")
 def home_timeline():
     params = flask.request.args.to_dict()
+    params["include_entities"] = 1
     data = timeline("Home", functools.partial(flask.g.api.get, "statuses/home_timeline", params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict())
@@ -63,6 +64,7 @@ def activity_timeline():
 def search_tweets():
     params = flask.request.args.to_dict()
     params["q"] = urllib.unquote(params["q"]).encode("utf8")
+    params["include_entities"] = 1
     data = timeline("Search", functools.partial(flask.g.api.get, "search/tweets", params=params))
     data["results"] = utils.remove_status_by_id(data["results"]["statuses"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], params)
@@ -73,6 +75,7 @@ def search_tweets():
 @decorators.templated("timeline.html")
 def user_favorites(screen_name):
     params = flask.request.args.to_dict()
+    params["include_entities"] = 1
     data = timeline("%s Favorites" % screen_name, functools.partial(flask.g.api.get, "favorites/list",
                                                                     screen_name=screen_name, params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
