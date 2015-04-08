@@ -40,7 +40,7 @@ def home_timeline():
 def connect_timeline():
     params = flask.request.args.to_dict()
     params["include_entities"] = 1
-    data = timeline("Connect", functools.partial(flask.g.api.get, "activity/about_me", version="i", params=params))
+    data = timeline("Connect", functools.partial(flask.g.api.get, "activity/about_me", version="1.1", params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict(),
                                                       key_name="max_position")
@@ -52,7 +52,7 @@ def connect_timeline():
 def activity_timeline():
     params = flask.request.args.to_dict()
     params["include_entities"] = 1
-    data = timeline("Activity", functools.partial(flask.g.api.get, "activity/by_friends", version="i", params=params))
+    data = timeline("Activity", functools.partial(flask.g.api.get, "activity/by_friends", version="1.1", params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict(),
                                                       key_name="max_position")
