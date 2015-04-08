@@ -123,15 +123,15 @@ def prerender_tweet_entities(text, tweet_json):
             "text": media["display_url"],
         }
         new_text.replace_indices(start, stop, "<a href=\"%(url)s\">%(text)s</a>" % data)
-
-    # support twitter new multiple picture in same tweet
-    if extended_entities and isinstance(extended_entities, dict):
-        media_entities = extended_entities["media"]
-    else:
-        media_entities = entities["media"]
-    for media in media_entities:
         media["preview_url"] = "%s:small" % media["media_url_https"]
         media["original_url"] = "%s:large" % media["media_url_https"]
+
+    # support twitter new multiple picture in same tweet
+    if extended_entities and isinstance(extended_entities, dict) and extended_entities["media"]:
+        entities["media"] = extended_entities["media"]
+        for media in entities["media"]:
+        	media["preview_url"] = "%s:small" % media["media_url_https"]
+        	media["original_url"] = "%s:large" % media["media_url_https"]
 
     urls = entities.get("urls", list())
     for url in urls:
