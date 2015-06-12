@@ -265,3 +265,57 @@
         </div>
     </div>
 {%- endmacro %}
+{% macro render_rss_tweet(result) -%}
+    {% set tweet=prerender_tweet(result) %}
+    <span>
+        <span>
+            <a href="{{ abs_url_for("user", screen_name=tweet.user.screen_name) }}">{{ tweet.user.screen_name }} ({{ tweet.user.name }})</a>
+        </span>
+        <a href="{{ abs_url_for("status_reply", status_id=tweet.id) }}">@</a>
+        <a href="{{ abs_url_for("status_replyall", status_id=tweet.id) }}">@@</a>
+        <a href="{{ abs_url_for("status_retweet", status_id=tweet.id) }}">RT</a>
+        {% if tweet.favorited %}
+            <a href="{{ abs_url_for("status_unfavorite", status_id=tweet.id) }}">UNFAV</a>
+        {% else %}
+            <a href="{{ abs_url_for("status_favorite", status_id=tweet.id) }}">FAV</a>
+        {% endif %}
+        <br/>
+        {{ tweet.text|safe }}
+        <br/>
+        {% if tweet.entities %}
+            {% for media in tweet.entities.media %}
+                <a href="{{ media.original_url }}">
+                    <img src="{{ media.preview_url }}"/>
+                </a>
+                <br/>
+            {% endfor %}
+        {% endif %}
+        {% if tweet.quoted_status %}
+        <blockquote>
+            {{ render_rss_tweet(tweet.quoted_status) }}
+        </blockquote>
+        {% endif %}
+        <a href="{{ abs_url_for("status", status_id=tweet.id) }}#t{{ tweet.id }}">{{ render_created_at(tweet.created_at) }}</a>
+        <span>
+            from {{ tweet.source|safe }}
+            {% if tweet.in_reply_to_status_id %}
+                <a href="{{ abs_url_for("status", status_id=tweet.id) }}#t{{ tweet.id }}">&gt;&gt;</a>
+            {% endif %}
+            {% if tweet.retweet %}
+                <br/>
+                <a href="{{ abs_url_for("status", status_id=tweet.retweet.id) }}">
+                    <span>{{ render_created_at(tweet.retweet.created_at) }}</span>
+                    retweeted
+                </a>
+                by
+                <a href="{{ abs_url_for("user", screen_name=tweet.retweet.user.screen_name) }}">
+                    {{ tweet.retweet.user.screen_name }}
+                </a>
+                from {{ tweet.retweet.source|safe }}
+                {% if tweet.retweet_count > 1 %}
+                    and {{ tweet.retweet_count - 1 }} other(s)
+                {% endif %}
+            {% endif %}
+        </span>
+    </span>
+{%- endmacro %}
