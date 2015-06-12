@@ -42,6 +42,11 @@
                 {% endfor %}
             {% endif %}
         </div>
+        {% if tweet.quoted_status %}
+        <blockquote class="quoted_status">
+            {{ render_tweet(tweet.quoted_status) }}
+        </blockquote>
+        {% endif %}
         <div class="item-footer">
             <a href="{{ url_for("status", status_id=tweet.id) }}#t{{ tweet.id }}"
                class="time">{{ render_created_at(tweet.created_at) }}</a>

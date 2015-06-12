@@ -98,10 +98,9 @@ ul.about {
 .avatar {
     height: 48px;
     width: 48px;
-    top: 9px;
-    left: 7px;
-    position: absolute;
     border: 0;
+    float: left;
+    margin: 0 -48px 0 -52px;
 }
 
 .status {
@@ -208,4 +207,10 @@ ul.about {
 .item-text p {
     white-space: pre-wrap;
     margin: 0;
+}
+
+.quoted_status {
+    margin: 4px 0 0 0;
+    border: 1px solid #138;
+    padding: 4px;
 }
