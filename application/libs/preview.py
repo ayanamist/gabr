@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import re
 # All functions should return a tuple containing a thumbnail and a full image url.
 
-_instagram_regex = re.compile(r"(http(?:s)?://(?:instagram\.com|instagr\.am)?/p/[a-z0-9\-_]+/)", re.I)
+_instagram_regex = re.compile(r"(http(?:s)?://(?:www\.)?(?:instagram\.com|instagr\.am)/p/[a-z0-9\-_]+/)", re.I)
 
 
 def media_instagram(url):
