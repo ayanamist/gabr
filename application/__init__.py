@@ -3,6 +3,8 @@ from __future__ import absolute_import
 import os
 import sys
 
+from google.appengine.api.modules import modules
+
 # add all egg files to sys.path
 # use egg files instead of plain directory for beautiful directory structure and faster upload
 lib_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "vendor"))
@@ -15,6 +17,9 @@ app = flask.Flask("application")
 
 # Config from os.environ are all strings, but here only accepts integer.
 app.config["PERMANENT_SESSION_LIFETIME"] = 31536000  # one year
+
+current_version_name = modules.get_current_version_name()
+
 # import all configs from app.yaml
 os_names = (
     "SITE_NAME",
@@ -24,7 +29,11 @@ os_names = (
     "SECRET_KEY",
 )
 for name in os_names:
-    app.config[name] = os.environ[name]
+    name_with_version = name + "_V" + current_version_name
+    if name_with_version not in os.environ:
+        name_with_version = name
+    app.config[name] = os.environ[name_with_version]
+
 app.config["TWIP_T_MODE"] = os.environ.get("TWIP_T_MODE", None)
 
 from application.utils import monkey_patch
