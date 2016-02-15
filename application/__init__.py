@@ -5,7 +5,7 @@ import sys
 
 # add all egg files to sys.path
 # use egg files instead of plain directory for beautiful directory structure and faster upload
-lib_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "lib"))
+lib_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "vendor"))
 for zip_file in os.listdir(lib_path):
     sys.path.insert(0, os.path.join(lib_path, zip_file))
 
