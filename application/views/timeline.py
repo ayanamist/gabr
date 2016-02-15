@@ -37,22 +37,13 @@ def home_timeline():
 
 @decorators.login_required
 @decorators.templated("timeline.html")
-def connect_timeline():
+def notifications_timeline():
     params = flask.request.args.to_dict()
     params["include_entities"] = 1
-    data = timeline("Connect", functools.partial(flask.g.api.get, "activity/about_me", version="1.1", params=params))
-    data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
-    data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict(),
-                                                      key_name="max_position")
-    return data
-
-
-@decorators.login_required
-@decorators.templated("timeline.html")
-def activity_timeline():
-    params = flask.request.args.to_dict()
-    params["include_entities"] = 1
-    data = timeline("Activity", functools.partial(flask.g.api.get, "activity/by_friends", version="1.1", params=params))
+    params["include_my_retweet"] = 1
+    params["include_rts"] = 1
+    params["model_version"] = 7
+    data = timeline("Notifications", functools.partial(flask.g.api.get, "activity/about_me", version="1.1", params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict(),
                                                       key_name="max_position")

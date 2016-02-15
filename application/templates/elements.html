@@ -265,6 +265,9 @@
         </div>
     </div>
 {%- endmacro %}
+{% macro render_quote(result) -%}
+    {{ render_tweet(result["targets"][0]) }}
+{%- endmacro %}
 {% macro render_rss_tweet(result) -%}
     {% set tweet=prerender_tweet(result) %}
     <span>

@@ -21,6 +21,8 @@
                         {{ render.render_retweet(result) }}
                     {% elif result.action == "list_member_added" %}
                         {{ render.render_list_member_added(result) }}
+                    {% elif result.action == "quote" %}
+                        {{ render.render_quote(result) }}
                     {% endif %}
                 {% else %}
                     {{ render.render_tweet(result) }}

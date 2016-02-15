@@ -39,8 +39,7 @@ url("/status/<status_id>/unfavorite", "status.status_unfavorite")
 url("/status/<status_id>/delete", "status.status_delete", methods=['GET', 'POST'])
 
 url("/", "timeline.home_timeline")
-url("/connect", "timeline.connect_timeline")
-url("/activity", "timeline.activity_timeline")
+url("/notifications", "timeline.notifications_timeline")
 url("/search", "timeline.search_tweets")
 url("/user/<screen_name>/favorites", "timeline.user_favorites")
 

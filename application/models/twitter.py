@@ -59,7 +59,11 @@ class API(object):
                 parts.query = "%s&%s" % (parts.query, urllib.urlencode(params))
             url = urlparse.urlunsplit(parts)
 
-        prepped = self.client.prepare_request(requests.Request(method=method, url=url, params=params, files=files))
+        headers = {
+            "User-Agent": "Twitter",
+        }
+
+        prepped = self.client.prepare_request(requests.Request(method=method, url=url, params=params, files=files, headers=headers))
         if use_t_mode and self.twip_t_mode_base_url:
             prepped.url = self.twip_t_mode_base_url + prepped.url[len(BASE_URL):]
         try:
