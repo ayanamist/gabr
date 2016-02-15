@@ -15,9 +15,9 @@
                         {{ render.render_tweet(result.targets|first) }}
                     {% elif result.action == "follow" %}
                         {{ render.render_follow(result) }}
-                    {% elif result.action == "favorite" %}
+                    {% elif result.action in ("favorite", "favorited_mention") %}
                         {{ render.render_favorite(result) }}
-                    {% elif result.action == "retweet" %}
+                    {% elif result.action in ("retweet", "retweeted_mention") %}
                         {{ render.render_retweet(result) }}
                     {% elif result.action == "list_member_added" %}
                         {{ render.render_list_member_added(result) }}
