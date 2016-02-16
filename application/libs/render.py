@@ -130,8 +130,8 @@ def prerender_tweet_entities(text, tweet_json):
     if extended_entities and isinstance(extended_entities, dict) and extended_entities["media"]:
         entities["media"] = extended_entities["media"]
         for media in entities["media"]:
-        	media["preview_url"] = "%s:small" % media["media_url_https"]
-        	media["original_url"] = "%s:large" % media["media_url_https"]
+            media["preview_url"] = "%s:small" % media["media_url_https"]
+            media["original_url"] = "%s:large" % media["media_url_https"]
 
     urls = entities.get("urls", list())
     for url in urls:

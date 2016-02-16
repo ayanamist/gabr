@@ -34,11 +34,22 @@
             </div>
             {% if tweet.entities %}
                 {% for media in tweet.entities.media %}
-                    <div class="item-pic">
-                        <a href="{{ media.original_url }}">
-                            <img class="preview" src="{{ media.preview_url }}"/>
-                        </a>
-                    </div>
+                    {% if media.video_info %}
+                        <div class="item-media">
+                            <video src="{{ media.video_info.variants[0].url }}"
+                                   autoplay loop>
+                                Sorry, your browser doesn't support embedded videos,
+                                but don't worry, you can <a href="{{ media.video_info.variants[0].url }}">download it</a>
+                                and watch it with your favorite video player!
+                            </video>
+                        </div>
+                    {% else %}
+                        <div class="item-media">
+                            <a href="{{ media.original_url }}">
+                                <img class="preview" src="{{ media.preview_url }}"/>
+                            </a>
+                        </div>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         </div>
@@ -149,7 +160,7 @@
                 {{ tweet.text|safe }}
             </div>
             {% if tweet.entities %}
-                <div class="item-pic">
+                <div class="item-media">
                     {% for media in tweet.entities.media %}
                         <a href="{{ media.original_url }}">
                             <img class="preview" src="{{ media.preview_url }}"/>
@@ -205,7 +216,7 @@
                 {{ tweet.text|safe }}
             </div>
             {% if tweet.entities %}
-                <div class="item-pic">
+                <div class="item-media">
                     {% for media in tweet.entities.media %}
                         <a href="{{ media.original_url }}">
                             <img class="preview" src="{{ media.preview_url }}"/>
@@ -290,9 +301,22 @@
         <br/>
         {% if tweet.entities %}
             {% for media in tweet.entities.media %}
-                <a href="{{ media.original_url }}">
-                    <img src="{{ media.preview_url }}"/>
-                </a>
+                {% if media.video_info %}
+                    <div>
+                        <video src="{{ media.video_info.variants[0].url }}"
+                               autoplay loop>
+                            Sorry, your browser doesn't support embedded videos,
+                            but don't worry, you can <a href="{{ media.video_info.variants[0].url }}">download it</a>
+                            and watch it with your favorite video player!
+                        </video>
+                    </div>
+                {% else %}
+                    <div>
+                        <a href="{{ media.original_url }}">
+                            <img src="{{ media.preview_url }}"/>
+                        </a>
+                    </div>
+                {% endif %}
                 <br/>
             {% endfor %}
         {% endif %}
