@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import logging
 import os
 import sys
 
@@ -32,6 +33,7 @@ for name in os_names:
     name_with_version = name + "_V" + current_version_name
     if name_with_version not in os.environ:
         name_with_version = name
+    logging.debug("load config %s from %s", name, name_with_version)
     app.config[name] = os.environ[name_with_version]
 
 app.config["TWIP_T_MODE"] = os.environ.get("TWIP_T_MODE", None)

@@ -4,6 +4,7 @@ import base64
 import email.utils
 import functools
 import json
+import logging
 import time
 import zlib
 
@@ -39,10 +40,11 @@ def home_rss(sid):
         return "Invalid sid."
     flask.g.api.bind_auth(oauth_token, oauth_token_secret)
     params = flask.request.args.to_dict()
-    if params.get("count"):
+    if "count" not in params:
         params["count"] = 100
     cached = memcache.get(sid + str(params))
     if cached:
+        logging.debug("fetched from memcache")
         data = {
             "title": "Home",
             "results": json.loads(zlib.decompress(cached))
@@ -56,6 +58,7 @@ def home_rss(sid):
             cmp=lambda a, b: int(time.mktime(email.utils.parsedate(a["created_at"])) - time.mktime(
                 email.utils.parsedate(b["created_at"]))),
             reverse=True)
+        logging.debug("rss result: %d", len(data["results"]))
         for tweet in data["results"]:
             new_text = indicesreplace.IndicesReplace(tweet["text"])
             entities = tweet.get("entities", {})
