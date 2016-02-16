@@ -193,7 +193,10 @@
             {% if tweet.user.screen_name == g.screen_name %}
                 your Tweet
             {% else %}
-                {{ tweet.user.screen_name }} ({{ tweet.user.name }})'s Tweet you were mentioned in
+                <a href="{{ url_for("user", screen_name=tweet.user.screen_name) }}">
+                    {{ tweet.user.screen_name }}
+                </a>
+                ({{ tweet.user.name }})'s Tweet you were mentioned in
             {% endif %}
             :
         </div>
