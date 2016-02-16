@@ -15,7 +15,7 @@
             <a href="{{ url_for("user", screen_name=g.screen_name) }}">Me</a>
             <a href="{{ url_for("status_post") }}">Tweet</a>
         {% else %}
-            <a href="http://code.google.com/p/gabr/">About</a>
+            <a href="https://github.com/ayanamist/gabr">About</a>
         {% endif %}
     </div>
     {% for message in get_flashed_messages() %}
