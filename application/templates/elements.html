@@ -188,7 +188,7 @@
                 {% endif %}
             {% endfor %}
             </span>
-            {% set tweet = prerender_tweet(result.target_objects|first) %}
+            {% set tweet = prerender_tweet(result.targets|first) %}
             retweeted
             {% if tweet.user.screen_name == g.screen_name %}
                 your Tweet
@@ -266,7 +266,7 @@
     </div>
 {%- endmacro %}
 {% macro render_quote(result) -%}
-    {{ render_tweet(result["targets"][0]) }}
+    {{ render_tweet(result["targets"]|first) }}
 {%- endmacro %}
 {% macro render_rss_tweet(result) -%}
     {% set tweet=prerender_tweet(result) %}
