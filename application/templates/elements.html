@@ -145,6 +145,9 @@
             </span>
             {% set tweet = prerender_tweet(result.targets|first) %}
             favorited
+            {% if result.action == "favorited_retweet" %}
+            your Retweet
+            {% else %}
             {% if tweet.user.screen_name == g.screen_name %}
                 your Tweet
             {% else %}
@@ -152,6 +155,7 @@
                     {{ tweet.user.screen_name }}
                 </a>
                 ({{ tweet.user.name }})'s Tweet you were mentioned in
+            {% endif %}
             {% endif %}
             :
         </div>
@@ -201,6 +205,9 @@
             </span>
             {% set tweet = prerender_tweet(result.targets|first) %}
             retweeted
+            {% if result.action == "retweeted_retweet" %}
+            your Retweet
+            {% else %}
             {% if tweet.user.screen_name == g.screen_name %}
                 your Tweet
             {% else %}
@@ -208,6 +215,7 @@
                     {{ tweet.user.screen_name }}
                 </a>
                 ({{ tweet.user.name }})'s Tweet you were mentioned in
+            {% endif %}
             {% endif %}
             :
         </div>
