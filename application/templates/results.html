@@ -11,7 +11,7 @@
                 {% if result.action %}
                     {% if result.action == "mention" %}
                         {{ render.render_tweet(result.target_objects|first) }}
-                    {% elif result.action == "reply" %}
+                    {% elif result.action in ("reply", "quote") %}
                         {{ render.render_tweet(result.targets|first) }}
                     {% elif result.action == "follow" %}
                         {{ render.render_follow(result) }}
@@ -21,8 +21,8 @@
                         {{ render.render_retweet(result) }}
                     {% elif result.action == "list_member_added" %}
                         {{ render.render_list_member_added(result) }}
-                    {% elif result.action == "quote" %}
-                        {{ render.render_quote(result) }}
+                    {% elif result.action in ("list_created", "joined_twitter", "media_tagged", "favorited_media_tagged", "retweeted_media_tagged") %}
+                        {{ result|json }}
                     {% endif %}
                 {% else %}
                     {{ render.render_tweet(result) }}

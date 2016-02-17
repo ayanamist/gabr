@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import copy
+import json
 import os
 import re
 import time
@@ -40,6 +41,10 @@ def do_item(obj, name):
 
 def do_rfc822(obj):
     return utils.formatdate(time.mktime(utils.parsedate(obj)))
+
+
+def do_json(obj, *args, **kwargs):
+    return json.dumps(obj, *args, **kwargs)
 
 
 def build_next_page_url(data, params, key_name="id_str"):

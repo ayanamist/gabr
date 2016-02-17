@@ -6,6 +6,7 @@ import logging
 from application.libs import render
 from application.utils import abs_url_for
 from application.utils import do_item
+from application.utils import do_json
 from application.utils import do_rfc822
 
 
@@ -40,6 +41,7 @@ def patch_jinja2(app):
     )
     app.jinja_env.filters['item'] = do_item
     app.jinja_env.filters['rfc822'] = do_rfc822
+    app.jinja_env.filters['json'] = do_json
     app.jinja_env.auto_reload = False
 
 
