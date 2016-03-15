@@ -12,13 +12,8 @@ from email import utils
 import flask
 
 
-is_support_versions = not not os.environ.get("VERSIONS", None)
-
-
 def abs_url_for(endpoint, **values):
     host = flask.request.host
-    if not is_support_versions:
-        host = re.sub(r'^[0-9]+\-dot\-', '', flask.request.host)
     return urlparse.urljoin("https://" + host, flask.url_for(endpoint, **values))
 
 
