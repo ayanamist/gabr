@@ -9,6 +9,7 @@ import time
 import zlib
 
 from google.appengine.api import memcache
+from google.appengine.api.app_identity import app_identity
 
 import flask
 
@@ -32,6 +33,7 @@ def rss_url():
 
 
 def home_rss(sid):
+    flask.g.host = app_identity.get_default_version_hostname()
     sid = str(sid)
     try:
         sid = crypto.decrypt(base64.urlsafe_b64decode(sid), flask.current_app.config["SECRET_KEY"])

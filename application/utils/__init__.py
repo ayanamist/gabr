@@ -13,7 +13,11 @@ import flask
 
 
 def abs_url_for(endpoint, **values):
-    host = flask.request.host
+    host = flask.request.host if not flask.g.host else flask.g.host
+    return host_url_for(host, endpoint, **values)
+
+
+def host_url_for(host, endpoint, **values):
     return urlparse.urljoin("https://" + host, flask.url_for(endpoint, **values))
 
 
