@@ -13,7 +13,7 @@ import flask
 
 
 def abs_url_for(endpoint, **values):
-    host = flask.request.host if not flask.g.host else flask.g.host
+    host = getattr(flask.g, "host", flask.request.host)
     return host_url_for(host, endpoint, **values)
 
 
