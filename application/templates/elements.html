@@ -88,9 +88,6 @@
 {% macro render_follow(result) -%}
     <div class="status shift">
         <div class="item-header">
-            {% if result.sources_size == 1 %}
-                <img class="avatar" src="{{ result.sources|first|item("profile_image_url_https") }}"/>
-            {% endif %}
             <span class="bold">
                 {% for source in result.sources %}
                     <a href="{{ url_for("user", screen_name=source.screen_name) }}">
@@ -130,9 +127,6 @@
 {% macro render_favorite(result) -%}
     <div class="status shift">
         <div class="item-header">
-            {% if result.sources_size == 1 %}
-                <img class="avatar" src="{{ result.sources|first|item("profile_image_url_https") }}"/>
-            {% endif %}
             <span class="bold">
                 {% for source in result.sources %}
                     <a href="{{ url_for("user", screen_name=source.screen_name) }}">
@@ -190,9 +184,6 @@
 {% macro render_retweet(result) -%}
     <div class="status shift">
         <div class="item-header">
-            {% if result.sources_size == 1 %}
-                <img class="avatar" src="{{ result.sources|first|item("profile_image_url_https") }}"/>
-            {% endif %}
             <span class="bold">
             {% for source in result.sources %}
                 <a href="{{ url_for("user", screen_name=source.screen_name) }}">
@@ -252,9 +243,6 @@
     </span>
     <div class="status shift">
         <div class="item-header">
-            {% if result.sources_size == 1 %}
-                <img class="avatar" src="{{ result.sources|first|item("profile_image_url_https") }}"/>
-            {% endif %}
             <span class="bold">
                 {% for source in result.sources %}
                     <a href="{{ url_for("user", screen_name=source.screen_name) }}">
