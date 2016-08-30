@@ -15,6 +15,7 @@
                     {% if user.contributors_enabled %}Contributed{% endif %}
                     {% if user.followed_by %}Following you{% endif %}
                 </span>
+                <a class="open-app" href="twitter://user?screen_name={{ user.screen_name }}">Open App</a>
                 </div>
                 <ul class="about">
                     <li>Bio: {{ user.description|safe }}</li>

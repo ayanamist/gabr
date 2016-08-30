@@ -215,6 +215,9 @@ ul.about {
     padding: 4px;
 }
 
+.open-app {
+    float: right;
+}
 
 @media screen and (max-width: 400px) {
     .avatar {
