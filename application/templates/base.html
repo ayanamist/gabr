@@ -5,7 +5,6 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="css/style.css") }}">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <script src="{{ url_for("static", filename="js/video.js") }}"></script>
 </head>
 <body>
 <div class="page">
@@ -31,5 +30,6 @@
         </div>
     {% endif %}
 </div>
+{% block footer %}{% endblock footer %}
 </body>
 </html>
