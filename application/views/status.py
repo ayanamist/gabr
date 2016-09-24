@@ -24,6 +24,7 @@ def status_post():
                     in_reply_to_id = flask.request.form.get("in_reply_to_id")
                     kwargs = {
                         "status": status_text,
+                        "tweet_mode": "extended",
                     }
                     if in_reply_to_id:
                         kwargs["in_reply_to_status_id"] = in_reply_to_id
