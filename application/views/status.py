@@ -19,7 +19,7 @@ def status_post():
             try:
                 retweet_id = flask.request.form.get("retweet_id")
                 if "retweet" in flask.request.form and retweet_id:
-                    result = flask.g.api.post("statuses/retweet/%s" % retweet_id).json()
+                    result = flask.g.api.post("statuses/retweet/%s" % retweet_id, {"tweet_mode": "extended", }).json()
                 else:
                     in_reply_to_id = flask.request.form.get("in_reply_to_id")
                     kwargs = {
@@ -183,7 +183,7 @@ def status_favorite(status_id):
         "title": "Favorite %s" % status_id,
     }
     try:
-        result = flask.g.api.post("favorites/create", {"id": status_id}).json()
+        result = flask.g.api.post("favorites/create", {"id": status_id, "tweet_mode": "extended", }).json()
     except twitter.Error as e:
         flask.flash("Create favorite error: %s" % str(e))
     else:
@@ -201,7 +201,7 @@ def status_unfavorite(status_id):
         "title": "Unfavorite %s" % status_id,
     }
     try:
-        result = flask.g.api.post("favorites/destroy", {"id": status_id}).json()
+        result = flask.g.api.post("favorites/destroy", {"id": status_id, "tweet_mode": "extended", }).json()
     except twitter.Error as e:
         flask.flash("Destroy favorite error: %s" % str(e))
     else:
@@ -221,7 +221,7 @@ def status_delete(status_id):
         data["status_id"] = status_id
         return flask.render_template("status_delete.html", **data)
     try:
-        result = flask.g.api.post("statuses/destroy/%s" % status_id).json()
+        result = flask.g.api.post("statuses/destroy/%s" % status_id, {"tweet_mode": "extended", }).json()
     except twitter.Error as e:
         flask.flash("Destroy status error: %s" % str(e))
     else:
