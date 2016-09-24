@@ -56,7 +56,7 @@ def status(status_id):
 
     tweets = []
     try:
-        tweets = flask.g.api.get("conversation/show", {"id": status_id, "count": 20}).json()
+        tweets = flask.g.api.get("conversation/show", {"id": status_id, "count": 20, "tweet_mode": "extended", }).json()
     except twitter.Error as e:
         flask.flash("Get conversation error: %s" % str(e))
 
@@ -70,7 +70,7 @@ def status(status_id):
 
     if not contain_status:
         try:
-            tweet = flask.g.api.get("statuses/show/%s" % status_id).json()
+            tweet = flask.g.api.get("statuses/show/%s" % status_id, {"tweet_mode": "extended", }).json()
         except twitter.Error as e:
             flask.flash("Get status error: %s" % str(e))
         else:
@@ -86,7 +86,7 @@ def status(status_id):
         if current_id and current_id not in fetched_ids:
             fetched_ids.add(current_id)
             try:
-                status = flask.g.api.get("statuses/show/%s" % current_id).json()
+                status = flask.g.api.get("statuses/show/%s" % current_id, {"tweet_mode": "extended", }).json()
             except twitter.Error:
                 pass
             else:
@@ -102,7 +102,7 @@ def status(status_id):
             if current_id in fetched_ids:
                 break
             try:
-                status = flask.g.api.get("statuses/show/%d" % current_id).json()
+                status = flask.g.api.get("statuses/show/%d" % current_id, {"tweet_mode": "extended", }).json()
             except twitter.Error:
                 break
         else:
@@ -125,7 +125,7 @@ def status_reply(status_id):
         "title": "Reply to %s" % status_id,
     }
     try:
-        result = flask.g.api.get("statuses/show/%s" % status_id).json()
+        result = flask.g.api.get("statuses/show/%s" % status_id, {"tweet_mode": "extended", }).json()
     except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
     else:
@@ -142,7 +142,7 @@ def status_replyall(status_id):
         "title": "Reply to All %s" % status_id,
     }
     try:
-        result = flask.g.api.get("statuses/show/%s" % status_id).json()
+        result = flask.g.api.get("statuses/show/%s" % status_id, {"tweet_mode": "extended", }).json()
     except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
     else:
@@ -166,12 +166,12 @@ def status_retweet(status_id):
         "title": "Retweet %s" % status_id,
     }
     try:
-        result = flask.g.api.get("statuses/show/%s" % status_id).json()
+        result = flask.g.api.get("statuses/show/%s" % status_id, {"tweet_mode": "extended", }).json()
     except twitter.Error as e:
         flask.flash("Get status error: %s" % str(e))
     else:
         data["retweet_status"] = result
-        data["preset_status"] = "RT @%s: %s" % (result["user"]["screen_name"], result["text"])
+        data["preset_status"] = "RT @%s: %s" % (result["user"]["screen_name"], result["full_text"])
     return data
 
 

@@ -40,6 +40,8 @@ def user(screen_name):
     else:
         data["title"] = "User %s Timeline" % screen_name
     params = flask.request.args.to_dict()
+    params["model_version"] = 7
+    params["tweet_mode"] = "extended"
     try:
         tweets_result = flask.g.api.get("statuses/user_timeline", screen_name=screen_name, **params).json()
     except twitter.Error as e:

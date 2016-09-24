@@ -30,7 +30,7 @@
         </div>
         <div class="item-content">
             <div class="item-text">
-                <p>{{ tweet.text|safe }}</p>
+                <p>{{ tweet.full_text|safe }}</p>
             </div>
             {% if tweet.entities %}
                 {% for media in tweet.entities.media %}
@@ -156,7 +156,7 @@
         </div>
         <div class="item-content">
             <div class="item-text">
-                {{ tweet.text|safe }}
+                {{ tweet.full_text|safe }}
             </div>
             {% if tweet.entities %}
                 <div class="item-media">
@@ -213,7 +213,7 @@
         </div>
         <div class="item-content">
             <div class="item-text">
-                {{ tweet.text|safe }}
+                {{ tweet.full_text|safe }}
             </div>
             {% if tweet.entities %}
                 <div class="item-media">
@@ -291,7 +291,7 @@
             <a href="{{ abs_url_for("status_favorite", status_id=tweet.id) }}">FAV</a>
         {% endif %}
         <br/>
-        {{ tweet.text|safe }}
+        {{ tweet.full_text|safe }}
         <br/>
         {% if tweet.entities %}
             {% for media in tweet.entities.media %}

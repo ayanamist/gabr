@@ -42,8 +42,9 @@ def home_rss(sid):
         return "Invalid sid."
     flask.g.api.bind_auth(oauth_token, oauth_token_secret)
     params = flask.request.args.to_dict()
+    params["tweet_mode"] = "extended"
     if "count" not in params:
-        params["count"] = 100
+        params["count"] = 200
     cached = memcache.get(sid + str(params))
     if cached:
         logging.debug("fetched from memcache")
@@ -62,7 +63,7 @@ def home_rss(sid):
             reverse=True)
         logging.debug("rss result: %d", len(data["results"]))
         for tweet in data["results"]:
-            new_text = indicesreplace.IndicesReplace(tweet["text"])
+            new_text = indicesreplace.IndicesReplace(tweet["full_text"])
             entities = tweet.get("entities", {})
             for url in entities.get("urls", []):
                 start, stop = url["indices"]

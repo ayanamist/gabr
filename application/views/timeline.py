@@ -29,6 +29,8 @@ def timeline(title, api_func):
 def home_timeline():
     params = flask.request.args.to_dict()
     params["include_entities"] = 1
+    params["model_version"] = 7
+    params["tweet_mode"] = "extended"
     data = timeline("Home", functools.partial(flask.g.api.get, "statuses/home_timeline", params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict())
@@ -43,6 +45,7 @@ def notifications_timeline():
     params["include_my_retweet"] = 1
     params["include_rts"] = 1
     params["model_version"] = 7
+    params["tweet_mode"] = "extended"
     data = timeline("Notifications", functools.partial(flask.g.api.get, "activity/about_me", version="1.1", params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], flask.request.args.to_dict(),
@@ -56,6 +59,8 @@ def search_tweets():
     params = flask.request.args.to_dict()
     params["q"] = urllib.unquote(params["q"]).encode("utf8")
     params["include_entities"] = 1
+    params["model_version"] = 7
+    params["tweet_mode"] = "extended"
     data = timeline("Search", functools.partial(flask.g.api.get, "search/tweets", params=params))
     data["results"] = utils.remove_status_by_id(data["results"]["statuses"], params.get("max_id"))
     data["next_page_url"] = utils.build_next_page_url(data["results"], params)
@@ -67,6 +72,8 @@ def search_tweets():
 def user_favorites(screen_name):
     params = flask.request.args.to_dict()
     params["include_entities"] = 1
+    params["model_version"] = 7
+    params["tweet_mode"] = "extended"
     data = timeline("%s Favorites" % screen_name, functools.partial(flask.g.api.get, "favorites/list",
                                                                     screen_name=screen_name, params=params))
     data["results"] = utils.remove_status_by_id(data["results"], params.get("max_id"))

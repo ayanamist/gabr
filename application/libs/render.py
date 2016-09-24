@@ -24,10 +24,10 @@ def prerender_tweet(tweet_json):
     tweet_json = prerender_retweet(tweet_json)
     if "retweet" in tweet_json:
         tweet_json["retweet"] = prerender_tweet(tweet_json["retweet"])
-    tweet_json["text_raw"] = tweet_json["text"]
+    tweet_json["text_raw"] = tweet_json["full_text"]
     entities = tweet_json.get("entities")
     if entities:
-        tweet_json["text"] = prerender_tweet_entities(tweet_json["text_raw"], tweet_json)
+        tweet_json["full_text"] = prerender_tweet_entities(tweet_json["text_raw"], tweet_json)
         tweet_json["highlight"] = screen_name_exists(flask.g.screen_name, entities)
     return tweet_json
 
