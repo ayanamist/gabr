@@ -518,7 +518,7 @@ def default_user_agent(name="python-requests"):
     try:
         p_system = platform.system()
         p_release = platform.release()
-    except IOError:
+    except (IOError, ImportError):
         p_system = 'Unknown'
         p_release = 'Unknown'
 
