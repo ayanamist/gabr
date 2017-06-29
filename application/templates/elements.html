@@ -64,7 +64,7 @@
             <span class="small">
                 from {{ tweet.source|safe }}
                 {% if tweet.in_reply_to_status_id %}
-                    <a href="{{ url_for("status", status_id=tweet.id) }}#t{{ tweet.id }}">&gt;&gt;</a>
+                    <a href="{{ url_for("status", status_id=tweet.in_reply_to_status_id) }}#t{{ tweet.id }}">&gt;&gt;</a>
                 {% endif %}
                 {% if tweet.retweet %}
                     <br/>
@@ -176,7 +176,7 @@
             <span class="small">
                 from {{ tweet.source|safe }}
                 {% if tweet.in_reply_to_status_id %}
-                    <a href="{{ url_for("status", status_id=tweet.id) }}">&gt;&gt;</a>
+                    <a href="{{ url_for("status", status_id=tweet.in_reply_to_status_id) }}">&gt;&gt;</a>
                 {% endif %}
             </span>
         </div>
@@ -233,7 +233,7 @@
             <span class="small">
                 from {{ tweet.source|safe }}
                 {% if tweet.in_reply_to_status_id %}
-                    <a href="{{ url_for("status", status_id=tweet.id) }}">&gt;&gt;</a>
+                    <a href="{{ url_for("status", status_id=tweet.in_reply_to_status_id) }}">&gt;&gt;</a>
                 {% endif %}
             </span>
         </div>
@@ -323,7 +323,7 @@
         <span>
             from {{ tweet.source|safe }}
             {% if tweet.in_reply_to_status_id %}
-                <a href="{{ abs_url_for("status", status_id=tweet.id) }}#t{{ tweet.id }}">&gt;&gt;</a>
+                <a href="{{ abs_url_for("status", status_id=tweet.in_reply_to_status_id) }}#t{{ tweet.id }}">&gt;&gt;</a>
             {% endif %}
             {% if tweet.retweet %}
                 <br/>
