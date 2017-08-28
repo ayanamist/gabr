@@ -37,7 +37,7 @@
                     {% if media.video_info %}
                         <div class="item-media">
                             <video src="{{ media.video_info.variants[0].url }}"
-                                   {%- if media.type == "animated_gif" %} autoplay loop{% else %} controls{% endif %}>
+                                   {%- if media.type == "animated_gif" %} autoplay loop{% endif %} controls>
                                 Sorry, your browser doesn't support embedded videos,
                                 but don't worry, you can <a href="{{ media.video_info.variants[0].url }}">download it</a>
                                 and watch it with your favorite video player!
@@ -298,7 +298,7 @@
                 {% if media.video_info %}
                     <div>
                         <video src="{{ media.video_info.variants[0].url }}"
-                                {%- if media.type == "animated_gif" %} autoplay loop{% else %} controls{% endif %}>
+                                {%- if media.type == "animated_gif" %} autoplay loop{% endif %} controls>
                             Sorry, your browser doesn't support embedded videos,
                             but don't worry, you can <a href="{{ media.video_info.variants[0].url }}">download it</a>
                             and watch it with your favorite video player!
