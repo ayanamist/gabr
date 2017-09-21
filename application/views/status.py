@@ -172,7 +172,11 @@ def status_retweet(status_id):
         flask.flash("Get status error: %s" % str(e))
     else:
         data["retweet_status"] = result
-        data["preset_status"] = "RT @%s: %s" % (result["user"]["screen_name"], result["full_text"])
+        if result["user"]["protected"]:
+            preset_status = " RT @%s: %s" % (result["user"]["screen_name"], result["full_text"])
+        else:
+            preset_status = " https://twitter.com/%s/status/%s" % (result["user"]["screen_name"], status_id)
+        data["preset_status"] = preset_status
     return data
 
 
