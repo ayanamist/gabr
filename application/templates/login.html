@@ -2,20 +2,19 @@
 {% block main %}
     <div class="login">
         <form method="post" action="{{ url_for("login") }}" accept-charset="UTF-8">
-            <fieldset>
-                <legend>Sign in with your Twitter account</legend>
-                <div class="fieldset-wrapper">
-                    <div class="form-item" id="edit-name">
-                        <label for="username">Username: </label>
-                        <input name="username" id="username" type="text"/>
-                    </div>
-                    <div class="form-item" id="edit-pass">
-                        <label for="password">Password: </label>
-                        <input name="password" id="password" type="password"/>
-                    </div>
+            {% if auth_url %}
+                <div>
+                    <a href="{{ auth_url }}" target="_blank">Open Twitter authorize url</a>
                 </div>
-            </fieldset>
-            <input name="submit" id="submit" type="submit" value="Log in"/>
+                <div>
+                    <input name="oauth_token" id="oauth_token" type="hidden" value="{{ oauth_token }}"/>
+                    <label for="oauth_verifier">Pin: </label>
+                    <input name="oauth_verifier" id="oauth_verifier" type="text"/>
+                </div>
+            {% endif %}
+            <div>
+                <input name="submit" id="submit" type="submit" value="Log in via OAuth"/>
+            </div>
         </form>
     </div>
 {% endblock main %}
