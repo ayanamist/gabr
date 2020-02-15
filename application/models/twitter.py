@@ -1,13 +1,13 @@
 from __future__ import absolute_import
 
 import functools
+import json
 import logging
 import urllib
 import urlparse
 
 import requests
 import requests_oauthlib
-
 
 BASE_URL = "https://api.twitter.com"  # w/o trail slash.
 OAUTH_REQUEST_TOKEN_URL = "%s/oauth/request_token" % BASE_URL
@@ -63,7 +63,8 @@ class API(object):
             "User-Agent": "Twitter",
         }
 
-        prepped = self.client.prepare_request(requests.Request(method=method, url=url, params=params, files=files, headers=headers))
+        prepped = self.client.prepare_request(
+            requests.Request(method=method, url=url, params=params, files=files, headers=headers))
         if use_t_mode and self.twip_t_mode_base_url:
             prepped.url = self.twip_t_mode_base_url + prepped.url[len(BASE_URL):]
         try:
@@ -73,10 +74,11 @@ class API(object):
         json_content = None
         if url.endswith(".json"):
             try:
-                json_content = response.json()
+                json_content = json.loads(response.content)
             except ValueError:  # not a json, sometimes maybe a XML file.
-                logging.debug("%d: Not a JSON response for %s %s:\n%s" % (response.status_code,
-                                                                          method, url, response.content))
+                logging.debug("%d: Not a JSON response for %s %s: (%d bytes)\n%s" % (response.status_code,
+                                                                                     method, url, len(response.content),
+                                                                                     response.content))
                 raise Error("Not a JSON response.", response=response)
         message = ""
         if response.status_code > 304:
