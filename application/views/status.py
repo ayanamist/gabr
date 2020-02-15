@@ -56,27 +56,14 @@ def status(status_id):
     }
 
     tweets = []
-    try:
-        tweets = flask.g.api.get("conversation/show", {"id": status_id, "count": 20, "tweet_mode": "extended", }).json()
-    except twitter.Error as e:
-        flask.flash("Get conversation error: %s" % str(e))
-
-    contain_status = False
     fetched_ids = set()
-    for tweet in tweets:
-        fetched_ids.add(tweet["id"])
-        if tweet["id_str"] == status_id:
-            tweet["current"] = True
-            contain_status = True
-
-    if not contain_status:
-        try:
-            tweet = flask.g.api.get("statuses/show/%s" % status_id, {"tweet_mode": "extended", }).json()
-        except twitter.Error as e:
-            flask.flash("Get status error: %s" % str(e))
-        else:
-            tweet["current"] = True
-            tweets.append(tweet)
+    try:
+        tweet = flask.g.api.get("statuses/show/%s" % status_id, {"tweet_mode": "extended", }).json()
+    except twitter.Error as e:
+        flask.flash("Get status error: %s" % str(e))
+    else:
+        tweet["current"] = True
+        tweets.append(tweet)
 
     # If a tweet has its parent not added, add it.
     for i, status in enumerate(tweets):
