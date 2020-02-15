@@ -16,7 +16,7 @@
                 <description><![CDATA[
                     {{ render.render_rss_tweet(result) }}
                 ]]></description>
-                <link>https://twitter.com/{{ result.user.screen_name }}/status/{{ result.id }}</link>
+                <link>{{ result.rss_link }}</link>
                 <guid>https://twitter.com/{{ result.user.screen_name }}/status/{{ result.id }}</guid>
                 <pubDate>{{ result.created_at|rfc822 }}</pubDate>
             </item>

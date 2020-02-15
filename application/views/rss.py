@@ -72,6 +72,11 @@ def home_rss(sid):
                 start, stop = url["indices"]
                 new_text.replace_indices(start, stop, url["display_url"])
             tweet["rss_title"] = unicode(new_text).replace("\r\n", " ").replace("\r", " ").replace("\n", " ")
+            id_str = tweet["id_str"]
+            retweeted_status = tweet.get("retweeted_status")
+            if retweeted_status:
+                id_str = retweeted_status["id_str"]
+            tweet["rss_link"] = "https://twitter.com/i/status/%s" % id_str
         memcache.set(sid + str(params), zlib.compress(json.dumps(data["results"]), 9), time=120)
     data["now"] = email.utils.formatdate()
     resp = flask.make_response(flask.render_template("rss.xml", **data))
